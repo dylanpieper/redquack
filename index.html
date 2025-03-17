@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="REDCap Data Export to DuckDB">
-<meta name="description" content="Provides a single function for exporting REDCap (Research Electronic Data Capture) data to DuckDB databases. Processes data in batches to handle large datasets while minimizing memory usage. Features include automatic type conversion, extraction logging, and progress tracking. Designed for medical and clinical research data workflows where memory efficiency is required.">
-<meta property="og:description" content="Provides a single function for exporting REDCap (Research Electronic Data Capture) data to DuckDB databases. Processes data in batches to handle large datasets while minimizing memory usage. Features include automatic type conversion, extraction logging, and progress tracking. Designed for medical and clinical research data workflows where memory efficiency is required.">
+<meta name="description" content="Provides a single function for exporting REDCap (Research Electronic Data Capture) data to a local DuckDB database. Processes data in batches to handle big datasets while minimizing memory usage. Features include graceful type conversion, process logging, and progress tracking. Designed for medical and clinical research data workflows where memory efficiency is required.">
+<meta property="og:description" content="Provides a single function for exporting REDCap (Research Electronic Data Capture) data to a local DuckDB database. Processes data in batches to handle big datasets while minimizing memory usage. Features include graceful type conversion, process logging, and progress tracking. Designed for medical and clinical research data workflows where memory efficiency is required.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -56,14 +56,14 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="redquack-">redquack <img src="reference/figures/redquack-hex.png" align="right" width="140"><a class="anchor" aria-label="anchor" href="#redquack-"></a>
 </h1></div>
-<p>redquack provides a single function <code><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> for exporting REDCap data to DuckDB in batches, limiting memory usage for big data workflows.</p>
+<p><code>redquack</code> provides a single function <code><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> for exporting REDCap data to a local DuckDB database in batches, which limits memory usage for big datasets.</p>
 <div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
 <ul>
 <li>Batch processing of large REDCap projects to DuckDB</li>
 <li>Optimize column types to gracefully handle conflicts across batches</li>
-<li>Log extraction process in a separate table</li>
+<li>Log process in a separate database table</li>
 <li>Track progress with console messages and sound notifications (quacks on success)</li>
 </ul>
 </div>
@@ -90,9 +90,9 @@
 <p>The <code><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> function includes several parameters to customize extraction:</p>
 <table class="table">
 <colgroup>
-<col width="25%">
-<col width="25%">
-<col width="48%">
+<col width="26%">
+<col width="26%">
+<col width="47%">
 </colgroup>
 <thead><tr class="header">
 <th>Parameter</th>
