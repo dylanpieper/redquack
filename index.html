@@ -90,9 +90,9 @@
 <p>The <code><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> function includes several parameters to customize extraction:</p>
 <table class="table">
 <colgroup>
-<col width="25%">
-<col width="25%">
-<col width="50%">
+<col width="33%">
+<col width="33%">
+<col width="33%">
 </colgroup>
 <thead><tr class="header">
 <th>Parameter</th>
@@ -101,52 +101,52 @@
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code>redcap_uri</code></td>
+<td>redcap_uri</td>
 <td>character</td>
 <td>URI of the REDCap server’s API</td>
 </tr>
 <tr class="even">
-<td><code>token</code></td>
+<td>token</td>
 <td>character</td>
 <td>REDCap API token with export permissions</td>
 </tr>
 <tr class="odd">
-<td><code>output_file</code></td>
+<td>output_file</td>
 <td>character</td>
 <td>Path for DuckDB database file (default: “redcap.duckdb”)</td>
 </tr>
 <tr class="even">
-<td><code>chunk_size</code></td>
+<td>chunk_size</td>
 <td>integer</td>
 <td>Record IDs to process per batch (default: 2000)</td>
 </tr>
 <tr class="odd">
-<td><code>chunk_delay</code></td>
+<td>chunk_delay</td>
 <td>numeric</td>
 <td>Seconds between batch requests (default: 0.5)</td>
 </tr>
 <tr class="even">
-<td><code>id_field</code></td>
+<td>id_field</td>
 <td>character</td>
 <td>Field name containing record identifiers (default: “id”)</td>
 </tr>
 <tr class="odd">
-<td><code>optimize_types</code></td>
+<td>optimize_types</td>
 <td>logical</td>
 <td>Optimize column types after import (default: TRUE)</td>
 </tr>
 <tr class="even">
-<td><code>return_duckdb</code></td>
+<td>return_duckdb</td>
 <td>logical</td>
 <td>Return a DBI connection object (default: TRUE)</td>
 </tr>
 <tr class="odd">
-<td><code>suppress_warnings</code></td>
+<td>suppress_warnings</td>
 <td>logical</td>
 <td>Suppress common REDCap parsing warnings (default: TRUE)</td>
 </tr>
 <tr class="even">
-<td><code>beep</code></td>
+<td>beep</td>
 <td>logical</td>
 <td>Play sound notifications on completion/errors (default: TRUE)</td>
 </tr>
