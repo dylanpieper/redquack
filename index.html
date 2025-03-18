@@ -153,12 +153,12 @@
 </tr>
 </tbody>
 </table>
-<p>For projects with many fields, you may want to decrease the <code>chunk_size</code>:</p>
+<p>For projects with a very large number of fields or repeated observations per record ID, you may want to decrease the <code>chunk_size</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb</a></span><span class="op">(</span></span>
 <span>  redcap_uri <span class="op">=</span> <span class="st">"https://redcap.example.org/api/"</span>,</span>
 <span>  token <span class="op">=</span> <span class="st">"YOUR_API_TOKEN"</span>,</span>
-<span>  chunk_size <span class="op">=</span> <span class="fl">500</span></span>
+<span>  chunk_size <span class="op">=</span> <span class="fl">1000</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -179,7 +179,7 @@
 <span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/tbl.html" class="external-link">tbl</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"data"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://arrow.apache.org/docs/r/reference/write_parquet.html" class="external-link">write_parquet</a></span><span class="op">(</span><span class="st">"redcap.parquet"</span><span class="op">)</span></span></code></pre></div>
-<p>Or create Parquet directly from DuckDB to avoid loading the data into memory:</p>
+<p>Or create Parquet directly from DuckDB to stream the data into the parquet file rather than loading all of the data into memory first:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)"</span><span class="op">)</span></span></code></pre></div>
 <p>Remember to close the connection when finished:</p>
