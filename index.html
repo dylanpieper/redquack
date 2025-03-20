@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Read REDCap Data and Insert into DuckDB Database • redquack</title>
+<title>Export REDCap Data to DuckDB Database • redquack</title>
 <script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Read REDCap Data and Insert into DuckDB Database">
-<meta name="description" content="Provides a single function to read REDCap (Research Electronic Data Capture) data and insert it into a DuckDB database. Processes data in batches to handle big datasets while minimizing memory usage. Features include gracefully converting column types, logging operations, and tracking progress. Designed for healthcare and clinical research data workflows where memory efficiency is required.">
-<meta property="og:description" content="Provides a single function to read REDCap (Research Electronic Data Capture) data and insert it into a DuckDB database. Processes data in batches to handle big datasets while minimizing memory usage. Features include gracefully converting column types, logging operations, and tracking progress. Designed for healthcare and clinical research data workflows where memory efficiency is required.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Export REDCap Data to DuckDB Database">
+<meta name="description" content="Provides a single function to export REDCap (Research Electronic Data Capture) data to a DuckDB database. Processes data in batches to handle large datasets while minimizing memory usage. Features include automatic resumption of incomplete transfers, progress tracking, intelligent column type conversion, and comprehensive logging. Designed for healthcare and clinical research data workflows where memory efficiency and reliability are required.">
+<meta property="og:description" content="Provides a single function to export REDCap (Research Electronic Data Capture) data to a DuckDB database. Processes data in batches to handle large datasets while minimizing memory usage. Features include automatic resumption of incomplete transfers, progress tracking, intelligent column type conversion, and comprehensive logging. Designed for healthcare and clinical research data workflows where memory efficiency and reliability are required.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -57,110 +57,58 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="redquack-">redquack <img src="reference/figures/redquack-hex.png" align="right" width="140"><a class="anchor" aria-label="anchor" href="#redquack-"></a>
 </h1></div>
-<p>This package provides a single function <code><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> to read REDCap project data and insert it into a DuckDB database in batches, which limits memory usage for big datasets.</p>
+<p>A specialized R package that efficiently extracts <a href="https://www.project-redcap.org/" class="external-link">REDCap</a> clinical research data and stores it in <a href="https://duckdb.org/" class="external-link">DuckDB</a> databases with minimal memory overhead, designed for large datasets that exceed available RAM.</p>
 <div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
 <ul>
-<li>Batch processing of large REDCap projects to DuckDB</li>
-<li>Optimize column types to gracefully handle conflicts across batches</li>
-<li>Log operations in a separate database table</li>
-<li>Track progress with console messages and sound notifications (quacks on success)</li>
+<li>
+<strong>Memory-efficient extraction</strong>: Processes REDCap records in configurable batches to limit RAM usage</li>
+<li>
+<strong>Automatic resumption</strong>: Detects and continues incomplete extractions without duplicate processing</li>
+<li>
+<strong>Smart data type handling</strong>: Automatically optimizes column types after import (integers, dates, etc.)</li>
+<li>
+<strong>Comprehensive logging</strong>: Records all operations with timestamps in a dedicated table</li>
+<li>
+<strong>Resilient error handling</strong>: Configurable retry logic for failed API requests</li>
+<li>
+<strong>Progress tracking</strong>: Visual progress indicators and elapsed time display</li>
+<li>
+<strong>Audible feedback</strong>: Sound notifications for completed extractions (quacks on success!)</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
+<p>From CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"redquack"</span><span class="op">)</span></span></code></pre></div>
+<p>Development version:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"dylanpieper/redquack"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+<h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
 </h2>
 <p>Export your REDCap project to a DuckDB database:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">redquack</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Basic extraction with default settings</span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb</a></span><span class="op">(</span></span>
 <span>  redcap_uri <span class="op">=</span> <span class="st">"https://redcap.example.org/api/"</span>,</span>
 <span>  token <span class="op">=</span> <span class="st">"YOUR_API_TOKEN"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="function-parameters">Function parameters<a class="anchor" aria-label="anchor" href="#function-parameters"></a>
-</h3>
-<p>The <code><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> function includes several parameters to customize extraction:</p>
-<table class="table">
-<colgroup>
-<col width="26%">
-<col width="26%">
-<col width="47%">
-</colgroup>
-<thead><tr class="header">
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>redcap_uri</td>
-<td>character</td>
-<td>URI of the REDCap server’s API</td>
-</tr>
-<tr class="even">
-<td>token</td>
-<td>character</td>
-<td>REDCap API token with export permissions</td>
-</tr>
-<tr class="odd">
-<td>output_file</td>
-<td>character</td>
-<td>Path for DuckDB database file (default: “redcap.duckdb”)</td>
-</tr>
-<tr class="even">
-<td>chunk_size</td>
-<td>integer</td>
-<td>Record IDs to process per batch (default: 5000)</td>
-</tr>
-<tr class="odd">
-<td>chunk_delay</td>
-<td>numeric</td>
-<td>Seconds between batch requests (default: 0.5)</td>
-</tr>
-<tr class="even">
-<td>id_field</td>
-<td>character</td>
-<td>Field name containing record identifiers (default: “id”)</td>
-</tr>
-<tr class="odd">
-<td>optimize_types</td>
-<td>logical</td>
-<td>Optimize column types after import (default: TRUE)</td>
-</tr>
-<tr class="even">
-<td>return_duckdb</td>
-<td>logical</td>
-<td>Return a DBI connection object (default: TRUE)</td>
-</tr>
-<tr class="odd">
-<td>suppress_warnings</td>
-<td>logical</td>
-<td>Suppress common REDCap parsing warnings (default: TRUE)</td>
-</tr>
-<tr class="even">
-<td>beep</td>
-<td>logical</td>
-<td>Play sound notifications on completion/errors (default: TRUE)</td>
-</tr>
-</tbody>
-</table>
-<p>For projects with a very large number of fields or repeated observations per record ID, you may want to decrease the <code>chunk_size</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb</a></span><span class="op">(</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Custom batch size for memory-constrained environments</span></span>
+<span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb</a></span><span class="op">(</span></span>
 <span>  redcap_uri <span class="op">=</span> <span class="st">"https://redcap.example.org/api/"</span>,</span>
 <span>  token <span class="op">=</span> <span class="st">"YOUR_API_TOKEN"</span>,</span>
-<span>  chunk_size <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  chunk_size <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  chunk_delay <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-</div>
 <div class="section level3">
 <h3 id="working-with-the-exported-data">Working with the exported data<a class="anchor" aria-label="anchor" href="#working-with-the-exported-data"></a>
 </h3>
@@ -169,21 +117,23 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">demographics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/tbl.html" class="external-link">tbl</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"data"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">form_complete</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">age</span>, <span class="va">race</span>, <span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Export data to Parquet for sharing or archiving:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/apache/arrow/" class="external-link">arrow</a></span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">demographics_complete</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">record_id</span>, <span class="va">age</span>, <span class="va">race</span>, <span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/tbl.html" class="external-link">tbl</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"data"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://arrow.apache.org/docs/r/reference/write_parquet.html" class="external-link">write_parquet</a></span><span class="op">(</span><span class="st">"redcap.parquet"</span><span class="op">)</span></span></code></pre></div>
-<p>Or create Parquet directly from DuckDB to stream the data into the parquet file rather than loading all of the data into memory first:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">age_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/tbl.html" class="external-link">tbl</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"data"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span></span>
+<span>    n <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    mean_age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">age</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>    median_age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">age</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Create a Parquet file directly from DuckDB (efficient for sharing data):</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"COPY (SELECT * FROM data) TO 'redcap_export.parquet' (FORMAT PARQUET)"</span><span class="op">)</span></span></code></pre></div>
 <p>Remember to close the connection when finished:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -193,13 +143,16 @@
 <p>The DuckDB database created by <code><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> contains two tables:</p>
 <ol style="list-style-type: decimal">
 <li>
-<code>data</code>: Contains all exported REDCap records</li>
+<p><code>data</code>: Contains all exported REDCap records with optimized column types</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SELECT * FROM data LIMIT 10"</span><span class="op">)</span></span></code></pre></div>
+</li>
 <li>
-<code>log</code>: Contains timestamped logs of the extraction process</li>
-</ol>
-<p>Query the log table to check extraction details:</p>
+<p><code>log</code>: Contains timestamped logs of the extraction process for troubleshooting</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SELECT * FROM log ORDER BY timestamp"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SELECT timestamp, type, message FROM log ORDER BY timestamp"</span><span class="op">)</span></span></code></pre></div>
+</li>
+</ol>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

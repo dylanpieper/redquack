@@ -40,15 +40,27 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="redquack-010">redquack 0.1.0<a class="anchor" aria-label="anchor" href="#redquack-010"></a></h2>
-<ul><li>Initial CRAN submission</li>
-<li>Single function <code><a href="../reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> for exporting REDCap data to DuckDB</li>
-<li>Batch processing to limit memory usage for large datasets</li>
-<li>Automatic column type optimization to handle conflicts</li>
-<li>Process logging in a separate database table</li>
-<li>Progress tracking with console messages</li>
-<li>Sound notifications (quacks on success)</li>
+<div class="section level3">
+<h3 id="new-features-0-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0"></a></h3>
+<ul><li>First release of redquack on CRAN</li>
+<li>Implemented <code><a href="../reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> function for extracting REDCap data into DuckDB databases</li>
+<li>Batch processing to efficiently handle large datasets with minimal memory usage</li>
+<li>Automatic data type optimization for improved query performance</li>
+<li>Support for resuming interrupted extraction processes</li>
+<li>Detection of completed extractions to prevent duplicated work</li>
+<li>Comprehensive logging system to track extraction progress and errors</li>
 </ul></div>
-  </main></div>
+<div class="section level3">
+<h3 id="implementation-details-0-1-0">Implementation details<a class="anchor" aria-label="anchor" href="#implementation-details-0-1-0"></a></h3>
+<ul><li>REDCap API integration using the ‘httr2’ package for reliable data extraction</li>
+<li>Robust error handling with configurable retry capabilities</li>
+<li>Progress tracking using the ‘cli’ package with customizable verbosity</li>
+<li>Dynamic memory management to handle large datasets on systems with limited RAM</li>
+<li>DuckDB integration for high-performance analytical database storage</li>
+</ul></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
