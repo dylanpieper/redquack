@@ -131,7 +131,7 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Create a Parquet file directly from DuckDB (efficient for sharing data):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"COPY (SELECT * FROM data) TO 'redcap_export.parquet' (FORMAT PARQUET)"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)"</span><span class="op">)</span></span></code></pre></div>
 <p>Remember to close the connection when finished:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
