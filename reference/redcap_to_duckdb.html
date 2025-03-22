@@ -48,23 +48,23 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">redcap_to_duckdb</span><span class="op">(</span></span>
 <span>  <span class="va">redcap_uri</span>,</span>
 <span>  <span class="va">token</span>,</span>
-<span>  output_file <span class="op">=</span> <span class="st">"redcap.duckdb"</span>,</span>
-<span>  chunk_size <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  chunk_delay <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  max_retries <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  raw_or_label <span class="op">=</span> <span class="st">"raw"</span>,</span>
 <span>  raw_or_label_headers <span class="op">=</span> <span class="st">"raw"</span>,</span>
 <span>  export_checkbox_label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  export_survey_fields <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  export_data_access_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  blank_for_gray_form_status <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  filter_logic <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  datetime_range_begin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span>,</span>
 <span>  datetime_range_end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span>,</span>
-<span>  blank_for_gray_form_status <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  fields <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  forms <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  events <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  id_field <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>  record_id_name <span class="op">=</span> <span class="st">"record_id"</span>,</span>
+<span>  chunk_size <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  chunk_delay <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  max_retries <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  output_file <span class="op">=</span> <span class="st">"redcap.duckdb"</span>,</span>
 <span>  optimize_types <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  return_duckdb <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -85,26 +85,6 @@ of the REDCap server's API.</p></dd>
 <dt id="arg-token">token<a class="anchor" aria-label="anchor" href="#arg-token"></a></dt>
 <dd><p>Character string containing the REDCap API token specific to your project.
 This token is used for authentication and must have export permissions.</p></dd>
-
-
-<dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
-<dd><p>Character string specifying the file path where the DuckDB database
-will be created or modified. Default is "redcap.duckdb" in current working directory.</p></dd>
-
-
-<dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
-<dd><p>Integer specifying the number of record IDs to process per chunk.
-Default is 1000. Consider decreasing this for projects with many fields.</p></dd>
-
-
-<dt id="arg-chunk-delay">chunk_delay<a class="anchor" aria-label="anchor" href="#arg-chunk-delay"></a></dt>
-<dd><p>Numeric value specifying the delay in seconds between chunked
-requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.</p></dd>
-
-
-<dt id="arg-max-retries">max_retries<a class="anchor" aria-label="anchor" href="#arg-max-retries"></a></dt>
-<dd><p>Integer specifying the maximum number of retry attempts for failed
-API requests. Default is 3. Set to 0 to disable retries.</p></dd>
 
 
 <dt id="arg-raw-or-label">raw_or_label<a class="anchor" aria-label="anchor" href="#arg-raw-or-label"></a></dt>
@@ -138,6 +118,12 @@ the <code>redcap_data_access_group</code> field when data access groups are util
 in the project. Default is FALSE.</p></dd>
 
 
+<dt id="arg-blank-for-gray-form-status">blank_for_gray_form_status<a class="anchor" aria-label="anchor" href="#arg-blank-for-gray-form-status"></a></dt>
+<dd><p>Logical that specifies whether
+or not to export blank values for instrument complete status fields that have
+a gray status icon. Default is FALSE.</p></dd>
+
+
 <dt id="arg-filter-logic">filter_logic<a class="anchor" aria-label="anchor" href="#arg-filter-logic"></a></dt>
 <dd><p>String of logic text (e.g., <code>[gender] = 'male'</code>) for
 filtering the data to be returned, where the API will only return records
@@ -156,12 +142,6 @@ modified <em>before</em> a given datetime, provide a POSIXct value.
 Default is NA (no end time).</p></dd>
 
 
-<dt id="arg-blank-for-gray-form-status">blank_for_gray_form_status<a class="anchor" aria-label="anchor" href="#arg-blank-for-gray-form-status"></a></dt>
-<dd><p>Logical that specifies whether
-or not to export blank values for instrument complete status fields that have
-a gray status icon. Default is FALSE.</p></dd>
-
-
 <dt id="arg-fields">fields<a class="anchor" aria-label="anchor" href="#arg-fields"></a></dt>
 <dd><p>Character vector specifying which fields to export.
 Default is NULL (all fields).</p></dd>
@@ -177,9 +157,29 @@ Default is NULL (all forms).</p></dd>
 Default is NULL (all events).</p></dd>
 
 
-<dt id="arg-id-field">id_field<a class="anchor" aria-label="anchor" href="#arg-id-field"></a></dt>
+<dt id="arg-record-id-name">record_id_name<a class="anchor" aria-label="anchor" href="#arg-record-id-name"></a></dt>
 <dd><p>Character string specifying the field name that contains record
-identifiers. Default is "id".</p></dd>
+identifiers used for chunking requests. Default is "record_id".</p></dd>
+
+
+<dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
+<dd><p>Integer specifying the number of record IDs to process per chunk.
+Default is 1000. Consider decreasing this for projects with many fields.</p></dd>
+
+
+<dt id="arg-chunk-delay">chunk_delay<a class="anchor" aria-label="anchor" href="#arg-chunk-delay"></a></dt>
+<dd><p>Numeric value specifying the delay in seconds between chunked
+requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.</p></dd>
+
+
+<dt id="arg-max-retries">max_retries<a class="anchor" aria-label="anchor" href="#arg-max-retries"></a></dt>
+<dd><p>Integer specifying the maximum number of retry attempts for failed
+API requests. Default is 3. Set to 0 to disable retries.</p></dd>
+
+
+<dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
+<dd><p>Character string specifying the file path where the DuckDB database
+will be created or modified. Default is "redcap.duckdb" in current working directory.</p></dd>
 
 
 <dt id="arg-optimize-types">optimize_types<a class="anchor" aria-label="anchor" href="#arg-optimize-types"></a></dt>
@@ -261,6 +261,7 @@ You must explicitly close this connection with <code><a href="https://dbi.r-dbi.
 <span class="r-in"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">redcap_to_duckdb</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  redcap_uri <span class="op">=</span> <span class="st">"https://redcap.example.org/api/"</span>,</span></span>
 <span class="r-in"><span>  token <span class="op">=</span> <span class="st">"YOUR_API_TOKEN"</span>,</span></span>
+<span class="r-in"><span>  record_id_name <span class="op">=</span> <span class="st">"record_id"</span>,</span></span>
 <span class="r-in"><span>  chunk_size <span class="op">=</span> <span class="fl">1000</span></span></span>
 <span class="r-in"><span>  <span class="co"># Increase chunk size for memory-efficient systems (faster)</span></span></span>
 <span class="r-in"><span>  <span class="co"># Decrease chunk size for memory-constrained systems (slower)</span></span></span>
