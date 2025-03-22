@@ -1,0 +1,9 @@
+url: https://dylanpieper.github.io/redquack/
+repo:
+  url:
+    home: https://github.com/dylanpieper/redquack
+template:
+  bootstrap: 5
+  light-switch: true
+figures:
+  dev: grfx
