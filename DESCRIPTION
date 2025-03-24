@@ -3,10 +3,10 @@ Title: Transfer 'REDCap' Data to 'DuckDB'
 Version: 0.1.1
 Authors@R: person("Dylan", "Pieper", , "dylanpieper@gmail.com", role = c("aut", "cre"))
 Description: Provides a single function to transfer 'REDCap' (Research Electronic
-    Data Capture) data to a 'DuckDB' database. Processes data in chunks to 
-    handle large datasets while minimizing memory usage. Features include 
-    resuming incomplete transfers, converting column types, tracking progress, 
-    logging operations in the database.
+    Data Capture) data to 'DuckDB'. Processes data in chunks to handle large
+    datasets while minimizing memory usage. Features include resuming incomplete
+    transfers, converting column types, tracking progress, and logging operations 
+    in the database.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
