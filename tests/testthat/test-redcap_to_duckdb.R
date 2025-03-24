@@ -19,7 +19,7 @@ test_that("redcap_to_duckdb handles different chunk sizes", {
   skip_on_ci()
   skip_on_cran()
 
-  db_small <- create_test_db("small_chunk.duckdb", chunk_size = 1000)
+  db_small <- create_test_db("small_chunk.duckdb", chunk_size = 500)
   on.exit(cleanup_db(db_small$con, db_small$path))
 
   db_large <- create_test_db("large_chunk.duckdb", chunk_size = 5000)
@@ -107,25 +107,57 @@ test_that("redcap_to_duckdb handles log table correctly", {
   expect_equal(nrow(time_ordered), dbGetQuery(db$con, "SELECT COUNT(*) FROM log")[[1]])
 })
 
-test_that("comprehensive integration test with real API", {
+test_that("all record IDs from REDCap are present in the database", {
   skip_on_ci()
   skip_on_cran()
+
+  fetch_all_redcap_record_ids <- function(uri, token, record_id_name = "id") {
+    req <- httr2::request(uri) |>
+      httr2::req_body_form(
+        token = token,
+        content = "record",
+        format = "csv",
+        type = "flat",
+        fields = record_id_name
+      ) |>
+      httr2::req_retry(max_tries = 4)
+
+    resp <- httr2::req_perform(req, verbosity = 0)
+    raw_text <- httr2::resp_body_string(resp)
+
+    result_data <- readr::read_csv(
+      raw_text,
+      col_types = readr::cols(.default = readr::col_character()),
+      show_col_types = FALSE
+    )
+
+    result_data[[1]]
+  }
 
   creds <- get_redcap_credentials()
 
   test_dir <- file.path(tempdir(), "redcap_tests")
   dir.create(test_dir, showWarnings = FALSE, recursive = TRUE)
-  file_path <- file.path(test_dir, "comprehensive.duckdb")
+  file_path <- file.path(test_dir, "complete_record_ids_test.duckdb")
 
+  record_id_name <- "id"
+
+  cli::cli_alert_info("Fetching all record IDs directly from REDCap")
+  all_redcap_ids <- fetch_all_redcap_record_ids(
+    uri = creds$uri,
+    token = creds$token,
+    record_id_name = record_id_name
+  )
+
+  expect_gt(length(all_redcap_ids), 0)
+  cli::cli_alert_info(paste("Found", length(all_redcap_ids), "record IDs in REDCap"))
+
+  cli::cli_alert_info("Creating test database with redcap_to_duckdb")
   con <- redcap_to_duckdb(
     redcap_uri = creds$uri,
     token = creds$token,
     output_file = file_path,
-    record_id_name = "id",
-    chunk_size = 5000,
-    export_data_access_groups = TRUE,
-    raw_or_label = "raw",
-    export_checkbox_label = FALSE,
+    record_id_name = record_id_name,
     beep = FALSE
   )
 
@@ -134,20 +166,54 @@ test_that("comprehensive integration test with real API", {
     unlink(file_path)
   })
 
-  data <- DBI::dbGetQuery(con, "SELECT * FROM data")
-  logs <- DBI::dbGetQuery(con, "SELECT * FROM log")
+  query <- paste0("SELECT DISTINCT ", DBI::dbQuoteIdentifier(con, record_id_name), " FROM data")
+  db_record_ids <- DBI::dbGetQuery(con, query)[[1]]
 
-  expect_gt(nrow(data), 0)
-  expect_gt(nrow(logs), 0)
+  expect_gt(length(db_record_ids), 0)
+  cli::cli_alert_info(paste("Found", length(db_record_ids), "unique record IDs in database"))
 
-  column_count <- ncol(data)
-  expect_gt(column_count, 1)
+  missing_ids <- setdiff(all_redcap_ids, db_record_ids)
+  extra_ids <- setdiff(db_record_ids, all_redcap_ids)
 
-  data_types <- dbGetQuery(con, "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'data'")
-  expect_equal(nrow(data_types), column_count)
+  if (length(missing_ids) > 0) {
+    cli::cli_alert_warning(paste("Missing", length(missing_ids), "record IDs in database"))
+    cli::cli_alert_info(paste("First few missing IDs:", paste(head(missing_ids, 5), collapse = ", ")))
+  }
 
-  unique_types <- unique(data_types$data_type)
-  expect_gt(length(unique_types), 1)
+  if (length(extra_ids) > 0) {
+    cli::cli_alert_warning(paste("Found", length(extra_ids), "extra record IDs in database not present in REDCap"))
+    cli::cli_alert_info(paste("First few extra IDs:", paste(head(extra_ids, 5), collapse = ", ")))
+  }
+
+  expect_equal(length(missing_ids), 0,
+    label = paste("Missing", length(missing_ids), "record IDs in database")
+  )
+  expect_equal(length(extra_ids), 0,
+    label = paste("Found", length(extra_ids), "extra record IDs in database")
+  )
+
+  expect_equal(sort(all_redcap_ids), sort(db_record_ids),
+    label = "Record IDs in database should match those in REDCap"
+  )
+
+  expect_equal(length(all_redcap_ids), length(db_record_ids),
+    label = "Number of record IDs should match"
+  )
+
+  expect_equal(length(unique(all_redcap_ids)), length(all_redcap_ids),
+    label = "All REDCap record IDs should be unique"
+  )
+
+  expect_equal(length(unique(db_record_ids)), length(db_record_ids),
+    label = "All database record IDs should be unique"
+  )
+
+  log_complete <- DBI::dbGetQuery(
+    con,
+    "SELECT COUNT(*) AS count FROM log WHERE type = 'INFO' AND message LIKE 'Transfer completed in%'"
+  )$count
+
+  expect_equal(log_complete, 1, label = "Transfer completion log entry should exist")
 })
 
 test_that("record_id_name parameter works properly", {
