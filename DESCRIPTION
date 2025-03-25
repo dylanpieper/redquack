@@ -1,6 +1,6 @@
 Package: redquack
 Title: Transfer 'REDCap' Data to 'DuckDB'
-Version: 0.1.1
+Version: 0.1.1.9000
 Authors@R: person("Dylan", "Pieper", , "dylanpieper@gmail.com", role = c("aut", "cre"))
 Description: Provides a single function to transfer 'REDCap' (Research Electronic
     Data Capture) data to 'DuckDB'. Processes data in chunks to handle large
