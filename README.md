@@ -4,6 +4,18 @@
 
 Transfer [REDCap](https://www.project-redcap.org/) data to [DuckDB](https://duckdb.org/) with minimal memory overhead, designed for large datasets that exceed available RAM.
 
+## Problem & Solution
+
+R objects live entirely in RAM, causing three problems:
+
+1.  You must load full datasets even when needing only portions
+
+2.  Unused objects still consume memory
+
+3.  Large datasets can easily exceed available RAM which
+
+redquack's solution to this problem is to only request and load one chunk of the REDCap dataset into an R object at a time, then to remove each chunk after it has been transferred to DuckDB.
+
 ## Features
 
 -   Chunked transfers for memory efficiency
