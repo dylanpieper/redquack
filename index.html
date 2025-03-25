@@ -66,7 +66,7 @@
 <ol style="list-style-type: decimal">
 <li>You must load full datasets even when needing only portions</li>
 <li>Unused objects still consume memory</li>
-<li>Large datasets can easily exceed available RAM which</li>
+<li>Large datasets can easily exceed available RAM</li>
 </ol>
 <p>redquack’s solution to this problem is to only request and load one chunk of the REDCap dataset into an R object at a time, then to remove each chunk after it has been transferred to DuckDB.</p>
 </div>
