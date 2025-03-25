@@ -64,9 +64,9 @@
 </h2>
 <p>R objects live entirely in RAM, causing three problems:</p>
 <ol style="list-style-type: decimal">
-<li><p>You must load full datasets even when needing only portions</p></li>
-<li><p>Unused objects still consume memory</p></li>
-<li><p>Large datasets can easily exceed available RAM which</p></li>
+<li>You must load full datasets even when needing only portions</li>
+<li>Unused objects still consume memory</li>
+<li>Large datasets can easily exceed available RAM which</li>
 </ol>
 <p>redquack’s solution to this problem is to only request and load one chunk of the REDCap dataset into an R object at a time, then to remove each chunk after it has been transferred to DuckDB.</p>
 </div>
