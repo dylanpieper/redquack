@@ -12,7 +12,11 @@ R objects live entirely in RAM, causing three problems:
 2.  Unused objects still consume memory
 3.  Large datasets can easily exceed available RAM
 
-redquack's solution to this problem is to only request and load one chunk of the REDCap dataset into an R object at a time, then to remove each object after it has been transferred to DuckDB.
+redquack's solution to this problem is to:
+
+1.  Request all of the record IDs in the database to sequence in chunks
+2.  Process one chunk of the REDCap dataset into an R object at a time
+3.  Remove each object from memory after it has been transferred to DuckDB
 
 ## Features
 
