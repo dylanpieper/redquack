@@ -416,7 +416,7 @@ redcap_to_duckdb <- function(
       pb <- cli::cli_progress_bar(
         format = paste0(
           "Processing chunk [{cli::pb_current}/{cli::pb_total}] ",
-          "[{cli::pb_bar}] {cli::pb_percent} | {cli::pb_elapsed}"
+          "[{cli::pb_bar}] {cli::pb_percent} | ETA: {cli::pb_eta}"
         ),
         total = num_chunks
       )
