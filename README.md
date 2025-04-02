@@ -14,8 +14,8 @@ R objects live entirely in RAM, causing three problems:
 
 redquack's solution to this problem is to:
 
-1.  Request all of the record IDs in the database to sequence in chunks
-2.  Process one chunk of the REDCap dataset into an R object at a time
+1.  Request all of the REDCap record IDs to sequence in chunks
+2.  Process each chunk of the REDCap data in one R object at a time
 3.  Remove each object from memory after it has been transferred to DuckDB
 
 ## Features
