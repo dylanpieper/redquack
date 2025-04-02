@@ -4,7 +4,7 @@
 
 Transfer [REDCap](https://www.project-redcap.org/) data to [DuckDB](https://duckdb.org/) with minimal memory overhead, designed for large datasets that exceed available RAM.
 
-## Problem & Solution
+## Motivation
 
 R objects live entirely in RAM, causing three problems:
 
@@ -90,7 +90,7 @@ Remember to close the connection when finished:
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-## Database structure
+## Database Structure
 
 The DuckDB database created by `redcap_to_duckdb()` contains two tables:
 
