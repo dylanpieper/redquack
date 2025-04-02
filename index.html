@@ -68,7 +68,12 @@
 <li>Unused objects still consume memory</li>
 <li>Large datasets can easily exceed available RAM</li>
 </ol>
-<p>redquack’s solution to this problem is to only request and load one chunk of the REDCap dataset into an R object at a time, then to remove each object after it has been transferred to DuckDB.</p>
+<p>redquack’s solution to this problem is to:</p>
+<ol style="list-style-type: decimal">
+<li>Request all of the record IDs in the database to sequence in chunks</li>
+<li>Process one chunk of the REDCap dataset into an R object at a time</li>
+<li>Remove each object from memory after it has been transferred to DuckDB</li>
+</ol>
 </div>
 <div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
