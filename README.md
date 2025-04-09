@@ -6,9 +6,9 @@ Transfer [REDCap](https://www.project-redcap.org/) data to [DuckDB](https://duck
 
 ## Motivation
 
-R objects live entirely in RAM, causing three problems:
+R objects live entirely in RAM, causing three problems if not using a specialized framework:
 
-1.  You must load full datasets even when needing only portions
+1.  You must load full datasets even if you only need a subset
 2.  Unused objects still consume memory
 3.  Large datasets can easily exceed available RAM
 
