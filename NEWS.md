@@ -1,4 +1,5 @@
 # redquack (development version)
+* Rebrand hex logo
 
 # redquack 0.1.1
 
