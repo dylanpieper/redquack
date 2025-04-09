@@ -1,4 +1,4 @@
-# redquack <img src="man/figures/redquack-hex.png" align="right" width="150"/>
+# redquack <img src="man/figures/redquack-hex.png" align="right" width="140"/>
 
 [![CRAN status](https://www.r-pkg.org/badges/version/redquack)](https://cran.r-pkg.org/package=redquack) [![R-CMD-check](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml)
 
