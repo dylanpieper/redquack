@@ -48,7 +48,7 @@
 #' @param chunk_delay Numeric value specifying the delay in seconds between chunked
 #'   requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.
 #' @param max_retries Integer specifying the maximum number of retry attempts for failed
-#'   API requests. Default is 3. Set to 0 to disable retries.
+#'   API connection or HTTP 504 error. Default is 3. Set to 0 to disable retries.
 #' @param output_file Character string specifying the file path where the DuckDB database
 #'   will be created or modified. Default is "redcap.duckdb" in current working directory.
 #' @param optimize_types Logical indicating whether column types should be optimized
@@ -292,7 +292,10 @@ redcap_to_duckdb <- function(
 
     httr2::request(redcap_uri) |>
       httr2::req_body_form(!!!all_params) |>
-      httr2::req_retry(max_tries = max_retries + 1)
+      httr2::req_retry(
+        max_tries = max_retries + 1,
+        is_transient = \(resp) resp$status_code == 504
+      )
   }
 
   perform_redcap_request <- function(req) {
