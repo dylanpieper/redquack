@@ -1,4 +1,5 @@
 # redquack (development version)
+* Add HTTP 504 transient error to retry
 * Rebrand hex logo
 
 # redquack 0.1.1
