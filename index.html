@@ -114,6 +114,7 @@
 <span>  <span class="co"># Increase chunk size for memory-efficient systems (faster)</span></span>
 <span>  <span class="co"># Decrease chunk size for memory-constrained systems (slower)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>By default, the function returns the DuckDB connection from the output file <code>redcap.duckdb</code>.</p>
 <div class="section level3">
 <h3 id="working-with-the-data">Working with the data<a class="anchor" aria-label="anchor" href="#working-with-the-data"></a>
 </h3>
@@ -139,7 +140,7 @@
 <code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)"</span><span class="op">)</span></span></code></pre></div>
 <p>Remember to close the connection when finished:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
