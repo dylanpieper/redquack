@@ -60,7 +60,7 @@ con <- redcap_to_duckdb(
 )
 ```
 
-By default, the function returns the DuckDB connection from the output file "redcap.duckdb".
+By default, the function returns the DuckDB connection from the output file `redcap.duckdb`.
 
 ### Working with the data
 
