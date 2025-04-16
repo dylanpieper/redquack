@@ -60,6 +60,8 @@ con <- redcap_to_duckdb(
 )
 ```
 
+By default, the function returns the DuckDB connection from the output file "redcap.duckdb".
+
 ### Working with the data
 
 Query the data with `dplyr`:
@@ -91,7 +93,7 @@ DBI::dbExecute(con, "COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQU
 Remember to close the connection when finished:
 
 ``` r
-DBI::dbDisconnect(con, shutdown = TRUE)
+DBI::dbDisconnect(con)
 ```
 
 ## Database Structure
