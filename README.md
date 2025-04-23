@@ -62,9 +62,34 @@ con <- redcap_to_duckdb(
 
 By default, the function returns the DuckDB connection from the output file `redcap.duckdb`.
 
-### Working with the data
+### Workflow Mode
 
-Query the data with `dplyr`:
+For scripted workflows or automated processes, you can use the function in workflow mode:
+
+```r
+success <- redcap_to_duckdb(
+  redcap_uri = "https://redcap.example.org/api/",
+  token = "YOUR_API_TOKEN",
+  record_id_name = "record_id",
+  return_duckdb = FALSE
+)
+
+if (success) {
+  message("Data transfer completed successfully!")
+} else {
+  stop("Data transfer failed or is incomplete!")
+}
+```
+
+When `return_duckdb = FALSE`, the function returns a logical value:
+- `TRUE` for a complete successful transfer
+- `FALSE` for a failed or partially completed transfer
+
+This mode automatically tries to resume incomplete transfers up to `max_retries` times.
+
+### Data Manipulation
+
+Query and collect the data with `dplyr`:
 
 ``` r
 library(dplyr)

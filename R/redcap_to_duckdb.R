@@ -71,7 +71,8 @@
 #'   \item `had_errors`: Logical indicating if errors occurred during the transfer
 #'   \item `error_chunks`: Vector of chunk numbers that failed processing (if any)
 #' }
-#' If `return_duckdb` is FALSE, returns invisibly.
+#' If `return_duckdb` is FALSE, returns TRUE for a complete successful transfer, 
+#' or FALSE for a failed or partially completed transfer.
 #'
 #' @details
 #' This function transfers data from REDCap to DuckDB in chunks, which helps manage memory
@@ -689,17 +690,26 @@ redcap_to_duckdb <- function(
     return(con)
   }
 
-  main_process <- function() {
+  is_transfer_complete <- function(con) {
+    completion_check <- DBI::dbGetQuery(
+      con,
+      "SELECT COUNT(*) AS count FROM log WHERE type = 'INFO' AND message LIKE 'Transfer completed in%'"
+    )
+    completion_check$count > 0
+  }
+  
+  attempt_transfer <- function(retry_count = 0) {
     env <- setup_environment()
+    
     if (is.list(env) && !is.null(env$status) && env$status == "complete") {
       if (return_duckdb) {
         if (verbose) {
           cli::cli_alert_warning("Remember to call DBI::dbDisconnect(...) when finished")
         }
-        return(env$con)
+        return(list(con = env$con, success = TRUE))
       } else {
         DBI::dbDisconnect(env$con, shutdown = TRUE)
-        return(invisible(NULL))
+        return(list(con = NULL, success = TRUE))
       }
     }
 
@@ -720,22 +730,14 @@ redcap_to_duckdb <- function(
           cli::cli_alert_success("transfer complete, no new records to process")
         }
 
-        if (return_duckdb) {
-          if (verbose) {
-            cli::cli_alert_warning("Remember to call DBI::dbDisconnect(...) when finished")
-          }
-          return(con)
-        } else {
-          DBI::dbDisconnect(con, shutdown = TRUE)
-          return(invisible(NULL))
-        }
+        return(list(con = if(return_duckdb) con else {DBI::dbDisconnect(con, shutdown = TRUE); NULL}, success = TRUE))
       } else {
         log_message(con, "ERROR", "No records returned from REDCap")
         DBI::dbDisconnect(con, shutdown = TRUE)
         if (verbose) {
           cli::cli_alert_danger("No records returned from REDCap")
         }
-        return(NULL)
+        return(list(con = NULL, success = FALSE))
       }
     }
 
@@ -758,11 +760,43 @@ redcap_to_duckdb <- function(
         audio::play(audio::load.wave(system.file("audio/quack.wav", package = "redquack")))
       }
     }
+    
+    if (isTRUE(attr(result_con, "had_errors"))) {
+      if (retry_count < max_retries) {
+        if (verbose) {
+          cli::cli_alert_warning("Transfer incomplete, retrying ({retry_count + 1}/{max_retries})")
+        }
+        log_message(result_con, "WARNING", paste("Transfer incomplete, retrying", retry_count + 1, "of", max_retries))
+        
+        if (!return_duckdb) {
+          DBI::dbDisconnect(result_con, shutdown = TRUE)
+        }
+        
+        return(attempt_transfer(retry_count + 1))
+      } else {
+        if (verbose) {
+          cli::cli_alert_danger("Transfer incomplete after {max_retries} retries")
+        }
+        log_message(result_con, "ERROR", paste("Transfer remained incomplete after", max_retries, "retries"))
+        
+        if (!return_duckdb) {
+          DBI::dbDisconnect(result_con, shutdown = TRUE)
+          return(list(con = NULL, success = FALSE))
+        }
+        return(list(con = result_con, success = FALSE))
+      }
+    }
 
+    return(list(con = result_con, success = TRUE))
+  }
+  
+  main_process <- function() {
+    result <- attempt_transfer()
+    
     if (return_duckdb) {
-      result_con
+      return(result$con)
     } else {
-      invisible(NULL)
+      return(invisible(result$success))
     }
   }
 
