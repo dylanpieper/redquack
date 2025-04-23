@@ -150,7 +150,13 @@
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"Data transfer failed or is incomplete!"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>When <code>return_duckdb = FALSE</code>, the function returns a logical value: - <code>TRUE</code> for a complete successful transfer - <code>FALSE</code> for a failed or partially completed transfer</p>
+<p>When <code>return_duckdb = FALSE</code>, the function returns a logical value:</p>
+<ul>
+<li>
+<code>TRUE</code> for a complete successful transfer</li>
+<li>
+<code>FALSE</code> for a failed or partially completed transfer</li>
+</ul>
 <p>Workflow mode automatically tries to resume incomplete transfers up to <code>max_retries</code> times.</p>
 </div>
 </div>
