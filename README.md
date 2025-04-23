@@ -107,8 +107,9 @@ if (success) {
 ```
 
 When `return_duckdb = FALSE`, the function returns a logical value:
-- `TRUE` for a complete successful transfer
-- `FALSE` for a failed or partially completed transfer
+
+-   `TRUE` for a complete successful transfer
+-   `FALSE` for a failed or partially completed transfer
 
 Workflow mode automatically tries to resume incomplete transfers up to `max_retries` times.
 
