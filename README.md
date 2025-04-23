@@ -73,15 +73,6 @@ demographics <- tbl(con, "data") |>
   filter(demographics_complete == 2) |>
   select(record_id, age, race, gender) |>
   collect()
-
-age_summary <- tbl(con, "data") |>
-  group_by(gender) |>
-  summarize(
-    n = n(),
-    mean_age = mean(age, na.rm = TRUE),
-    median_age = median(age, na.rm = TRUE)
-  ) |>
-  collect()
 ```
 
 Create a Parquet file directly from DuckDB (efficient for sharing data):
