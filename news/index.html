@@ -40,11 +40,15 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="redquack-development-version">redquack (development version)<a class="anchor" aria-label="anchor" href="#redquack-development-version"></a></h2>
-<ul><li>Add HTTP 504 transient error to retry</li>
+<ul><li>Added workflow mode with <code>return_duckdb</code> = <code>FALSE</code> now returning TRUE/FALSE status for success or failure</li>
+<li>Added automatic retry attempts for partial transfers in workflow mode up to <code>max_retries</code>
+</li>
+<li>Add HTTP 504 transient error to retry</li>
 <li>Rebrand hex logo</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.1" id="redquack-011">redquack 0.1.1<a class="anchor" aria-label="anchor" href="#redquack-011"></a></h2><p class="text-muted">CRAN release: 2025-03-24</p>
+<p>First release of redquack on CRAN</p>
 <div class="section level3">
 <h3 id="patches-0-1-1">Patches<a class="anchor" aria-label="anchor" href="#patches-0-1-1"></a></h3>
 <ul><li>Improved parameter names and defaults to align with the REDCap API (e.g., <code>record_id_name</code> = <code>record_id</code>)</li>
@@ -56,8 +60,7 @@
 <h2 class="pkg-version" data-toc-text="0.1.0" id="redquack-010">redquack 0.1.0<a class="anchor" aria-label="anchor" href="#redquack-010"></a></h2>
 <div class="section level3">
 <h3 id="new-features-0-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0"></a></h3>
-<ul><li>First release of redquack on CRAN</li>
-<li>Transfer REDCap data to DuckDB using the <code><a href="../reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> function</li>
+<ul><li>Transfer REDCap data to DuckDB using the <code><a href="../reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> function</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
