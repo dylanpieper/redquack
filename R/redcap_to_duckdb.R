@@ -663,17 +663,14 @@ redcap_to_duckdb <- function(
     formatted_time <- format_elapsed_time(as.numeric(elapsed))
     formatted_chunk_time <- format_elapsed_time(total_chunk_time)
 
-    is_partial_transfer <- FALSE
     if (had_errors) {
-      is_partial_transfer <- TRUE
       error_message <- paste(
         "Errors occurred in chunks:",
         paste(error_chunks, collapse = ", ")
       )
       cli::cli_alert_danger("{failed_chunks} of {num_chunks} chunks failed processing! Check log table for details.")
       log_message(con, "ERROR", error_message)
-    }
-    if (is_partial_transfer) {
+
       log_message(con, "WARNING", paste(
         "Transfer partially completed in", formatted_time,
         "with", successful_chunks, "of", num_chunks, "chunks successful,",
@@ -689,7 +686,6 @@ redcap_to_duckdb <- function(
 
     attr(con, "had_errors") <- had_errors
     attr(con, "error_chunks") <- error_chunks
-    attr(con, "is_partial_transfer") <- is_partial_transfer
 
     chunk_results <- NULL
 
@@ -698,14 +694,6 @@ redcap_to_duckdb <- function(
     }
 
     return(con)
-  }
-
-  is_transfer_complete <- function(con) {
-    completion_check <- DBI::dbGetQuery(
-      con,
-      "SELECT COUNT(*) AS count FROM log WHERE type = 'INFO' AND message LIKE 'Transfer completed in%'"
-    )
-    completion_check$count > 0
   }
 
   attempt_transfer <- function(retry_count = 0) {
@@ -776,7 +764,7 @@ redcap_to_duckdb <- function(
       }
     }
 
-    if (isTRUE(attr(result_con, "is_partial_transfer")) || isTRUE(attr(result_con, "had_errors"))) {
+    if (isTRUE(attr(result_con, "had_errors"))) {
       if (retry_count < max_retries) {
         if (verbose) {
           cli::cli_alert_warning("Transfer incomplete, retrying ({retry_count + 1}/{max_retries})")
