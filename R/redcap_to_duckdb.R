@@ -231,7 +231,7 @@ redcap_to_duckdb <- function(
 
       error_check <- DBI::dbGetQuery(
         con,
-        "SELECT COUNT(*) AS count FROM log WHERE type = 'ERROR' AND message LIKE '%'"
+        "SELECT COUNT(*) AS count FROM log WHERE type = 'ERROR'"
       )
 
       if (completion_check$count > 0 && error_check$count == 0) {
