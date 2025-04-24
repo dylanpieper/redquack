@@ -136,7 +136,7 @@
 #' logs <- DBI::dbGetQuery(con, "SELECT * FROM log")
 #'
 #' # Remember to close the connection
-#' DBI::dbDisconnect(con, shutdown = TRUE)
+#' DBI::dbDisconnect(con)
 #' }
 #' @seealso
 #' \code{\link[DBI]{dbConnect}} for database connection details
@@ -229,11 +229,22 @@ redcap_to_duckdb <- function(
         "SELECT COUNT(*) AS count FROM log WHERE type = 'INFO' AND message LIKE 'Transfer completed in%'"
       )
 
-      if (completion_check$count > 0) {
+      error_check <- DBI::dbGetQuery(
+        con,
+        "SELECT COUNT(*) AS count FROM log WHERE type = 'ERROR' AND message LIKE '%'"
+      )
+
+      if (completion_check$count > 0 && error_check$count == 0) {
         if (verbose) {
-          cli::cli_alert_success("Database exists and transfer is complete. No further processing needed.")
+          cli::cli_alert_success("Database exists and transfer is complete without errors. No further processing needed.")
         }
         return(list(con = con, status = "complete", start_time = Sys.time()))
+      } else if (completion_check$count > 0 && error_check$count > 0) {
+        if (verbose) {
+          cli::cli_alert_warning("Database exists but had errors during previous transfer")
+        }
+        log_message(con, "WARNING", "Transfer previously marked as complete but had errors - attempting to fix")
+        return(list(con = con, status = "error", start_time = Sys.time()))
       } else {
         if (verbose) {
           cli::cli_alert_info("Resuming from incomplete transfer")
@@ -409,12 +420,26 @@ redcap_to_duckdb <- function(
     chunks <- split(record_ids, ceiling(seq_along(record_ids) / chunk_size))
     num_chunks <- length(chunks)
 
-    log_message(con, "INFO", paste("Processing data in", num_chunks, "chunks of", chunk_size, "record IDs"))
+    log_message(con, "INFO", paste("Processing data in", num_chunks, "chunks of up to", chunk_size, "record IDs each"))
 
     processing_start_time <- Sys.time()
     data_table_created <- DBI::dbExistsTable(con, "data")
     error_chunks <- integer(0)
     total_chunk_time <- 0
+
+    processed_ids <- character(0)
+    if (data_table_created) {
+      processed_ids_query <- paste0("SELECT DISTINCT ", DBI::dbQuoteIdentifier(con, record_id_name), " FROM data")
+      processed_ids <- tryCatch(
+        {
+          DBI::dbGetQuery(con, processed_ids_query)[[1]]
+        },
+        error = function(e) {
+          log_message(con, "WARNING", paste("Could not determine already processed IDs:", e$message))
+          character(0)
+        }
+      )
+    }
 
     if (verbose) {
       pb <- cli::cli_progress_bar(
@@ -429,6 +454,23 @@ redcap_to_duckdb <- function(
     for (i in seq_along(chunks)) {
       chunk_id <- sprintf("%04d", i)
       chunk_record_ids <- chunks[[i]]
+
+      if (length(processed_ids) > 0) {
+        original_count <- length(chunk_record_ids)
+        chunk_record_ids <- setdiff(chunk_record_ids, processed_ids)
+        skipped_count <- original_count - length(chunk_record_ids)
+
+        if (skipped_count > 0) {
+          log_message(con, "INFO", paste("Skipping", skipped_count, "already processed records in chunk", i))
+
+          if (length(chunk_record_ids) == 0) {
+            if (verbose) {
+              cli::cli_progress_update()
+            }
+            next
+          }
+        }
+      }
 
       log_message(con, "INFO", paste("Processing chunk", i, "of", num_chunks, "with", length(chunk_record_ids), "record IDs"))
 
@@ -467,16 +509,26 @@ redcap_to_duckdb <- function(
             show_col_types = FALSE
           )
 
+          if (ncol(chunk_data) == 0 || nrow(chunk_data) == 0) {
+            log_message(con, "WARNING", paste("Chunk", i, "returned no data. Continuing but marking as potential issue."))
+          }
+
           chunk_data <- as.data.frame(lapply(chunk_data, as.character), stringsAsFactors = FALSE)
 
           if (!data_table_created) {
-            columns <- paste(names(chunk_data), "VARCHAR", collapse = ", ")
-            DBI::dbExecute(con, paste("CREATE TABLE data (", columns, ")"))
-            data_table_created <- TRUE
-            log_message(con, "INFO", "Created data table in DuckDB with VARCHAR columns")
+            if (ncol(chunk_data) > 0) {
+              columns <- paste(names(chunk_data), "VARCHAR", collapse = ", ")
+              DBI::dbExecute(con, paste("CREATE TABLE data (", columns, ")"))
+              data_table_created <- TRUE
+              log_message(con, "INFO", "Created data table in DuckDB with VARCHAR columns")
+            } else {
+              stop("Cannot create table schema: first chunk returned no data")
+            }
           }
 
-          DBI::dbAppendTable(con, "data", chunk_data)
+          if (nrow(chunk_data) > 0) {
+            DBI::dbAppendTable(con, "data", chunk_data)
+          }
 
           success_msg <- paste0(
             "Chunk ", chunk_id, " successfully transferred (",
@@ -519,20 +571,27 @@ redcap_to_duckdb <- function(
       total_chunk_time <- chunk_result$total_chunk_time
 
       if (!chunk_result$success) {
-        log_message(con, "WARNING", "Stopping further processing due to error in chunk")
+        log_message(con, "WARNING", paste("Error in chunk", i, "- continuing with remaining chunks"))
 
         if (verbose) {
           cli::cli_progress_done()
-          cli::cli_alert_warning("Stopping further processing due to error")
-        }
+          cli::cli_alert_warning("Error in chunk {i} - continuing with remaining chunks")
 
-        break
+          pb <- cli::cli_progress_bar(
+            format = paste0(
+              "Processing chunk [{cli::pb_current}/{cli::pb_total}] ",
+              "[{cli::pb_bar}] {cli::pb_percent} | ETA: {cli::pb_eta}"
+            ),
+            total = num_chunks,
+            current = i
+          )
+        }
       }
 
       if (i < num_chunks) Sys.sleep(chunk_delay)
     }
 
-    if (verbose && chunk_result$success) {
+    if (verbose) {
       cli::cli_progress_done()
     }
 
@@ -646,9 +705,6 @@ redcap_to_duckdb <- function(
       optimize_column_types(con)
     }
 
-    DBI::dbDisconnect(con, shutdown = TRUE)
-    con <- DBI::dbConnect(duckdb::duckdb(), dbdir = output_file)
-
     record_count <- DBI::dbGetQuery(con, "SELECT COUNT(*) AS count FROM data")$count
     formatted_chunk_time <- format_elapsed_time(total_chunk_time)
 
@@ -684,30 +740,44 @@ redcap_to_duckdb <- function(
       ))
     }
 
-    attr(con, "had_errors") <- had_errors
-    attr(con, "error_chunks") <- error_chunks
+    if (return_duckdb) {
+      DBI::dbDisconnect(con)
+      con <- DBI::dbConnect(duckdb::duckdb(), dbdir = output_file)
+      attr(con, "had_errors") <- had_errors
+      attr(con, "error_chunks") <- error_chunks
 
-    chunk_results <- NULL
-
-    if (return_duckdb && verbose) {
-      cli::cli_alert_warning("Remember to call DBI::dbDisconnect() when finished")
+      if (verbose) {
+        cli::cli_alert_warning("Remember to call DBI::dbDisconnect() when finished")
+      }
     }
 
+    chunk_results <- NULL
     return(con)
   }
 
-  attempt_transfer <- function(retry_count = 0) {
+  attempt_transfer <- function(retry_count = 0, failed_record_ids = NULL) {
     env <- setup_environment()
 
-    if (is.list(env) && !is.null(env$status) && env$status == "complete") {
-      if (return_duckdb) {
-        if (verbose) {
-          cli::cli_alert_warning("Remember to call DBI::dbDisconnect(...) when finished")
+    if (is.list(env) && !is.null(env$status)) {
+      if (env$status == "complete") {
+        error_check <- DBI::dbGetQuery(
+          env$con,
+          "SELECT COUNT(*) AS count FROM log WHERE type = 'ERROR' AND message LIKE 'Transfer remained incomplete after%'"
+        )
+
+        if (error_check$count == 0) {
+          if (return_duckdb) {
+            if (verbose) {
+              cli::cli_alert_warning("Remember to call DBI::dbDisconnect(...) when finished")
+            }
+            return(list(con = env$con, success = TRUE))
+          } else {
+            DBI::dbDisconnect(env$con)
+            return(list(con = NULL, success = TRUE))
+          }
+        } else if (verbose) {
+          cli::cli_alert_info("Previous transfer marked as complete but had errors. Attempting to fix.")
         }
-        return(list(con = env$con, success = TRUE))
-      } else {
-        DBI::dbDisconnect(env$con, shutdown = TRUE)
-        return(list(con = NULL, success = TRUE))
       }
     }
 
@@ -716,7 +786,15 @@ redcap_to_duckdb <- function(
 
     log_message(con, "INFO", "Transfer started")
 
-    record_ids <- fetch_record_ids(con, start_time)
+    if (is.null(failed_record_ids)) {
+      record_ids <- fetch_record_ids(con, start_time)
+    } else {
+      log_message(con, "INFO", paste("Retrying transfer with", length(failed_record_ids), "record IDs from previous failed chunks"))
+      if (verbose) {
+        cli::cli_alert_info("Retrying transfer with {length(failed_record_ids)} record IDs from previous failed chunks")
+      }
+      record_ids <- failed_record_ids
+    }
 
     if (is.null(record_ids)) {
       log_message(con, "INFO", "No new records to process")
@@ -724,19 +802,15 @@ redcap_to_duckdb <- function(
       if (DBI::dbExistsTable(con, "data")) {
         log_message(con, "INFO", paste("Transfer completed in", format_elapsed_time(difftime(Sys.time(), start_time, units = "secs"))))
 
-        if (verbose) {
-          cli::cli_alert_success("transfer complete, no new records to process")
-        }
-
         return(list(con = if (return_duckdb) {
           con
         } else {
-          DBI::dbDisconnect(con, shutdown = TRUE)
+          DBI::dbDisconnect(con)
           NULL
         }, success = TRUE))
       } else {
         log_message(con, "ERROR", "No records returned from REDCap")
-        DBI::dbDisconnect(con, shutdown = TRUE)
+        DBI::dbDisconnect(con)
         if (verbose) {
           cli::cli_alert_danger("No records returned from REDCap")
         }
@@ -750,7 +824,17 @@ redcap_to_duckdb <- function(
       start_time
     )
 
+    error_chunks <- chunk_results$error_chunks
+    chunks <- split(record_ids, ceiling(seq_along(record_ids) / chunk_size))
+    failed_ids <- NULL
+
+    if (length(error_chunks) > 0) {
+      failed_ids <- unlist(chunks[error_chunks], use.names = FALSE)
+      log_message(con, "INFO", paste("Identified", length(failed_ids), "record IDs in", length(error_chunks), "failed chunks"))
+    }
+
     record_ids <- NULL
+    chunks <- NULL
     gc(FALSE)
 
     result_con <- finalize_and_report(con, chunk_results, start_time)
@@ -764,30 +848,35 @@ redcap_to_duckdb <- function(
       }
     }
 
-    if (isTRUE(attr(result_con, "had_errors"))) {
+    if (isTRUE(attr(result_con, "had_errors")) && !is.null(failed_ids)) {
       if (retry_count < max_retries) {
         if (verbose) {
-          cli::cli_alert_warning("Transfer incomplete, retrying ({retry_count + 1}/{max_retries})")
+          cli::cli_alert_warning("Transfer incomplete, retrying {length(failed_ids)} failed records ({retry_count + 1}/{max_retries})")
         }
-        log_message(result_con, "WARNING", paste("Transfer incomplete, retrying", retry_count + 1, "of", max_retries))
+        log_message(result_con, "WARNING", paste("Transfer incomplete, retrying", length(failed_ids), "failed records,", retry_count + 1, "of", max_retries))
 
         if (!return_duckdb) {
-          DBI::dbDisconnect(result_con, shutdown = TRUE)
+          DBI::dbDisconnect(result_con)
         }
 
-        return(attempt_transfer(retry_count + 1))
+        return(attempt_transfer(retry_count + 1, failed_ids))
       } else {
         if (verbose) {
-          cli::cli_alert_danger("Transfer incomplete after {max_retries} retries")
+          cli::cli_alert_danger("Transfer incomplete after {max_retries} retries with {length(failed_ids)} remaining failed records")
         }
-        log_message(result_con, "ERROR", paste("Transfer remained incomplete after", max_retries, "retries"))
+        log_message(result_con, "ERROR", paste("Transfer remained incomplete after", max_retries, "retries with", length(failed_ids), "remaining failed records"))
 
         if (!return_duckdb) {
-          DBI::dbDisconnect(result_con, shutdown = TRUE)
+          DBI::dbDisconnect(result_con)
           return(list(con = NULL, success = FALSE))
         }
         return(list(con = result_con, success = FALSE))
       }
+    }
+
+    if (!return_duckdb) {
+      DBI::dbDisconnect(result_con)
+      return(list(con = NULL, success = TRUE))
     }
 
     return(list(con = result_con, success = TRUE))
