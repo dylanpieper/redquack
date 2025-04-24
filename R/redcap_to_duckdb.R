@@ -663,23 +663,33 @@ redcap_to_duckdb <- function(
     formatted_time <- format_elapsed_time(as.numeric(elapsed))
     formatted_chunk_time <- format_elapsed_time(total_chunk_time)
 
-    log_message(con, "INFO", paste(
-      "Transfer completed in", formatted_time,
-      "with", successful_chunks, "of", num_chunks, "chunks successful,",
-      failed_chunks, "failed (active processing time:", formatted_chunk_time, ")"
-    ))
-
+    is_partial_transfer <- FALSE
     if (had_errors) {
+      is_partial_transfer <- TRUE
       error_message <- paste(
         "Errors occurred in chunks:",
         paste(error_chunks, collapse = ", ")
       )
       cli::cli_alert_danger("{failed_chunks} of {num_chunks} chunks failed processing! Check log table for details.")
       log_message(con, "ERROR", error_message)
-
-      attr(con, "had_errors") <- TRUE
-      attr(con, "error_chunks") <- error_chunks
     }
+    if (is_partial_transfer) {
+      log_message(con, "WARNING", paste(
+        "Transfer partially completed in", formatted_time,
+        "with", successful_chunks, "of", num_chunks, "chunks successful,",
+        failed_chunks, "failed (active processing time:", formatted_chunk_time, ")"
+      ))
+    } else {
+      log_message(con, "INFO", paste(
+        "Transfer completed in", formatted_time,
+        "with", successful_chunks, "of", num_chunks, "chunks successful,",
+        failed_chunks, "failed (active processing time:", formatted_chunk_time, ")"
+      ))
+    }
+
+    attr(con, "had_errors") <- had_errors
+    attr(con, "error_chunks") <- error_chunks
+    attr(con, "is_partial_transfer") <- is_partial_transfer
 
     chunk_results <- NULL
 
@@ -766,7 +776,7 @@ redcap_to_duckdb <- function(
       }
     }
 
-    if (isTRUE(attr(result_con, "had_errors"))) {
+    if (isTRUE(attr(result_con, "is_partial_transfer")) || isTRUE(attr(result_con, "had_errors"))) {
       if (retry_count < max_retries) {
         if (verbose) {
           cli::cli_alert_warning("Transfer incomplete, retrying ({retry_count + 1}/{max_retries})")
