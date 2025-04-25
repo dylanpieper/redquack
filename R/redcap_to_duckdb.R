@@ -236,15 +236,15 @@ redcap_to_duckdb <- function(
 
       if (completion_check$count > 0 && error_check$count == 0) {
         if (verbose) {
-          cli::cli_alert_success("Database exists and transfer is complete without errors. No further processing needed.")
+          cli::cli_alert_success("Database exists and transfer was completed without errors")
         }
         return(list(con = con, status = "complete", start_time = Sys.time()))
       } else if (completion_check$count > 0 && error_check$count > 0) {
         if (verbose) {
           cli::cli_alert_warning("Database exists but had errors during previous transfer")
         }
-        log_message(con, "WARNING", "Transfer previously marked as complete but had errors - attempting to fix")
-        return(list(con = con, status = "error", start_time = Sys.time()))
+        log_message(con, "WARNING", "Resuming from incomplete transfer with errors")
+        return(list(con = con, start_time = Sys.time()))
       } else {
         if (verbose) {
           cli::cli_alert_info("Resuming from incomplete transfer")
@@ -755,28 +755,19 @@ redcap_to_duckdb <- function(
     return(con)
   }
 
-  attempt_transfer <- function(retry_count = 0, failed_record_ids = NULL) {
+  attempt_transfer <- function(failed_record_ids = NULL) {
     env <- setup_environment()
 
     if (is.list(env) && !is.null(env$status)) {
       if (env$status == "complete") {
-        error_check <- DBI::dbGetQuery(
-          env$con,
-          "SELECT COUNT(*) AS count FROM log WHERE type = 'ERROR' AND message LIKE 'Transfer remained incomplete after%'"
-        )
-
-        if (error_check$count == 0) {
-          if (return_duckdb) {
-            if (verbose) {
-              cli::cli_alert_warning("Remember to call DBI::dbDisconnect(...) when finished")
-            }
-            return(list(con = env$con, success = TRUE))
-          } else {
-            DBI::dbDisconnect(env$con)
-            return(list(con = NULL, success = TRUE))
+        if (return_duckdb) {
+          if (verbose) {
+            cli::cli_alert_warning("Remember to call DBI::dbDisconnect(...) when finished")
           }
-        } else if (verbose) {
-          cli::cli_alert_info("Previous transfer marked as complete but had errors. Attempting to fix.")
+          return(list(con = env$con, success = TRUE))
+        } else {
+          DBI::dbDisconnect(env$con)
+          return(list(con = NULL, success = TRUE))
         }
       }
     }
@@ -789,9 +780,9 @@ redcap_to_duckdb <- function(
     if (is.null(failed_record_ids)) {
       record_ids <- fetch_record_ids(con, start_time)
     } else {
-      log_message(con, "INFO", paste("Retrying transfer with", length(failed_record_ids), "record IDs from previous failed chunks"))
+      log_message(con, "INFO", paste("Processing", length(failed_record_ids), "record IDs"))
       if (verbose) {
-        cli::cli_alert_info("Retrying transfer with {length(failed_record_ids)} record IDs from previous failed chunks")
+        cli::cli_alert_info("Processing {length(failed_record_ids)} record IDs")
       }
       record_ids <- failed_record_ids
     }
@@ -849,29 +840,16 @@ redcap_to_duckdb <- function(
     }
 
     if (isTRUE(attr(result_con, "had_errors")) && !is.null(failed_ids)) {
-      if (retry_count < max_retries) {
-        if (verbose) {
-          cli::cli_alert_warning("Transfer incomplete, retrying {length(failed_ids)} failed records ({retry_count + 1}/{max_retries})")
-        }
-        log_message(result_con, "WARNING", paste("Transfer incomplete, retrying", length(failed_ids), "failed records,", retry_count + 1, "of", max_retries))
-
-        if (!return_duckdb) {
-          DBI::dbDisconnect(result_con)
-        }
-
-        return(attempt_transfer(retry_count + 1, failed_ids))
-      } else {
-        if (verbose) {
-          cli::cli_alert_danger("Transfer incomplete after {max_retries} retries with {length(failed_ids)} remaining failed records")
-        }
-        log_message(result_con, "ERROR", paste("Transfer remained incomplete after", max_retries, "retries with", length(failed_ids), "remaining failed records"))
-
-        if (!return_duckdb) {
-          DBI::dbDisconnect(result_con)
-          return(list(con = NULL, success = FALSE))
-        }
-        return(list(con = result_con, success = FALSE))
+      if (verbose) {
+        cli::cli_alert_danger("Transfer incomplete with {length(failed_ids)} failed records")
       }
+      log_message(result_con, "ERROR", paste("Transfer incomplete with", length(failed_ids), "failed records"))
+
+      if (!return_duckdb) {
+        DBI::dbDisconnect(result_con)
+        return(list(con = NULL, success = FALSE))
+      }
+      return(list(con = result_con, success = FALSE))
     }
 
     if (!return_duckdb) {

@@ -21,7 +21,7 @@ redquack's solution to this problem is to:
 ## Features
 
 -   Chunked transfers for memory efficiency
--   Auto-resume from interruptions
+-   Auto-resume from incomplete transfers
 -   Optimal data type conversion
 -   Timestamped operation logs
 -   Configurable API request retries
@@ -60,7 +60,12 @@ con <- redcap_to_duckdb(
 )
 ```
 
-By default, the function returns the DuckDB connection from the output file `redcap.duckdb`.
+By default `return_duckdb = TRUE`, returning the DuckDB connection from the output file `redcap.duckdb`.
+
+When `return_duckdb = FALSE`, the function returns a logical value:
+
+-   `TRUE` for a complete / successful transfer
+-   `FALSE` for an incomplete / failed transfer
 
 ### Data Manipulation
 
@@ -86,32 +91,6 @@ Remember to close the connection when finished:
 ``` r
 DBI::dbDisconnect(con)
 ```
-
-### Workflow Mode
-
-For scripted workflows or automated processes where you don't need to return the connection, you can use the function in workflow mode:
-
-```r
-success <- redcap_to_duckdb(
-  redcap_uri = "https://redcap.example.org/api/",
-  token = "YOUR_API_TOKEN",
-  record_id_name = "record_id",
-  return_duckdb = FALSE
-)
-
-if (success) {
-  message("Data transfer completed successfully!")
-} else {
-  stop("Data transfer failed or is incomplete!")
-}
-```
-
-When `return_duckdb = FALSE`, the function returns a logical value:
-
--   `TRUE` for a complete successful transfer
--   `FALSE` for a failed or partially completed transfer
-
-Workflow mode automatically tries to resume incomplete transfers up to `max_retries` times.
 
 ## Database Structure
 
