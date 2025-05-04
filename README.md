@@ -2,7 +2,7 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/redquack)](https://cran.r-pkg.org/package=redquack) [![R-CMD-check](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml)
 
-Transfer [REDCap](https://www.project-redcap.org/) data to [DuckDB](https://duckdb.org/) with minimal memory overhead, designed for large datasets that exceed available RAM.
+Transfer [REDCap](https://www.project-redcap.org/) data to [DuckDB](https://duckdb.org/) with minimal memory overhead, designed for large projects with datasets that exceed available RAM.
 
 ## Motivation
 
@@ -20,7 +20,6 @@ redquack's solution to this problem is to:
 
 ## Features
 
--   Chunked transfers for memory efficiency
 -   Auto-resume from incomplete transfers
 -   Optimal data type conversion
 -   Timestamped operation logs
@@ -107,3 +106,9 @@ The DuckDB database created by `redcap_to_duckdb()` contains two tables:
     ``` r
     DBI::dbGetQuery(con, "SELECT timestamp, type, message FROM log ORDER BY timestamp")
     ```
+
+## Others Interfaces to REDCap API
+
+-   [REDCapR](https://ouhscbbmc.github.io/REDCapR/) (R package)
+
+-   [PyCap](https://redcap-tools.github.io/PyCap/) (python module)
