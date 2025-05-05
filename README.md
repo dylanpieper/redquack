@@ -107,6 +107,24 @@ The DuckDB database created by `redcap_to_duckdb()` contains two tables:
     DBI::dbGetQuery(con, "SELECT timestamp, type, message FROM log ORDER BY timestamp")
     ```
 
+## Data Type Conversion
+
+By default, column types are automatically converted after transfer (`optimize_types = TRUE`):
+
+-   **INTEGER**: Columns with only whole numbers
+-   **DOUBLE**: Columns with decimal numbers
+-   **DATE**: Columns with valid date strings
+-   **TIMESTAMP**: Columns with valid timestamp strings
+-   **VARCHAR**: All other columns remain as strings
+
+If you disable type conversion (`optimize_types = FALSE`), all columns will be VARCHAR. Disable type conversion when you need consistent string handling, have complex mixed-type data, or plan to handle conversions manually.
+
+You can easily query the data to inspect the column types:
+
+``` r
+DBI::dbGetQuery(con, "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'data'")
+```
+
 ## Others Interfaces to REDCap API
 
 -   [REDCapR](https://ouhscbbmc.github.io/REDCapR/) (R package)
