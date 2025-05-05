@@ -42,9 +42,9 @@ Development version:
 pak::pak("dylanpieper/redquack")
 ```
 
-## Setup API Key
+## Setup API Token
 
-Your REDCap API key allows R to interface with REDCap and should be stored as an environmental variable for security. I recommend using the [usethis](https://usethis.r-lib.org) package to setup API keys in your `.Renviron` such as `REDCAP_TOKEN=your-api-token`.
+Your REDCap API token allows R to interface with REDCap and should be stored as an environmental variable for security. I recommend using the [usethis](https://usethis.r-lib.org) package to set your API token in `.Renviron` as `REDCAP_TOKEN=your-api-token`.
 
 ``` r
 usethis::edit_r_environ(scope = c("user", "project"))
