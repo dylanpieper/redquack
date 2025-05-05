@@ -44,7 +44,7 @@ pak::pak("dylanpieper/redquack")
 
 ## Setup API Key
 
-Your [REDCap API](https://ws.engr.illinois.edu/sitemanager/getfile.asp?id=3112) key allows R to interface with REDCap and should be stored as an environmental variable for security. I recommend the `usethis` package to setup API keys in your `.Renviron` such as `REDCAP_TOKEN=your-api-token`.
+Your REDCap API key allows R to interface with REDCap and should be stored as an environmental variable for security. I recommend the `usethis` package to setup API keys in your `.Renviron` such as `REDCAP_TOKEN=your-api-token`.
 
 ``` r
 usethis::edit_r_environ(scope = c("user", "project"))
@@ -133,7 +133,7 @@ You can easily query the data to inspect the column types:
 DBI::dbGetQuery(con, "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'data'")
 ```
 
-## Others Interfaces to REDCap API
+## Other REDCap Packages
 
 -   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package; also provides a package comparison table)
 
