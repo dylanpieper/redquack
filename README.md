@@ -42,6 +42,14 @@ Development version:
 pak::pak("dylanpieper/redquack")
 ```
 
+## Setup API Key
+
+Your [REDCap API](https://ws.engr.illinois.edu/sitemanager/getfile.asp?id=3112) key allows R to interface with REDCap and should be stored as an environmental variable for security. I recommend the `usethis` package to setup API keys in your `.Renviron` such as `REDCAP_TOKEN=your-api-token`.
+
+``` r
+usethis::edit_r_environ(scope = c("user", "project"))
+```
+
 ## Basic Usage
 
 Data from REDCap is transferred to DuckDB in configurable chunks of record IDs:
@@ -51,7 +59,7 @@ library(redquack)
 
 con <- redcap_to_duckdb(
   redcap_uri = "https://redcap.example.org/api/",
-  token = "YOUR_API_TOKEN",
+  token = Sys.getenv("REDCAP_TOKEN"),
   record_id_name = "record_id",
   chunk_size = 1000  
   # Increase chunk size for memory-efficient systems (faster)
@@ -127,6 +135,6 @@ DBI::dbGetQuery(con, "SELECT column_name, data_type FROM information_schema.colu
 
 ## Others Interfaces to REDCap API
 
--   [REDCapR](https://ouhscbbmc.github.io/REDCapR/) (R package)
+-   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package; also provides a package comparison table)
 
 -   [PyCap](https://redcap-tools.github.io/PyCap/) (python module)
