@@ -21,7 +21,7 @@ redquack's solution to this problem is to:
 ## Features
 
 -   Auto-resume from incomplete transfers
--   Optimal data type conversion
+-   Auto-convert column types
 -   Timestamped operation logs
 -   Configurable API request retries
 -   Real-time progress indicators
@@ -68,14 +68,14 @@ When `return_duckdb = FALSE`, the function returns a logical value:
 
 ### Data Manipulation
 
-Query and collect the data with `dplyr`:
+Query and collect the data with [dplyr](https://dplyr.tidyverse.org):
 
 ``` r
 library(dplyr)
 
 demographics <- tbl(con, "data") |>
-  filter(demographics_complete == 2) |>
-  select(record_id, age, race, gender) |>
+  filter(redcap_repeat_instrument == "demographics") |>
+  select(record_id, age, race, sex, gender) |>
   collect()
 ```
 
@@ -107,7 +107,7 @@ The DuckDB database created by `redcap_to_duckdb()` contains two tables:
     DBI::dbGetQuery(con, "SELECT timestamp, type, message FROM log ORDER BY timestamp")
     ```
 
-## Data Type Conversion
+## Column Types
 
 By default, column types are automatically converted after transfer (`optimize_types = TRUE`):
 
