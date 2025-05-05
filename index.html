@@ -158,6 +158,27 @@
 </ol>
 </div>
 <div class="section level2">
+<h2 id="data-type-conversion">Data Type Conversion<a class="anchor" aria-label="anchor" href="#data-type-conversion"></a>
+</h2>
+<p>By default, column types are automatically converted after transfer (<code>optimize_types = TRUE</code>):</p>
+<ul>
+<li>
+<strong>INTEGER</strong>: Columns with only whole numbers</li>
+<li>
+<strong>DOUBLE</strong>: Columns with decimal numbers</li>
+<li>
+<strong>DATE</strong>: Columns with valid date strings</li>
+<li>
+<strong>TIMESTAMP</strong>: Columns with valid timestamp strings</li>
+<li>
+<strong>VARCHAR</strong>: All other columns remain as strings</li>
+</ul>
+<p>If you disable type conversion (<code>optimize_types = FALSE</code>), all columns will be VARCHAR. Disable type conversion when you need consistent string handling, have complex mixed-type data, or plan to handle conversions manually.</p>
+<p>You can easily query the data to inspect the column types:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'data'"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="others-interfaces-to-redcap-api">Others Interfaces to REDCap API<a class="anchor" aria-label="anchor" href="#others-interfaces-to-redcap-api"></a>
 </h2>
 <ul>
