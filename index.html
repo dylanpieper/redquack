@@ -80,7 +80,7 @@
 </h2>
 <ul>
 <li>Auto-resume from incomplete transfers</li>
-<li>Optimal data type conversion</li>
+<li>Auto-convert column types</li>
 <li>Timestamped operation logs</li>
 <li>Configurable API request retries</li>
 <li>Real-time progress indicators</li>
@@ -124,13 +124,13 @@
 <div class="section level3">
 <h3 id="data-manipulation">Data Manipulation<a class="anchor" aria-label="anchor" href="#data-manipulation"></a>
 </h3>
-<p>Query and collect the data with <code>dplyr</code>:</p>
+<p>Query and collect the data with <a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">demographics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/tbl.html" class="external-link">tbl</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"data"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">demographics_complete</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">record_id</span>, <span class="va">age</span>, <span class="va">race</span>, <span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">redcap_repeat_instrument</span> <span class="op">==</span> <span class="st">"demographics"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">record_id</span>, <span class="va">age</span>, <span class="va">race</span>, <span class="va">sex</span>, <span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Create a Parquet file directly from DuckDB (efficient for sharing data):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -158,7 +158,7 @@
 </ol>
 </div>
 <div class="section level2">
-<h2 id="data-type-conversion">Data Type Conversion<a class="anchor" aria-label="anchor" href="#data-type-conversion"></a>
+<h2 id="column-types">Column Types<a class="anchor" aria-label="anchor" href="#column-types"></a>
 </h2>
 <p>By default, column types are automatically converted after transfer (<code>optimize_types = TRUE</code>):</p>
 <ul>
