@@ -82,7 +82,7 @@ Query and collect the data with [dplyr](https://dplyr.tidyverse.org):
 library(dplyr)
 
 demographics <- tbl(con, "data") |>
-  filter(redcap_repeat_instrument == "demographics") |>
+  filter(is.na(redcap_repeat_instrument)) |>
   select(record_id, age, race, sex, gender) |>
   collect()
 ```
@@ -125,7 +125,7 @@ By default, column types are automatically converted after transfer (`optimize_t
 -   **TIMESTAMP**: Columns with valid timestamp strings
 -   **VARCHAR**: All other columns remain as strings
 
-If you disable type conversion (`optimize_types = FALSE`), all columns will be VARCHAR. Disable type conversion when you need consistent string handling, have complex mixed-type data, or plan to handle conversions manually.
+If you disable type conversion (`optimize_types = FALSE`), all columns will be VARCHAR. Disable type conversion when you have complex mixed-type data or plan to handle conversions manually.
 
 You can easily query the data to inspect the column types:
 
@@ -133,7 +133,7 @@ You can easily query the data to inspect the column types:
 DBI::dbGetQuery(con, "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'data'")
 ```
 
-## Other REDCap Packages
+## Other REDCap Interfaces
 
 -   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package; also provides a package comparison table)
 

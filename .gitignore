@@ -5,3 +5,5 @@
 .DS_Store
 data/
 docs
+redcap.duckdb
+redcap.duckdb.wal
