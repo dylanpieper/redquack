@@ -21,9 +21,9 @@ redquack's solution to this problem is to:
 ## Features
 
 -   Auto-resume from incomplete transfers
+-   Auto-retry for API request failures
 -   Auto-convert column types
 -   Timestamped operation logs
--   Configurable API request retries
 -   Real-time progress indicators
 -   Completion notifications (🔊 🦆)
 
