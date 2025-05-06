@@ -80,9 +80,9 @@
 </h2>
 <ul>
 <li>Auto-resume from incomplete transfers</li>
+<li>Auto-retry for API request failures</li>
 <li>Auto-convert column types</li>
 <li>Timestamped operation logs</li>
-<li>Configurable API request retries</li>
 <li>Real-time progress indicators</li>
 <li>Completion notifications (🔊 🦆)</li>
 </ul>
@@ -136,7 +136,7 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">demographics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/tbl.html" class="external-link">tbl</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"data"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">redcap_repeat_instrument</span> <span class="op">==</span> <span class="st">"demographics"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">redcap_repeat_instrument</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">record_id</span>, <span class="va">age</span>, <span class="va">race</span>, <span class="va">sex</span>, <span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Create a Parquet file directly from DuckDB (efficient for sharing data):</p>
@@ -180,13 +180,13 @@
 <li>
 <strong>VARCHAR</strong>: All other columns remain as strings</li>
 </ul>
-<p>If you disable type conversion (<code>optimize_types = FALSE</code>), all columns will be VARCHAR. Disable type conversion when you need consistent string handling, have complex mixed-type data, or plan to handle conversions manually.</p>
+<p>If you disable type conversion (<code>optimize_types = FALSE</code>), all columns will be VARCHAR. Disable type conversion when you have complex mixed-type data or plan to handle conversions manually.</p>
 <p>You can easily query the data to inspect the column types:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'data'"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="other-redcap-packages">Other REDCap Packages<a class="anchor" aria-label="anchor" href="#other-redcap-packages"></a>
+<h2 id="other-redcap-interfaces">Other REDCap Interfaces<a class="anchor" aria-label="anchor" href="#other-redcap-interfaces"></a>
 </h2>
 <ul>
 <li><p><a href="https://github.com/vubiostat/redcapAPI" class="external-link">redcapAPI</a> (R package; also provides a package comparison table)</p></li>
