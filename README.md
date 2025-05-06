@@ -87,7 +87,33 @@ demographics <- tbl(con, "data") |>
   collect()
 ```
 
-Create a Parquet file directly from DuckDB (efficient for sharing data):
+If you `collect()` your data into memory in the last step, it can make a slow process nearly instantaneous. The following example data is 2,819,697 rows x 397 columns:
+
+``` r
+system.time(
+  records <- con |>
+    tbl("data") |>
+    collect() |>
+    group_by(redcap_repeat_instrument) |>
+    summarize(count = n()) |>
+    arrange(desc(count)) 
+)
+#>    user  system elapsed
+#>  20.748  10.455  32.916
+
+system.time(
+  records <- con |>
+    tbl("data") |>
+    group_by(redcap_repeat_instrument) |>
+    summarize(count = n()) |>
+    arrange(desc(count)) |>
+    collect()
+)
+#>    user  system elapsed
+#>   0.040   0.015   0.040
+```
+
+You can also create a Parquet file directly from DuckDB to take advantage of the features of [arrow](https://arrow.apache.org/docs/r/):
 
 ``` r
 DBI::dbExecute(con, "COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)")
