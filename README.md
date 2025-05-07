@@ -44,10 +44,10 @@ pak::pak("dylanpieper/redquack")
 
 ## Setup API Token
 
-Your REDCap API token allows R to interface with REDCap and should be stored as an environmental variable for security. I recommend using the [usethis](https://usethis.r-lib.org) package to set your API token in `.Renviron` as `REDCAP_TOKEN=your-api-token`.
+Your REDCap API token allows R to interface with REDCap and should be stored securely. I recommend using the [keyring](https://keyring.r-lib.org) package to store your API token. For example:
 
 ``` r
-usethis::edit_r_environ(scope = c("user", "project"))
+keyring::key_set("redcap_token", "example_project")
 ```
 
 ## Basic Usage
@@ -59,7 +59,7 @@ library(redquack)
 
 con <- redcap_to_duckdb(
   redcap_uri = "https://redcap.example.org/api/",
-  token = Sys.getenv("REDCAP_TOKEN"),
+  token = keyring::key_get("redcap_token", "example_project"),
   record_id_name = "record_id",
   chunk_size = 1000  
   # Increase chunk size for memory-efficient systems (faster)
