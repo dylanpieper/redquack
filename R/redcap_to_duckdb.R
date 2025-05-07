@@ -7,15 +7,15 @@
 #'   of the REDCap server's API.
 #' @param token Character string containing the REDCap API token specific to your project.
 #'   This token is used for authentication and must have export permissions.
-#' @param raw_or_label A string (either `'raw'` or `'label'`) that specifies
+#' @param raw_or_label A string (either "raw" or "label") that specifies
 #'   whether to export the raw coded values or the labels for the options of
-#'   multiple choice fields. Default is `'raw'`.
-#' @param raw_or_label_headers A string (either `'raw'` or `'label'`) that
+#'   multiple choice fields. Default is "raw".
+#' @param raw_or_label_headers A string (either "raw" or "label") that
 #'   specifies for the CSV headers whether to export the variable/field names
-#'   (raw) or the field labels (label). Default is `'raw'`.
+#'   (raw) or the field labels (label). Default is "raw".
 #' @param export_checkbox_label Logical that specifies the format of checkbox field values
 #'   specifically when exporting the data as labels. If `raw_or_label` is
-#'   `'label'` and `export_checkbox_label` is TRUE, the values will be the text
+#'   "label" and `export_checkbox_label` is TRUE, the values will be the text
 #'   displayed to the users. Otherwise, the values will be 0/1. Default is FALSE.
 #' @param export_survey_fields Logical that specifies whether to export the
 #'   survey identifier field (e.g., 'redcap_survey_identifier') or survey
@@ -216,11 +216,14 @@ redcap_to_duckdb <- function(
     con <- DBI::dbConnect(duckdb::duckdb(), dbdir = output_file)
 
     if (!DBI::dbExistsTable(con, "log")) {
-      DBI::dbExecute(con, "CREATE TABLE log (
-    timestamp TIMESTAMP,
-    type VARCHAR,
-    message VARCHAR
-  )")
+      DBI::dbExecute(
+        con,
+        "CREATE TABLE log (
+        timestamp TIMESTAMP,
+        type VARCHAR,
+        message VARCHAR
+        )"
+      )
     }
 
     if (DBI::dbExistsTable(con, "data")) {

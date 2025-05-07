@@ -38,17 +38,17 @@ of the REDCap server's API.}
 \item{token}{Character string containing the REDCap API token specific to your project.
 This token is used for authentication and must have export permissions.}
 
-\item{raw_or_label}{A string (either \code{'raw'} or \code{'label'}) that specifies
+\item{raw_or_label}{A string (either "raw" or "label") that specifies
 whether to export the raw coded values or the labels for the options of
-multiple choice fields. Default is \code{'raw'}.}
+multiple choice fields. Default is "raw".}
 
-\item{raw_or_label_headers}{A string (either \code{'raw'} or \code{'label'}) that
+\item{raw_or_label_headers}{A string (either "raw" or "label") that
 specifies for the CSV headers whether to export the variable/field names
-(raw) or the field labels (label). Default is \code{'raw'}.}
+(raw) or the field labels (label). Default is "raw".}
 
 \item{export_checkbox_label}{Logical that specifies the format of checkbox field values
 specifically when exporting the data as labels. If \code{raw_or_label} is
-\code{'label'} and \code{export_checkbox_label} is TRUE, the values will be the text
+"label" and \code{export_checkbox_label} is TRUE, the values will be the text
 displayed to the users. Otherwise, the values will be 0/1. Default is FALSE.}
 
 \item{export_survey_fields}{Logical that specifies whether to export the
@@ -94,7 +94,7 @@ Default is 1000. Consider decreasing this for projects with many fields.}
 requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.}
 
 \item{max_retries}{Integer specifying the maximum number of retry attempts for failed
-API requests. Default is 3. Set to 0 to disable retries.}
+API connection or HTTP 504 error. Default is 3. Set to 0 to disable retries.}
 
 \item{output_file}{Character string specifying the file path where the DuckDB database
 will be created or modified. Default is "redcap.duckdb" in current working directory.}
@@ -123,7 +123,8 @@ Connection has attributes:
 \item \code{had_errors}: Logical indicating if errors occurred during the transfer
 \item \code{error_chunks}: Vector of chunk numbers that failed processing (if any)
 }
-If \code{return_duckdb} is FALSE, returns invisibly.
+If \code{return_duckdb} is FALSE, returns TRUE for a complete successful transfer,
+or FALSE for a failed or partially completed transfer.
 }
 \description{
 Transfer REDCap data to DuckDB in chunks to minimize memory usage.
@@ -192,7 +193,7 @@ data <- DBI::dbGetQuery(con, "SELECT * FROM data LIMIT 10")
 logs <- DBI::dbGetQuery(con, "SELECT * FROM log")
 
 # Remember to close the connection
-DBI::dbDisconnect(con, shutdown = TRUE)
+DBI::dbDisconnect(con)
 }
 }
 \seealso{
