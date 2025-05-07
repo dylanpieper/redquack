@@ -101,9 +101,9 @@
 <div class="section level2">
 <h2 id="setup-api-token">Setup API Token<a class="anchor" aria-label="anchor" href="#setup-api-token"></a>
 </h2>
-<p>Your REDCap API token allows R to interface with REDCap and should be stored as an environmental variable for security. I recommend using the <a href="https://usethis.r-lib.org" class="external-link">usethis</a> package to set your API token in <code>.Renviron</code> as <code>REDCAP_TOKEN=your-api-token</code>.</p>
+<p>Your REDCap API token allows R to interface with REDCap and should be stored securely. I recommend using the <a href="https://keyring.r-lib.org" class="external-link">keyring</a> package to store your API token. For example:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">edit_r_environ</span><span class="op">(</span>scope <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"user"</span>, <span class="st">"project"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">keyring</span><span class="fu">::</span><span class="fu"><a href="https://keyring.r-lib.org/reference/key_get.html" class="external-link">key_set</a></span><span class="op">(</span><span class="st">"redcap_token"</span>, <span class="st">"example_project"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
@@ -114,7 +114,7 @@
 <span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/redcap_to_duckdb.html">redcap_to_duckdb</a></span><span class="op">(</span></span>
 <span>  redcap_uri <span class="op">=</span> <span class="st">"https://redcap.example.org/api/"</span>,</span>
-<span>  token <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"REDCAP_TOKEN"</span><span class="op">)</span>,</span>
+<span>  token <span class="op">=</span> <span class="fu">keyring</span><span class="fu">::</span><span class="fu"><a href="https://keyring.r-lib.org/reference/key_get.html" class="external-link">key_get</a></span><span class="op">(</span><span class="st">"redcap_token"</span>, <span class="st">"example_project"</span><span class="op">)</span>,</span>
 <span>  record_id_name <span class="op">=</span> <span class="st">"record_id"</span>,</span>
 <span>  chunk_size <span class="op">=</span> <span class="fl">1000</span>  </span>
 <span>  <span class="co"># Increase chunk size for memory-efficient systems (faster)</span></span>

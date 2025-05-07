@@ -88,21 +88,21 @@ This token is used for authentication and must have export permissions.</p></dd>
 
 
 <dt id="arg-raw-or-label">raw_or_label<a class="anchor" aria-label="anchor" href="#arg-raw-or-label"></a></dt>
-<dd><p>A string (either <code>'raw'</code> or <code>'label'</code>) that specifies
+<dd><p>A string (either "raw" or "label") that specifies
 whether to export the raw coded values or the labels for the options of
-multiple choice fields. Default is <code>'raw'</code>.</p></dd>
+multiple choice fields. Default is "raw".</p></dd>
 
 
 <dt id="arg-raw-or-label-headers">raw_or_label_headers<a class="anchor" aria-label="anchor" href="#arg-raw-or-label-headers"></a></dt>
-<dd><p>A string (either <code>'raw'</code> or <code>'label'</code>) that
+<dd><p>A string (either "raw" or "label") that
 specifies for the CSV headers whether to export the variable/field names
-(raw) or the field labels (label). Default is <code>'raw'</code>.</p></dd>
+(raw) or the field labels (label). Default is "raw".</p></dd>
 
 
 <dt id="arg-export-checkbox-label">export_checkbox_label<a class="anchor" aria-label="anchor" href="#arg-export-checkbox-label"></a></dt>
 <dd><p>Logical that specifies the format of checkbox field values
 specifically when exporting the data as labels. If <code>raw_or_label</code> is
-<code>'label'</code> and <code>export_checkbox_label</code> is TRUE, the values will be the text
+"label" and <code>export_checkbox_label</code> is TRUE, the values will be the text
 displayed to the users. Otherwise, the values will be 0/1. Default is FALSE.</p></dd>
 
 
@@ -174,7 +174,7 @@ requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.</p></d
 
 <dt id="arg-max-retries">max_retries<a class="anchor" aria-label="anchor" href="#arg-max-retries"></a></dt>
 <dd><p>Integer specifying the maximum number of retry attempts for failed
-API requests. Default is 3. Set to 0 to disable retries.</p></dd>
+API connection or HTTP 504 error. Default is 3. Set to 0 to disable retries.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
@@ -214,7 +214,8 @@ completes or encounters errors. Default is TRUE.</p></dd>
 whether newly created, partially completed and resumed, or already complete.
 Connection has attributes:</p><ul><li><p><code>had_errors</code>: Logical indicating if errors occurred during the transfer</p></li>
 <li><p><code>error_chunks</code>: Vector of chunk numbers that failed processing (if any)</p></li>
-</ul><p>If <code>return_duckdb</code> is FALSE, returns invisibly.</p>
+</ul><p>If <code>return_duckdb</code> is FALSE, returns TRUE for a complete successful transfer,
+or FALSE for a failed or partially completed transfer.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -274,7 +275,7 @@ You must explicitly close this connection with <code><a href="https://dbi.r-dbi.
 <span class="r-in"><span><span class="va">logs</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SELECT * FROM log"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Remember to close the connection</span></span></span>
-<span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
