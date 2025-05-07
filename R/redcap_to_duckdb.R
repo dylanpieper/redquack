@@ -144,7 +144,6 @@
 #' \code{\link[httr2]{req_retry}} for retry functionality details
 #'
 #' @importFrom audio load.wave play
-#' @importFrom beepr beep
 #' @importFrom DBI dbConnect dbDisconnect dbExecute dbExistsTable dbGetQuery dbAppendTable dbQuoteIdentifier
 #' @importFrom dplyr coalesce
 #' @importFrom duckdb duckdb
@@ -396,7 +395,7 @@ redcap_to_duckdb <- function(
       },
       error = function(e) {
         if (verbose) cli::cli_status_clear(status_id)
-        if (beep) beepr::beep("wilhelm")
+        if (beep) audio::play(audio::load.wave(system.file("audio/wilhelm.wav", package = "redquack")))
 
         error_msg <- e$message
 
@@ -552,7 +551,7 @@ redcap_to_duckdb <- function(
           list(success = TRUE, error_chunks = error_chunks, total_chunk_time = total_chunk_time)
         },
         error = function(e) {
-          if (beep) beepr::beep("wilhelm")
+          if (beep) audio::play(audio::load.wave(system.file("audio/wilhelm.wav", package = "redquack")))
           chunk_total <- round(difftime(Sys.time(), chunk_start, units = "secs"))
           total_chunk_time <- total_chunk_time + as.numeric(chunk_total)
           formatted_chunk_sum <- format_elapsed_time(total_chunk_time)
