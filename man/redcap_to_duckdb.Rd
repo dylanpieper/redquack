@@ -116,18 +116,17 @@ completes or encounters errors. Default is TRUE.}
 \item{...}{Additional arguments passed to the REDCap API call.}
 }
 \value{
-If \code{return_duckdb} is TRUE, returns a DBI connection object to the DuckDB database,
-whether newly created, partially completed and resumed, or already complete.
+If \code{return_duckdb} is TRUE, returns a DBI connection object to the DuckDB database.
 Connection has attributes:
 \itemize{
 \item \code{had_errors}: Logical indicating if errors occurred during the transfer
 \item \code{error_chunks}: Vector of chunk numbers that failed processing (if any)
 }
-If \code{return_duckdb} is FALSE, returns TRUE for a complete successful transfer,
-or FALSE for a failed or partially completed transfer.
+If \code{return_duckdb} is FALSE, returns TRUE for a complete transfer,
+or FALSE for an incomplete transfer.
 }
 \description{
-Transfer REDCap data to DuckDB in chunks to minimize memory usage.
+Transfer REDCap data to a local DuckDB file in chunks to minimize memory usage.
 }
 \details{
 This function transfers data from REDCap to DuckDB in chunks, which helps manage memory
@@ -144,13 +143,13 @@ The function automatically detects existing databases and handles them in three 
 \item If a database exists and is complete, returns a connection without reprocessing
 }
 
-The function fetches record IDs first, then processes records in chunks.
+The function fetches record IDs, then processes records in chunks.
 If any error occurs during processing, the function will stop further processing
-to prevent incomplete data. Memory is explicitly managed to handle large datasets.
+to prevent incomplete data. Memory is managed to handle large datasets.
 
 All data is initially stored as VARCHAR type for consistent handling across chunks.
-When \code{optimize_types = TRUE} (the default), column types are automatically converted
-after all data is inserted, based on content analysis:
+When \code{optimize_types = TRUE} (default), column types are automatically converted
+after all data is inserted:
 \itemize{
 \item Columns containing only integers are converted to INTEGER
 \item Columns containing numeric values are converted to DOUBLE
@@ -164,8 +163,7 @@ when:
 \itemize{
 \item You need consistent string-based handling of all data
 \item You're working with complex mixed-type data
-\item You plan to handle type conversions manually in subsequent SQL queries
-\item Import speed is prioritized over storage efficiency or query optimization
+\item You plan to handle types manually in subsequent SQL queries
 }
 }
 \section{Database Connection}{
