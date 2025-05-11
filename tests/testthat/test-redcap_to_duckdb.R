@@ -49,7 +49,6 @@ test_that("redcap_to_db handles different chunk sizes", {
 })
 
 test_that("optimize_data_types correctly converts column types in DuckDB", {
-  skip_on_ci()
   skip_on_cran()
 
   # Create a temporary DuckDB connection
@@ -187,7 +186,6 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
 })
 
 test_that("optimize_data_types gracefully handles SQLite", {
-  skip_on_ci()
   skip_on_cran()
 
   # Create a temporary SQLite connection
