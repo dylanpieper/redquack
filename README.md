@@ -42,7 +42,7 @@ Development version:
 pak::pak("dylanpieper/redquack")
 ```
 
-These packages are used in the following examples:
+These packages are used in the examples and are not imported by redquack:
 
 ``` r
 pak::pak(c("dplyr", "duckdb", "keyring"))
@@ -80,6 +80,48 @@ The function returns a logical value:
 
 -   `TRUE` for a complete / successful transfer
 -   `FALSE` for an incomplete / failed transfer
+
+## Database Structure
+
+The database created by `redcap_to_db()` contains two tables:
+
+1.  `data`: Contains all exported REDCap records with optimized column types
+
+    ``` r
+    data <- DBI::dbGetQuery(duckdb, "SELECT * FROM data LIMIT 1000")
+    ```
+
+2.  `log`: Contains timestamped logs of the transfer process for troubleshooting
+
+    ``` r
+    log <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
+    ```
+
+## Data Types
+
+Data is first set to **VARCHAR/TEXT** type for consistent handling across chunks.
+
+For DuckDB, data types are automatically optimized after transfer to improve query performance:
+
+-   **INTEGER**: Columns with only whole numbers
+-   **DOUBLE**: Columns with decimal numbers
+-   **DATE**: Columns with valid dates
+-   **TIMESTAMP**: Columns with valid timestamps
+-   **VARCHAR/TEXT**: All other columns remain as strings
+
+In DuckDB, you can query the data to inspect the data types:
+
+``` r
+DBI::dbGetQuery(duckdb, "PRAGMA table_info(data)")
+```
+
+You can also automatically convert data types in R using [readr](#0):
+
+``` r
+readr::type_convert(data)
+```
+
+To optimize query performance with other databases, you must alter your data table manually.
 
 ### Data Manipulation
 
@@ -130,48 +172,6 @@ Remember to close the connection when finished:
 
 ``` r
 DBI::dbDisconnect(duckdb)
-```
-
-## Database Structure
-
-The database created by `redcap_to_db()` contains two tables:
-
-1.  `data`: Contains all exported REDCap records with optimized column types
-
-    ``` r
-    data <- DBI::dbGetQuery(duckdb, "SELECT * FROM data LIMIT 1000")
-    ```
-
-2.  `log`: Contains timestamped logs of the transfer process for troubleshooting
-
-    ``` r
-    log <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
-    ```
-
-## Data Types
-
-Data is first set to **VARCHAR/TEXT** type for consistent handling across chunks.
-
-For DuckDB, data types are automatically optimized after transfer to improve query performance:
-
--   **INTEGER**: Columns with only whole numbers
--   **DOUBLE**: Columns with decimal numbers
--   **DATE**: Columns with valid dates
--   **TIMESTAMP**: Columns with valid timestamps
--   **VARCHAR/TEXT**: All other columns remain as strings
-
-To optimize query performance with other database drivers, you must alter your data table manually.
-
-In DuckDB, you can easily query the data to inspect the data types:
-
-``` r
-DBI::dbGetQuery(duckdb, "PRAGMA table_info(data)")
-```
-
-You can also automatically convert data types in R using [readr](#0):
-
-``` r
-readr::type_convert(data)
 ```
 
 ## Other REDCap Interfaces
