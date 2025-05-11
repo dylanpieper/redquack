@@ -17,13 +17,13 @@ Imports:
     cli,
     DBI,
     httr2,
-    readr,
-    utils
+    readr
 Suggests:
     dplyr,
     duckdb,
     keyring,
     pak,
+    RSQLite,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: R (>= 4.1.0)

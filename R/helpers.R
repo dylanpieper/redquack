@@ -9,12 +9,13 @@ is_db_class <- function(conn, class = "duckdb_connection") {
 }
 
 #' Log a message to a database table
+#' @param conn A DBI connection object to a database
 #' @param log_table_ref The name of the log table in database
 #' @param type Type of log message
 #' @param msg The message to log
 #' @keywords internal
 #' @noRd
-log_message <- function(log_table_ref, type, msg) {
+log_message <- function(conn, log_table_ref, type, msg) {
   timestamp <- Sys.time()
   DBI::dbExecute(
     conn,

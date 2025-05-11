@@ -1,7 +1,13 @@
-# redquack (development version)
-* Remove dependency on beepr
-* Add workflow mode with `return_duckdb` = `FALSE` now returning TRUE/FALSE status for success or failure
-* Add automatic retry attempts for partial transfers in workflow mode up to `max_retries`
+# redquack 0.2.0
+
+## Lifecycle Changes
+* Rename `redcap_to_duckdb()` to `redcap_to_db()` and gain a `conn` argument to support any database connection
+
+## Patches
+* Remove dependencies on beepr and utils
+* Remove `optimize_types` and use connection class to check if DuckDB
+* Remove `return_duckdb` to return TRUE (complete) or FALSE (incomplete)
+* Bump default `max_retries` from 3 to 10 retries
 * Add HTTP 504 transient error to retry
 * Rebrand hex logo
 
@@ -11,7 +17,7 @@ First release of redquack on CRAN
 ## Patches
 * Improve parameter names and defaults to align with the REDCap API (e.g., `record_id_name` = `record_id`)
 * Fixe progress tracking messages and audio feedback for an improved user experience
-* Improve documentation and use of consistent language
+* Improve documentation and use consistent language
 
 # redquack 0.1.0
 
