@@ -2,44 +2,50 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/redquack)](https://cran.r-pkg.org/package=redquack) [![R-CMD-check](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml)
 
-Transfer [REDCap](https://www.project-redcap.org/) data to [DuckDB](https://duckdb.org/) with minimal memory overhead, designed for large projects with datasets that exceed available RAM.
+Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Compatible with all databases, but specifically optimized for [DuckDB](https://duckdb.org/)**—**a fast and portable SQL engine with first-class integration in R/Posit products.
 
 ## Motivation
 
-R objects live entirely in RAM, causing three problems if not using a specialized framework:
+R objects live entirely in memory, causing three problems if not using a specialized framework:
 
 1.  You must load full datasets even if you only need a subset
 2.  Unused objects still consume memory
-3.  Large datasets can easily exceed available RAM
+3.  Large datasets can easily exceed available memory
 
 redquack's solution to this problem is to:
 
 1.  Request all of the REDCap record IDs to sequence in chunks
 2.  Process each chunk of the REDCap data in one R object at a time
-3.  Remove each object from memory after it has been transferred to DuckDB
+3.  Remove each object from memory after it has been transferred to the database
 
 ## Features
 
 -   Auto-resume from incomplete transfers
 -   Auto-retry for API request failures
--   Auto-convert column types
+-   Auto-convert data types for DuckDB
 -   Timestamped operation logs
--   Real-time progress indicators
--   Completion notifications (🔊 🦆)
+-   Status messages and progress bar
+-   Sound notifications (🔊 🦆)
 
 ## Installation
 
 From CRAN:
 
 ``` r
-install.packages("redquack")
+# install.packages("pak")
+pak::pak("redquack")
 ```
 
 Development version:
 
 ``` r
-# install.packages("pak")
 pak::pak("dylanpieper/redquack")
+```
+
+These packages are used in the following examples:
+
+``` r
+pak::pak(c("dplyr", "duckdb", "keyring"))
 ```
 
 ## Setup API Token
@@ -47,19 +53,22 @@ pak::pak("dylanpieper/redquack")
 Your REDCap API token allows R to interface with REDCap and should be stored securely. I recommend using the [keyring](https://keyring.r-lib.org) package to store your API token. For example:
 
 ``` r
-keyring::key_set("redcap_token", "example_project")
+keyring::key_set("redcap_token")
 ```
 
 ## Basic Usage
 
-Data from REDCap is transferred to DuckDB in configurable chunks of record IDs:
+Data from REDCap is transferred to a database in configurable chunks of record IDs:
 
 ``` r
 library(redquack)
 
-con <- redcap_to_duckdb(
+duckdb <- DBI::dbConnect(duckdb::duckdb(), "redcap.duckdb")
+
+redcap_to_db(
+  conn = duckdb,
   redcap_uri = "https://redcap.example.org/api/",
-  token = keyring::key_get("redcap_token", "example_project"),
+  token = keyring::key_get("redcap_token"),
   record_id_name = "record_id",
   chunk_size = 1000  
   # Increase chunk size for memory-efficient systems (faster)
@@ -67,9 +76,7 @@ con <- redcap_to_duckdb(
 )
 ```
 
-By default `return_duckdb = TRUE`, returning the DuckDB connection from the output file `redcap.duckdb`.
-
-When `return_duckdb = FALSE`, the function returns a logical value:
+The function returns a logical value:
 
 -   `TRUE` for a complete / successful transfer
 -   `FALSE` for an incomplete / failed transfer
@@ -81,7 +88,7 @@ Query and collect the data with [dplyr](https://dplyr.tidyverse.org):
 ``` r
 library(dplyr)
 
-demographics <- tbl(con, "data") |>
+demographics <- tbl(duckdb, "data") |>
   filter(is.na(redcap_repeat_instrument)) |>
   select(record_id, age, race, sex, gender) |>
   collect()
@@ -91,7 +98,7 @@ If you `collect()` your data into memory in the last step, it can make a slow pr
 
 ``` r
 system.time(
-  records <- con |>
+  records <- duckdb |>
     tbl("data") |>
     collect() |>
     group_by(redcap_repeat_instrument) |>
@@ -102,7 +109,7 @@ system.time(
 #>  20.748  10.455  32.916
 
 system.time(
-  records <- con |>
+  records <- duckdb |>
     tbl("data") |>
     group_by(redcap_repeat_instrument) |>
     summarize(count = n()) |>
@@ -113,54 +120,62 @@ system.time(
 #>   0.040   0.015   0.040
 ```
 
-You can also create a Parquet file directly from DuckDB to take advantage of the features of [arrow](https://arrow.apache.org/docs/r/):
+You can also write a Parquet file directly from DuckDB to take advantage of the features of [arrow](https://arrow.apache.org/docs/r/):
 
 ``` r
-DBI::dbExecute(con, "COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)")
+DBI::dbExecute(duckdb, "COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)")
 ```
 
 Remember to close the connection when finished:
 
 ``` r
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(duckdb)
 ```
 
 ## Database Structure
 
-The DuckDB database created by `redcap_to_duckdb()` contains two tables:
+The database created by `redcap_to_db()` contains two tables:
 
 1.  `data`: Contains all exported REDCap records with optimized column types
 
     ``` r
-    DBI::dbGetQuery(con, "SELECT * FROM data LIMIT 10")
+    data <- DBI::dbGetQuery(duckdb, "SELECT * FROM data LIMIT 1000")
     ```
 
 2.  `log`: Contains timestamped logs of the transfer process for troubleshooting
 
     ``` r
-    DBI::dbGetQuery(con, "SELECT timestamp, type, message FROM log ORDER BY timestamp")
+    log <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
     ```
 
-## Column Types
+## Data Types
 
-By default, column types are automatically converted after transfer (`optimize_types = TRUE`):
+Data is first set to **VARCHAR/TEXT** type for consistent handling across chunks.
+
+For DuckDB, data types are automatically optimized after transfer to improve query performance:
 
 -   **INTEGER**: Columns with only whole numbers
 -   **DOUBLE**: Columns with decimal numbers
--   **DATE**: Columns with valid date strings
--   **TIMESTAMP**: Columns with valid timestamp strings
--   **VARCHAR**: All other columns remain as strings
+-   **DATE**: Columns with valid dates
+-   **TIMESTAMP**: Columns with valid timestamps
+-   **VARCHAR/TEXT**: All other columns remain as strings
 
-If you disable type conversion (`optimize_types = FALSE`), all columns will be VARCHAR. Disable type conversion when you have complex mixed-type data or plan to handle conversions manually.
+To optimize query performance with other database drivers, you must alter your data table manually.
 
-You can easily query the data to inspect the column types:
+In DuckDB, you can easily query the data to inspect the data types:
 
 ``` r
-DBI::dbGetQuery(con, "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'data'")
+DBI::dbGetQuery(duckdb, "PRAGMA table_info(data)")
+```
+
+You can also automatically convert data types in R using [readr](#0):
+
+``` r
+readr::type_convert(data)
 ```
 
 ## Other REDCap Interfaces
 
--   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package; also provides a package comparison table)
+-   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package; provides a package comparison table)
 
 -   [PyCap](https://redcap-tools.github.io/PyCap/) (python module)
