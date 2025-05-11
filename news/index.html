@@ -39,14 +39,21 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="redquack-development-version">redquack (development version)<a class="anchor" aria-label="anchor" href="#redquack-development-version"></a></h2>
-<ul><li>Remove dependency on beepr</li>
-<li>Add workflow mode with <code>return_duckdb</code> = <code>FALSE</code> now returning TRUE/FALSE status for success or failure</li>
-<li>Add automatic retry attempts for partial transfers in workflow mode up to <code>max_retries</code>
-</li>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="redquack-020">redquack 0.2.0<a class="anchor" aria-label="anchor" href="#redquack-020"></a></h2>
+<div class="section level3">
+<h3 id="lifecycle-changes-0-2-0">Lifecycle Changes<a class="anchor" aria-label="anchor" href="#lifecycle-changes-0-2-0"></a></h3>
+<ul><li>Rename <code>redcap_to_duckdb()</code> to <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> and gain a <code>conn</code> argument to support any database connection</li>
+</ul></div>
+<div class="section level3">
+<h3 id="patches-0-2-0">Patches<a class="anchor" aria-label="anchor" href="#patches-0-2-0"></a></h3>
+<ul><li>Remove dependencies on beepr and utils</li>
+<li>Remove <code>optimize_types</code> and use connection class to check if DuckDB</li>
+<li>Remove <code>return_duckdb</code> to return TRUE (complete) or FALSE (incomplete)</li>
+<li>Bump default <code>max_retries</code> from 3 to 10 retries</li>
 <li>Add HTTP 504 transient error to retry</li>
 <li>Rebrand hex logo</li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.1" id="redquack-011">redquack 0.1.1<a class="anchor" aria-label="anchor" href="#redquack-011"></a></h2><p class="text-muted">CRAN release: 2025-03-24</p>
 <p>First release of redquack on CRAN</p>
@@ -54,14 +61,14 @@
 <h3 id="patches-0-1-1">Patches<a class="anchor" aria-label="anchor" href="#patches-0-1-1"></a></h3>
 <ul><li>Improve parameter names and defaults to align with the REDCap API (e.g., <code>record_id_name</code> = <code>record_id</code>)</li>
 <li>Fixe progress tracking messages and audio feedback for an improved user experience</li>
-<li>Improve documentation and use of consistent language</li>
+<li>Improve documentation and use consistent language</li>
 </ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="redquack-010">redquack 0.1.0<a class="anchor" aria-label="anchor" href="#redquack-010"></a></h2>
 <div class="section level3">
 <h3 id="new-features-0-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0"></a></h3>
-<ul><li>Transfer REDCap data to DuckDB using the <code><a href="../reference/redcap_to_duckdb.html">redcap_to_duckdb()</a></code> function</li>
+<ul><li>Transfer REDCap data to DuckDB using the <code>redcap_to_duckdb()</code> function</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
