@@ -160,7 +160,7 @@
 <div class="section level2">
 <h2 id="data-types">Data Types<a class="anchor" aria-label="anchor" href="#data-types"></a>
 </h2>
-<p>Data is first set to <strong>VARCHAR/TEXT</strong> type for consistent handling across chunks.</p>
+<p>Data is imported as <strong>VARCHAR/TEXT</strong> for consistent handling across chunks.</p>
 <p>For DuckDB, data types are automatically optimized after transfer to improve query performance:</p>
 <ul>
 <li>
@@ -180,7 +180,7 @@
 <p>You can also automatically convert data types in R using <a href="#id_0">readr</a>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/type_convert.html" class="external-link">type_convert</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
-<p>To optimize query performance with other databases, you must alter your data table manually.</p>
+<p>To optimize query performance with other databases, you must alter the data table manually.</p>
 <div class="section level3">
 <h3 id="data-manipulation">Data Manipulation<a class="anchor" aria-label="anchor" href="#data-manipulation"></a>
 </h3>
