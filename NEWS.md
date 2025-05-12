@@ -2,6 +2,7 @@
 
 ## Lifecycle Changes
 * Rename `redcap_to_duckdb()` to `redcap_to_db()` and gain a `conn` argument to support any database connection
+* Return an S3 object with a list of processing data
 
 ## Patches
 * If `log_table_name` is NULL, then disable logging
