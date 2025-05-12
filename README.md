@@ -2,7 +2,7 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/redquack)](https://cran.r-pkg.org/package=redquack) [![R-CMD-check](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml)
 
-Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Compatible with all databases, but specifically optimized for [DuckDB](https://duckdb.org/)—a fast and portable SQL engine with first-class integration in R/Posit products.
+Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/)—a fast and portable SQL engine with first-class integration in R/Posit products.
 
 ## Motivation
 
@@ -58,7 +58,7 @@ keyring::key_set("redcap_token")
 
 ## Basic Usage
 
-Data from REDCap is transferred to a database in configurable chunks of record IDs:
+Data from REDCap is transferred to a database via a [DBI](https://dbi.r-dbi.org) connection in chunks of record IDs:
 
 ``` r
 library(redquack)

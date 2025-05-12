@@ -4,6 +4,7 @@
 * Rename `redcap_to_duckdb()` to `redcap_to_db()` and gain a `conn` argument to support any database connection
 
 ## Patches
+* If `log_table_name` is NULL, then disable logging
 * Remove dependencies on beepr and utils
 * Remove `optimize_types` and use connection class to check if DuckDB
 * Remove `return_duckdb` to return TRUE (complete) or FALSE (incomplete)

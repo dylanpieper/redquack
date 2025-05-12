@@ -16,13 +16,15 @@ is_db_class <- function(conn, class = "duckdb_connection") {
 #' @keywords internal
 #' @noRd
 log_message <- function(conn, log_table_ref, type, msg) {
-  timestamp <- Sys.time()
-  DBI::dbExecute(
-    conn,
-    paste0(
-      "INSERT INTO ", log_table_ref, " (timestamp, type, message) ",
-      "VALUES (?, ?, ?)"
-    ),
-    list(timestamp, type, msg)
-  )
+  if (!is.null(log_table_ref)) {
+    timestamp <- Sys.time()
+    DBI::dbExecute(
+      conn,
+      paste0(
+        "INSERT INTO ", log_table_ref, " (timestamp, type, message) ",
+        "VALUES (?, ?, ?)"
+      ),
+      list(timestamp, type, msg)
+    )
+  }
 }

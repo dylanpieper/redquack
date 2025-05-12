@@ -44,7 +44,8 @@ This token is used for authentication and must have export permissions.}
 data to. Default is "data". Can include schema name (e.g. "schema.table").}
 
 \item{log_table_name}{Character string specifying the name of the table to store
-transfer logs. Default is "log". Can include schema name (e.g. "schema.log").}
+transfer logs. Default is "log". Can include schema name (e.g. "schema.log").
+Set to NULL to disable logging.}
 
 \item{raw_or_label}{A string (either "raw" or "label") that specifies
 whether to export the raw coded values or the labels for the options of

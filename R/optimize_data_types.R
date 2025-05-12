@@ -3,10 +3,11 @@
 #' @param conn A DBI connection object
 #' @param data_table_ref The name of the data table in database
 #' @param log_table_ref The name of the log table in database
+#' @param verbose Logical to show status messages
 #' @return NULL invisibly
 #' @details Optimizes column data types by analyzing content and converting to appropriate types
 #' @keywords internal
-optimize_data_types <- function(conn, data_table_ref, log_table_ref) {
+optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
   if (!is_db_class(conn)) {
     log_message(conn, log_table_ref, "WARNING", "Connection is not DuckDB, skipping optimization")
     return(invisible(NULL))
@@ -21,6 +22,12 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref) {
   )
 
   log_message(conn, log_table_ref, "INFO", paste("Found", nrow(column_info), "columns to check"))
+
+  status_id <- NULL
+
+  if (verbose) {
+    status_id <- cli::cli_status(paste("Optimizing", nrow(column_info), "columns..."))
+  }
 
   for (col in column_info$column_name) {
     tryCatch(
@@ -91,10 +98,14 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref) {
     )
   }
 
+  if (verbose) {
+    cli::cli_status_update(status_id, "Enabling compression...")
+  }
+
   tryCatch(
     {
       DBI::dbExecute(conn, "PRAGMA force_compression = 'Auto'")
-      log_message(conn, log_table_ref, "INFO", "Enabled automatic compression for DuckDB")
+      log_message(conn, log_table_ref, "INFO", "Enabled compression for DuckDB")
     },
     error = function(e) {
       log_message(conn, log_table_ref, "WARNING", paste("Unable to enable compression:", e$message))
@@ -102,5 +113,11 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref) {
   )
 
   log_message(conn, log_table_ref, "INFO", "Column optimization completed")
+
+  if (verbose) {
+    cli::cli_status_clear(status_id)
+    cli::cli_alert_success("Data types optimized successfully")
+  }
+
   return(invisible(NULL))
 }

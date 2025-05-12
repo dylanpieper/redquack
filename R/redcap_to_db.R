@@ -12,6 +12,7 @@
 #'   data to. Default is "data". Can include schema name (e.g. "schema.table").
 #' @param log_table_name Character string specifying the name of the table to store
 #'   transfer logs. Default is "log". Can include schema name (e.g. "schema.log").
+#'   Set to NULL to disable logging.
 #' @param raw_or_label A string (either "raw" or "label") that specifies
 #'   whether to export the raw coded values or the labels for the options of
 #'   multiple choice fields. Default is "raw".
@@ -193,14 +194,18 @@ redcap_to_db <- function(
   }
 
   get_table_reference <- function(conn, table_name) {
-    return(DBI::dbQuoteIdentifier(conn, table_name))
+    if (is.null(table_name)) {
+      return(NULL)
+    } else {
+      return(DBI::dbQuoteIdentifier(conn, table_name))
+    }
   }
 
   setup_environment <- function(conn) {
     data_table_ref <- get_table_reference(conn, data_table_name)
     log_table_ref <- get_table_reference(conn, log_table_name)
 
-    if (!DBI::dbExistsTable(conn, name = log_table_name)) {
+    if (!is.null(log_table_name) && !DBI::dbExistsTable(conn, name = log_table_name)) {
       DBI::dbExecute(
         conn,
         paste0(
@@ -636,7 +641,7 @@ redcap_to_db <- function(
     successful_chunks <- num_chunks - length(error_chunks)
     failed_chunks <- length(error_chunks)
 
-    optimize_data_types(conn, data_table_ref, log_table_ref)
+    optimize_data_types(conn, data_table_ref, log_table_ref, verbose)
 
     record_count_query <- paste0("SELECT COUNT(*) AS count FROM ", data_table_ref)
     record_count <- DBI::dbGetQuery(conn, record_count_query)$count
