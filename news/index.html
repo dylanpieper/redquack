@@ -43,7 +43,7 @@
 <div class="section level3">
 <h3 id="lifecycle-changes-0-2-0">Lifecycle Changes<a class="anchor" aria-label="anchor" href="#lifecycle-changes-0-2-0"></a></h3>
 <ul><li>Rename <code>redcap_to_duckdb()</code> to <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> and gain a <code>conn</code> argument to support any database connection</li>
-<li>Return an S3 object with a list of processing data</li>
+<li>Return a list of processing data as an S3 object (<code>redcap_transfer_result</code>)</li>
 </ul></div>
 <div class="section level3">
 <h3 id="patches-0-2-0">Patches<a class="anchor" aria-label="anchor" href="#patches-0-2-0"></a></h3>
@@ -62,7 +62,7 @@
 <div class="section level3">
 <h3 id="patches-0-1-1">Patches<a class="anchor" aria-label="anchor" href="#patches-0-1-1"></a></h3>
 <ul><li>Improve parameter names and defaults to align with the REDCap API (e.g., <code>record_id_name</code> = <code>record_id</code>)</li>
-<li>Fixe progress tracking messages and audio feedback for an improved user experience</li>
+<li>Fix progress tracking messages and audio feedback for an improved user experience</li>
 <li>Improve documentation and use consistent language</li>
 </ul></div>
 </div>
