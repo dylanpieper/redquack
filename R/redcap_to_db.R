@@ -66,12 +66,10 @@
 #' \itemize{
 #'   \item `had_errors`: Logical indicating if errors occurred during the transfer
 #'   \item `error_chunks`: Vector of chunk numbers that failed processing (if any)
-#'   \item `elapsed_sec`: Integer seconds for the total elapsed time for the transfer
-#'   \item `processing_sec`: Integer seconds spent actively processing chunks
+#'   \item `elapsed_sec`: Numeric value representing total seconds for the transfer
+#'   \item `processing_sec`: Numeric value representing seconds spent actively processing chunks
 #'   \item `success`: Logical indicating if the transfer was successful (TRUE) or incomplete (FALSE)
 #' }
-#' For backward compatibility, when used in logical context (e.g., `if (result)`) the
-#' return value behaves like the `success` component.
 #'
 #' @details
 #' This function transfers data from REDCap to any database in chunks, which helps manage memory

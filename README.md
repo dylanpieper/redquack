@@ -80,8 +80,8 @@ The function returns a list with class `redcap_transfer_result`:
 
 -   `had_errors`: Logical indicating if errors occurred during the transfer
 -   `error_chunks`: Vector of chunk numbers that failed processing (if any)
--   `elapsed_sec`: Integer seconds for the total elapsed time for the transfer
--   `processing_sec`: Integer seconds spent actively processing chunks
+-   `elapsed_sec`: Numeric value representing total seconds for the transfer
+-   `processing_sec`: Numeric value representing seconds spent actively processing chunks
 -   `success`: Logical indicating if the transfer was complete (TRUE) or incomplete (FALSE)
 
 ## Database Structure

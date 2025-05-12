@@ -118,12 +118,10 @@ Returns a list with the following components:
 \itemize{
 \item \code{had_errors}: Logical indicating if errors occurred during the transfer
 \item \code{error_chunks}: Vector of chunk numbers that failed processing (if any)
-\item \code{elapsed_sec}: Integer seconds for the total elapsed time for the transfer
-\item \code{processing_sec}: Integer seconds spent actively processing chunks
+\item \code{elapsed_sec}: Numeric value representing total seconds for the transfer
+\item \code{processing_sec}: Numeric value representing seconds spent actively processing chunks
 \item \code{success}: Logical indicating if the transfer was successful (TRUE) or incomplete (FALSE)
 }
-For backward compatibility, when used in logical context (e.g., \verb{if (result)}) the
-return value behaves like the \code{success} component.
 }
 \description{
 Transfer REDCap data to a database in chunks to minimize memory usage.
