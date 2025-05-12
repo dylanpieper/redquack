@@ -46,7 +46,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="patches-0-2-0">Patches<a class="anchor" aria-label="anchor" href="#patches-0-2-0"></a></h3>
-<ul><li>Remove dependencies on beepr and utils</li>
+<ul><li>If <code>log_table_name</code> is NULL, then disable logging</li>
+<li>Remove dependencies on beepr and utils</li>
 <li>Remove <code>optimize_types</code> and use connection class to check if DuckDB</li>
 <li>Remove <code>return_duckdb</code> to return TRUE (complete) or FALSE (incomplete)</li>
 <li>Bump default <code>max_retries</code> from 3 to 10 retries</li>
