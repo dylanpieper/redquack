@@ -90,7 +90,7 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
   DBI::dbWriteTable(con, "data_opt", sample_data, overwrite = TRUE)
 
   # Call the optimize_data_types function on the optimized table only
-  optimize_data_types(con, "data_opt", "log")
+  optimize_data_types(con, "data_opt", "log", FALSE)
 
   # Retrieve schemas for both tables
   raw_schema <- DBI::dbGetQuery(con, "PRAGMA table_info(data_raw)")
@@ -215,7 +215,7 @@ test_that("optimize_data_types gracefully handles SQLite", {
   DBI::dbWriteTable(con, "data_opt", sample_data, overwrite = TRUE)
 
   # Call the optimize_data_types function
-  optimize_data_types(con, "data_opt", "log")
+  optimize_data_types(con, "data_opt", "log", FALSE)
 
   # Verify it didn't crash and logged the message
   logs <- DBI::dbGetQuery(con, "SELECT * FROM log WHERE type = 'WARNING'")
