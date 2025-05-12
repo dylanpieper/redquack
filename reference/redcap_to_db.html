@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">redquack</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -210,12 +210,10 @@ completes or encounters errors. Default is TRUE.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Returns a list with the following components:</p><ul><li><p><code>had_errors</code>: Logical indicating if errors occurred during the transfer</p></li>
 <li><p><code>error_chunks</code>: Vector of chunk numbers that failed processing (if any)</p></li>
-<li><p><code>elapsed_sec</code>: Integer seconds for the total elapsed time for the transfer</p></li>
-<li><p><code>processing_sec</code>: Integer seconds spent actively processing chunks</p></li>
+<li><p><code>elapsed_sec</code>: Numeric value representing total seconds for the transfer</p></li>
+<li><p><code>processing_sec</code>: Numeric value representing seconds spent actively processing chunks</p></li>
 <li><p><code>success</code>: Logical indicating if the transfer was successful (TRUE) or incomplete (FALSE)</p></li>
-</ul><p>For backward compatibility, when used in logical context (e.g., <code>if (result)</code>) the
-return value behaves like the <code>success</code> component.</p>
-    </div>
+</ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function transfers data from REDCap to any database in chunks, which helps manage memory
