@@ -102,7 +102,7 @@ The database created by `redcap_to_db()` contains two tables:
 
 ## Data Types
 
-Data is first set to **VARCHAR/TEXT** type for consistent handling across chunks.
+Data is imported as **VARCHAR/TEXT** for consistent handling across chunks.
 
 For DuckDB, data types are automatically optimized after transfer to improve query performance:
 
@@ -124,7 +124,7 @@ You can also automatically convert data types in R using [readr](#0):
 readr::type_convert(data)
 ```
 
-To optimize query performance with other databases, you must alter your data table manually.
+To optimize query performance with other databases, you must alter the data table manually.
 
 ### Data Manipulation
 
