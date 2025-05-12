@@ -65,7 +65,7 @@ library(redquack)
 
 duckdb <- DBI::dbConnect(duckdb::duckdb(), "redcap.duckdb")
 
-redcap_to_db(
+result <- redcap_to_db(
   conn = duckdb,
   redcap_uri = "https://redcap.example.org/api/",
   token = keyring::key_get("redcap_token"),
@@ -76,10 +76,13 @@ redcap_to_db(
 )
 ```
 
-The function returns a logical value:
+The function returns a list with class `redcap_transfer_result`:
 
--   `TRUE` for a complete / successful transfer
--   `FALSE` for an incomplete / failed transfer
+-   `had_errors`: Logical indicating if errors occurred during the transfer
+-   `error_chunks`: Vector of chunk numbers that failed processing (if any)
+-   `elapsed_sec`: Integer seconds for the total elapsed time for the transfer
+-   `processing_sec`: Integer seconds spent actively processing chunks
+-   `success`: Logical indicating if the transfer was complete (TRUE) or incomplete (FALSE)
 
 ## Database Structure
 

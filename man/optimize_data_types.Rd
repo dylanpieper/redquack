@@ -4,7 +4,7 @@
 \alias{optimize_data_types}
 \title{Optimize data types in a DuckDB table}
 \usage{
-optimize_data_types(conn, data_table_ref, log_table_ref)
+optimize_data_types(conn, data_table_ref, log_table_ref, verbose)
 }
 \arguments{
 \item{conn}{A DBI connection object}
@@ -12,6 +12,8 @@ optimize_data_types(conn, data_table_ref, log_table_ref)
 \item{data_table_ref}{The name of the data table in database}
 
 \item{log_table_ref}{The name of the log table in database}
+
+\item{verbose}{Logical to show status messages}
 }
 \value{
 NULL invisibly

@@ -62,12 +62,16 @@
 #' @param ... Additional arguments passed to the REDCap API call.
 #'
 #' @return
-#' Invisibly returns TRUE for a successful transfer, or FALSE for an incomplete transfer.
-#' The connection object is modified with additional attributes:
+#' Returns a list with the following components:
 #' \itemize{
 #'   \item `had_errors`: Logical indicating if errors occurred during the transfer
 #'   \item `error_chunks`: Vector of chunk numbers that failed processing (if any)
+#'   \item `elapsed_sec`: Integer seconds for the total elapsed time for the transfer
+#'   \item `processing_sec`: Integer seconds spent actively processing chunks
+#'   \item `success`: Logical indicating if the transfer was successful (TRUE) or incomplete (FALSE)
 #' }
+#' For backward compatibility, when used in logical context (e.g., `if (result)`) the
+#' return value behaves like the `success` component.
 #'
 #' @details
 #' This function transfers data from REDCap to any database in chunks, which helps manage memory
@@ -81,7 +85,7 @@
 #' \itemize{
 #'   \item If no table exists, starts a new transfer process
 #'   \item If a table exists but is incomplete, resumes from the last processed record ID
-#'   \item If a table exists and is complete, returns TRUE without reprocessing
+#'   \item If a table exists and is complete, returns success without reprocessing
 #' }
 #'
 #' The function fetches record IDs, then processes records in chunks.
@@ -107,19 +111,14 @@
 #'
 #' duckdb <- DBI::dbConnect(duckdb::duckdb(), "redcap.duckdb")
 #'
-#' success <- redcap_to_db(
+#' result <- redcap_to_db(
 #'   redcap_uri = "https://redcap.example.org/api/",
 #'   token = keyring::key_get("redcap_token"),
 #'   conn = duckdb,
 #' )
 #'
 #' data <- DBI::dbGetQuery(duckdb, "SELECT * FROM data LIMIT 1000")
-#'
-#' if (!success) {
-#'   logs <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
-#'   had_errors <- attr(duckdb, "had_errors")
-#'   error_chunks <- attr(duckdb, "error_chunks")
-#' }
+#' log <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
 #'
 #' DBI::dbDisconnect(duckdb)
 #' }
@@ -419,7 +418,7 @@ redcap_to_db <- function(
         had_errors = FALSE,
         error_chunks = integer(0),
         num_chunks = 0,
-        processing_time = difftime(Sys.time(), start_time, units = "secs"),
+        processing_sec = round(as.numeric(difftime(Sys.time(), start_time, units = "secs"))),
         total_chunk_time = 0
       ))
     }
@@ -620,8 +619,8 @@ redcap_to_db <- function(
       had_errors = length(error_chunks) > 0,
       error_chunks = error_chunks,
       num_chunks = num_chunks,
-      processing_time = difftime(Sys.time(), processing_start_time, units = "secs"),
-      total_chunk_time = total_chunk_time
+      processing_sec = round(as.numeric(difftime(Sys.time(), processing_start_time, units = "secs"))),
+      total_chunk_time = round(total_chunk_time)
     )
 
     chunks <- NULL
@@ -635,7 +634,7 @@ redcap_to_db <- function(
     had_errors <- chunk_results$had_errors
     error_chunks <- chunk_results$error_chunks
     num_chunks <- chunk_results$num_chunks
-    processing_time <- chunk_results$processing_time
+    processing_sec <- chunk_results$processing_sec
     total_chunk_time <- chunk_results$total_chunk_time
 
     successful_chunks <- num_chunks - length(error_chunks)
@@ -679,11 +678,15 @@ redcap_to_db <- function(
       ))
     }
 
-    attr(conn, "had_errors") <- had_errors
-    attr(conn, "error_chunks") <- error_chunks
+    result <- list(
+      had_errors = had_errors,
+      error_chunks = error_chunks,
+      elapsed_sec = round(as.numeric(elapsed)),
+      processing_sec = round(as.numeric(total_chunk_time))
+    )
 
     chunk_results <- NULL
-    return(conn)
+    return(result)
   }
 
   attempt_transfer <- function(conn, failed_record_ids = NULL) {
@@ -691,7 +694,13 @@ redcap_to_db <- function(
 
     if (is.list(env) && !is.null(env$status)) {
       if (env$status == "complete") {
-        return(TRUE)
+        return(list(
+          success = TRUE,
+          had_errors = FALSE,
+          error_chunks = integer(0),
+          elapsed_sec = 0,
+          processing_sec = 0
+        ))
       }
     }
 
@@ -715,14 +724,27 @@ redcap_to_db <- function(
       log_message(conn, log_table_ref, "INFO", "No new records to process")
 
       if (DBI::dbExistsTable(conn, name = data_table_name)) {
-        log_message(conn, log_table_ref, "INFO", paste("Transfer completed in", format_elapsed_time(difftime(Sys.time(), start_time, units = "secs"))))
-        return(TRUE)
+        elapsed_sec <- difftime(Sys.time(), start_time, units = "secs")
+        log_message(conn, log_table_ref, "INFO", paste("Transfer completed in", format_elapsed_time(elapsed_sec)))
+        return(list(
+          success = TRUE,
+          had_errors = FALSE,
+          error_chunks = integer(0),
+          elapsed_sec = round(as.numeric(elapsed_sec)),
+          processing_sec = 0
+        ))
       } else {
         log_message(conn, log_table_ref, "ERROR", "No records returned from REDCap")
         if (verbose) {
           cli::cli_alert_danger("No records returned from REDCap")
         }
-        return(FALSE)
+        return(list(
+          success = FALSE,
+          had_errors = TRUE,
+          error_chunks = integer(0),
+          elapsed_sec = round(as.numeric(difftime(Sys.time(), start_time, units = "secs"))),
+          processing_sec = 0
+        ))
       }
     }
 
@@ -746,13 +768,13 @@ redcap_to_db <- function(
     chunks <- NULL
     gc(FALSE)
 
-    result_conn <- finalize_and_report(data_table_ref, log_table_ref, chunk_results, start_time)
+    result <- finalize_and_report(data_table_ref, log_table_ref, chunk_results, start_time)
 
     chunk_results <- NULL
     gc(FALSE)
 
     if (beep) {
-      if (!isTRUE(attr(result_conn, "had_errors"))) {
+      if (!result$had_errors) {
         tryCatch(
           {
             audio::play(audio::load.wave(system.file("audio/quack.wav", package = "redquack")))
@@ -762,21 +784,29 @@ redcap_to_db <- function(
       }
     }
 
-    if (isTRUE(attr(result_conn, "had_errors")) && !is.null(failed_ids)) {
+    success <- !(result$had_errors && !is.null(failed_ids))
+
+    if (!success) {
       if (verbose) {
         cli::cli_alert_danger("Transfer incomplete with {length(failed_ids)} failed records")
       }
       log_message(conn, log_table_ref, "ERROR", paste("Transfer incomplete with", length(failed_ids), "failed records"))
-      return(FALSE)
     }
 
-    return(TRUE)
+    result$success <- success
+    return(result)
   }
 
   main_process <- function(conn) {
     result <- attempt_transfer(conn)
-    return(invisible(result))
+    class(result) <- c("redcap_transfer_result", class(result))
+    return(result)
   }
 
-  main_process(conn)
+  registerS3method("as.logical", "redcap_transfer_result", function(x, ...) {
+    return(x$success)
+  }, envir = .GlobalEnv)
+
+  result <- main_process(conn)
+  return(result)
 }

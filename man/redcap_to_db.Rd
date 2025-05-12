@@ -114,12 +114,16 @@ completes or encounters errors. Default is TRUE.}
 \item{...}{Additional arguments passed to the REDCap API call.}
 }
 \value{
-Invisibly returns TRUE for a successful transfer, or FALSE for an incomplete transfer.
-The connection object is modified with additional attributes:
+Returns a list with the following components:
 \itemize{
 \item \code{had_errors}: Logical indicating if errors occurred during the transfer
 \item \code{error_chunks}: Vector of chunk numbers that failed processing (if any)
+\item \code{elapsed_sec}: Integer seconds for the total elapsed time for the transfer
+\item \code{processing_sec}: Integer seconds spent actively processing chunks
+\item \code{success}: Logical indicating if the transfer was successful (TRUE) or incomplete (FALSE)
 }
+For backward compatibility, when used in logical context (e.g., \verb{if (result)}) the
+return value behaves like the \code{success} component.
 }
 \description{
 Transfer REDCap data to a database in chunks to minimize memory usage.
@@ -136,7 +140,7 @@ The function automatically detects existing databases and handles them in three 
 \itemize{
 \item If no table exists, starts a new transfer process
 \item If a table exists but is incomplete, resumes from the last processed record ID
-\item If a table exists and is complete, returns TRUE without reprocessing
+\item If a table exists and is complete, returns success without reprocessing
 }
 
 The function fetches record IDs, then processes records in chunks.
@@ -162,19 +166,14 @@ library(redquack)
 
 duckdb <- DBI::dbConnect(duckdb::duckdb(), "redcap.duckdb")
 
-success <- redcap_to_db(
+result <- redcap_to_db(
   redcap_uri = "https://redcap.example.org/api/",
   token = keyring::key_get("redcap_token"),
   conn = duckdb,
 )
 
 data <- DBI::dbGetQuery(duckdb, "SELECT * FROM data LIMIT 1000")
-
-if (!success) {
-  logs <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
-  had_errors <- attr(duckdb, "had_errors")
-  error_chunks <- attr(duckdb, "error_chunks")
-}
+log <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
 
 DBI::dbDisconnect(duckdb)
 }
