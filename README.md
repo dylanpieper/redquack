@@ -177,6 +177,10 @@ Remember to close the connection when finished:
 DBI::dbDisconnect(duckdb)
 ```
 
+## Collaboration Opportunities
+
+While this package is only optimized for DuckDB, I invite collaborators to help optimize it for other databases. The pathway I suggest right now is to target your edits in `R/optimize_data_types.R`. Feel free to submit a PR and share any other ideas you may have.
+
 ## Other REDCap Interfaces
 
 -   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package; provides a package comparison table)
