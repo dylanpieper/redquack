@@ -2,7 +2,7 @@
 
 ## Lifecycle Changes
 * Rename `redcap_to_duckdb()` to `redcap_to_db()` and gain a `conn` argument to support any database connection
-* Return an S3 object with a list of processing data
+* Return a list of processing data as an S3 object (`redcap_transfer_result`) 
 
 ## Patches
 * If `log_table_name` is NULL, then disable logging
@@ -18,7 +18,7 @@ First release of redquack on CRAN
 
 ## Patches
 * Improve parameter names and defaults to align with the REDCap API (e.g., `record_id_name` = `record_id`)
-* Fixe progress tracking messages and audio feedback for an improved user experience
+* Fix progress tracking messages and audio feedback for an improved user experience
 * Improve documentation and use consistent language
 
 # redquack 0.1.0
