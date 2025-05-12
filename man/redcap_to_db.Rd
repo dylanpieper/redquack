@@ -117,10 +117,10 @@ completes or encounters errors. Default is TRUE.}
 Returns a list with the following components:
 \itemize{
 \item \code{had_errors}: Logical indicating if errors occurred during the transfer
-\item \code{error_chunks}: Vector of chunk numbers that failed processing (if any)
-\item \code{elapsed_sec}: Numeric value representing total seconds for the transfer
-\item \code{processing_sec}: Numeric value representing seconds spent actively processing chunks
-\item \code{success}: Logical indicating if the transfer was successful (TRUE) or incomplete (FALSE)
+\item \code{error_chunks}: Vector of chunk numbers that failed processing
+\item \code{elapsed_sec}: Numeric value for total seconds
+\item \code{processing_sec}: Numeric value for seconds of active processing
+\item \code{success}: Logical indicating if the transfer was complete
 }
 }
 \description{

@@ -4,11 +4,13 @@
 #' @param class The expected database connection class (default: "duckdb_connection")
 #' @return Logical indicating if connection matches the specified class
 #' @keywords internal
+#' @noRd
 is_db_class <- function(conn, class = "duckdb_connection") {
   class(conn)[[1]] == class
 }
 
 #' Log a message to a database table
+#'
 #' @param conn A DBI connection object to a database
 #' @param log_table_ref The name of the log table in database
 #' @param type Type of log message

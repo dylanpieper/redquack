@@ -7,6 +7,7 @@
 #' @return NULL invisibly
 #' @details Optimizes column data types by analyzing content and converting to appropriate types
 #' @keywords internal
+#' @noRd
 optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
   if (!is_db_class(conn)) {
     log_message(conn, log_table_ref, "WARNING", "Connection is not DuckDB, skipping optimization")

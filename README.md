@@ -78,11 +78,11 @@ result <- redcap_to_db(
 
 The function returns a list with class `redcap_transfer_result`:
 
--   `had_errors`: Logical indicating if errors occurred during the transfer
--   `error_chunks`: Vector of chunk numbers that failed processing (if any)
--   `elapsed_sec`: Numeric value representing total seconds for the transfer
--   `processing_sec`: Numeric value representing seconds spent actively processing chunks
--   `success`: Logical indicating if the transfer was complete (TRUE) or incomplete (FALSE)
+-   `had_errors`: Logical if errors occurred during the transfer
+-   `error_chunks`: Vector of chunk numbers that failed processing
+-   `elapsed_sec`: Numeric value for total seconds
+-   `processing_sec`: Numeric value for seconds of active processing
+-   `success`: Logical if the transfer was complete
 
 ## Database Structure
 

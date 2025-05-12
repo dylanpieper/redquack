@@ -65,10 +65,10 @@
 #' Returns a list with the following components:
 #' \itemize{
 #'   \item `had_errors`: Logical indicating if errors occurred during the transfer
-#'   \item `error_chunks`: Vector of chunk numbers that failed processing (if any)
-#'   \item `elapsed_sec`: Numeric value representing total seconds for the transfer
-#'   \item `processing_sec`: Numeric value representing seconds spent actively processing chunks
-#'   \item `success`: Logical indicating if the transfer was successful (TRUE) or incomplete (FALSE)
+#'   \item `error_chunks`: Vector of chunk numbers that failed processing
+#'   \item `elapsed_sec`: Numeric value for total seconds
+#'   \item `processing_sec`: Numeric value for seconds of active processing
+#'   \item `success`: Logical indicating if the transfer was complete
 #' }
 #'
 #' @details
