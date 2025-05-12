@@ -208,10 +208,14 @@ completes or encounters errors. Default is TRUE.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Invisibly returns TRUE for a successful transfer, or FALSE for an incomplete transfer.
-The connection object is modified with additional attributes:</p><ul><li><p><code>had_errors</code>: Logical indicating if errors occurred during the transfer</p></li>
+    <p>Returns a list with the following components:</p><ul><li><p><code>had_errors</code>: Logical indicating if errors occurred during the transfer</p></li>
 <li><p><code>error_chunks</code>: Vector of chunk numbers that failed processing (if any)</p></li>
-</ul></div>
+<li><p><code>elapsed_sec</code>: Integer seconds for the total elapsed time for the transfer</p></li>
+<li><p><code>processing_sec</code>: Integer seconds spent actively processing chunks</p></li>
+<li><p><code>success</code>: Logical indicating if the transfer was successful (TRUE) or incomplete (FALSE)</p></li>
+</ul><p>For backward compatibility, when used in logical context (e.g., <code>if (result)</code>) the
+return value behaves like the <code>success</code> component.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function transfers data from REDCap to any database in chunks, which helps manage memory
@@ -219,7 +223,7 @@ usage when dealing with large projects. It creates two tables in the database:</
 <li><p><code>log_table_name</code>: Contains timestamped logs of the transfer process</p></li>
 </ul><p>The function automatically detects existing databases and handles them in three ways:</p><ul><li><p>If no table exists, starts a new transfer process</p></li>
 <li><p>If a table exists but is incomplete, resumes from the last processed record ID</p></li>
-<li><p>If a table exists and is complete, returns TRUE without reprocessing</p></li>
+<li><p>If a table exists and is complete, returns success without reprocessing</p></li>
 </ul><p>The function fetches record IDs, then processes records in chunks.
 If any error occurs during processing, the function will continue with remaining chunks
 but mark the transfer as incomplete.</p>
@@ -245,19 +249,14 @@ For DuckDB, data types are automatically optimized after all data is inserted:</
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">duckdb</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"redcap.duckdb"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">success</span> <span class="op">&lt;-</span> <span class="fu">redcap_to_db</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">redcap_to_db</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  redcap_uri <span class="op">=</span> <span class="st">"https://redcap.example.org/api/"</span>,</span></span>
 <span class="r-in"><span>  token <span class="op">=</span> <span class="fu">keyring</span><span class="fu">::</span><span class="fu"><a href="https://keyring.r-lib.org/reference/key_get.html" class="external-link">key_get</a></span><span class="op">(</span><span class="st">"redcap_token"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  conn <span class="op">=</span> <span class="va">duckdb</span>,</span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">duckdb</span>, <span class="st">"SELECT * FROM data LIMIT 1000"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">success</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">logs</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">duckdb</span>, <span class="st">"SELECT * FROM log"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">had_errors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">duckdb</span>, <span class="st">"had_errors"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">error_chunks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">duckdb</span>, <span class="st">"error_chunks"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">log</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">duckdb</span>, <span class="st">"SELECT * FROM log"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">duckdb</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
