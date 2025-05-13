@@ -14,15 +14,13 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
     return(invisible(NULL))
   }
 
-  log_message(conn, log_table_ref, "INFO", "Optimizing data types for DuckDB")
-
   data_table_str <- gsub('"', "", data_table_ref)
   column_info <- DBI::dbGetQuery(
     conn,
     paste0("SELECT column_name FROM information_schema.columns WHERE table_name = '", data_table_str, "'")
   )
 
-  log_message(conn, log_table_ref, "INFO", paste("Found", nrow(column_info), "columns to check"))
+  log_message(conn, log_table_ref, "INFO", paste("Optimizing", nrow(column_info), "columns"))
 
   status_id <- NULL
 
@@ -115,7 +113,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
 
   if (verbose) {
     cli::cli_status_clear(status_id)
-    cli::cli_alert_success("Data types optimized successfully")
+    cli::cli_alert_success(paste("Optimized data types for", nrow(column_info), "columns"))
   }
 
   return(invisible(NULL))

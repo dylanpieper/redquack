@@ -66,8 +66,7 @@
 #' \itemize{
 #'   \item `success`: Logical if the transfer was completed with no failed processing
 #'   \item `error_chunks`: Vector of chunk numbers that failed processing
-#'   \item `elapsed_sec`: Numeric value for total seconds
-#'   \item `processing_sec`: Numeric value for seconds of active processing
+#'   \item `time_s`: Numeric value for total seconds to transfer and optimize data
 #' }
 #'
 #' @details
@@ -414,7 +413,6 @@ redcap_to_db <- function(
       return(list(
         error_chunks = integer(0),
         num_chunks = 0,
-        processing_sec = round(as.numeric(difftime(Sys.time(), start_time, units = "secs"))),
         total_chunk_time = 0
       ))
     }
@@ -615,7 +613,6 @@ redcap_to_db <- function(
     result <- list(
       error_chunks = error_chunks,
       num_chunks = num_chunks,
-      processing_sec = round(as.numeric(difftime(Sys.time(), processing_start_time, units = "secs"))),
       total_chunk_time = round(total_chunk_time)
     )
 
@@ -629,7 +626,6 @@ redcap_to_db <- function(
   finalize_and_report <- function(data_table_ref, log_table_ref, chunk_results, start_time) {
     error_chunks <- chunk_results$error_chunks
     num_chunks <- chunk_results$num_chunks
-    processing_sec <- chunk_results$processing_sec
     total_chunk_time <- chunk_results$total_chunk_time
 
     successful_chunks <- num_chunks - length(error_chunks)
@@ -663,20 +659,19 @@ redcap_to_db <- function(
       log_message(conn, log_table_ref, "WARNING", paste(
         "Transfer partially completed in", formatted_time,
         "with", successful_chunks, "of", num_chunks, "chunks successful,",
-        failed_chunks, "failed (active processing time:", formatted_chunk_time, ")"
+        failed_chunks, "failed"
       ))
     } else {
       log_message(conn, log_table_ref, "INFO", paste(
         "Transfer completed in", formatted_time,
         "with", successful_chunks, "of", num_chunks, "chunks successful,",
-        failed_chunks, "failed (active processing time:", formatted_chunk_time, ")"
+        failed_chunks, "failed"
       ))
     }
 
     result <- list(
       error_chunks = error_chunks,
-      elapsed_sec = round(as.numeric(elapsed)),
-      processing_sec = round(as.numeric(total_chunk_time))
+      time_s = round(as.numeric(elapsed))
     )
 
     chunk_results <- NULL
@@ -691,8 +686,7 @@ redcap_to_db <- function(
         return(list(
           success = TRUE,
           error_chunks = integer(0),
-          elapsed_sec = 0,
-          processing_sec = 0
+          time_s = 0
         ))
       }
     }
@@ -722,8 +716,7 @@ redcap_to_db <- function(
         return(list(
           success = TRUE,
           error_chunks = integer(0),
-          elapsed_sec = round(as.numeric(elapsed_sec)),
-          processing_sec = 0
+          time_s = round(as.numeric(elapsed_sec))
         ))
       } else {
         log_message(conn, log_table_ref, "ERROR", "No records returned from REDCap")
@@ -733,8 +726,7 @@ redcap_to_db <- function(
         return(list(
           success = FALSE,
           error_chunks = integer(0),
-          elapsed_sec = round(as.numeric(difftime(Sys.time(), start_time, units = "secs"))),
-          processing_sec = 0
+          time_s = round(as.numeric(difftime(Sys.time(), start_time, units = "secs")))
         ))
       }
     }
@@ -787,8 +779,7 @@ redcap_to_db <- function(
     result <- list(
       success = result$success,
       error_chunks = result$error_chunks,
-      elapsed_sec = result$elapsed_sec,
-      processing_sec = result$processing_sec
+      time_s = result$time_s
     )
 
     class(result) <- c("redcap_transfer_result", class(result))

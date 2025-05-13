@@ -80,8 +80,7 @@ The function returns a list with class `redcap_transfer_result`:
 
 -   `success`: Logical if the transfer was completed with no failed processing
 -   `error_chunks`: Vector of chunk numbers that failed processing
--   `elapsed_sec`: Numeric value for total seconds
--   `processing_sec`: Numeric value for seconds of active processing
+-   `time_s`: Numeric value for total seconds to transfer and optimize data
 
 ## Database Structure
 
@@ -138,7 +137,7 @@ demographics <- tbl(duckdb, "data") |>
   collect()
 ```
 
-If you `collect()` your data into memory in the last step, it can make a slow process nearly instantaneous. The following example data is 2,819,697 rows x 397 columns:
+If you `collect()` your data into memory in the last step, it can make a slow process nearly instantaneous. The following example data is 2,825,092 rows x 397 columns:
 
 ``` r
 system.time(
@@ -149,8 +148,8 @@ system.time(
     summarize(count = n()) |>
     arrange(desc(count)) 
 )
-#>    user  system elapsed
-#>  20.748  10.455  32.916
+#>   user  system elapsed
+#>  5.048   5.006   6.077
 
 system.time(
   records <- duckdb |>
@@ -164,7 +163,7 @@ system.time(
 #>   0.040   0.015   0.040
 ```
 
-You can also write a Parquet file directly from DuckDB to take advantage of the features of [arrow](https://arrow.apache.org/docs/r/):
+You can also write a Parquet file directly from DuckDB and use [arrow](https://arrow.apache.org/docs/r/). A Parquet file will be about 5 times smaller than a DuckDB file:
 
 ``` r
 DBI::dbExecute(duckdb, "COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)")

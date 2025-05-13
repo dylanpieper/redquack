@@ -118,8 +118,7 @@ Returns a list with the following components:
 \itemize{
 \item \code{success}: Logical if the transfer was completed with no failed processing
 \item \code{error_chunks}: Vector of chunk numbers that failed processing
-\item \code{elapsed_sec}: Numeric value for total seconds
-\item \code{processing_sec}: Numeric value for seconds of active processing
+\item \code{time_s}: Numeric value for total seconds to transfer and optimize data
 }
 }
 \description{

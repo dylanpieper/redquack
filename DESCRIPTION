@@ -19,6 +19,7 @@ Imports:
     httr2,
     readr
 Suggests:
+    arrow,
     dplyr,
     duckdb,
     keyring,
