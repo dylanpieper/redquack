@@ -133,9 +133,7 @@
 <li>
 <code>error_chunks</code>: Vector of chunk numbers that failed processing</li>
 <li>
-<code>elapsed_sec</code>: Numeric value for total seconds</li>
-<li>
-<code>processing_sec</code>: Numeric value for seconds of active processing</li>
+<code>time_s</code>: Numeric value for total seconds to transfer and optimize data</li>
 </ul>
 </div>
 <div class="section level2">
@@ -190,7 +188,7 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">redcap_repeat_instrument</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">record_id</span>, <span class="va">age</span>, <span class="va">race</span>, <span class="va">sex</span>, <span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>If you <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect()</a></code> your data into memory in the last step, it can make a slow process nearly instantaneous. The following example data is 2,819,697 rows x 397 columns:</p>
+<p>If you <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect()</a></code> your data into memory in the last step, it can make a slow process nearly instantaneous. The following example data is 2,825,092 rows x 397 columns:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span></span>
 <span>  <span class="va">records</span> <span class="op">&lt;-</span> <span class="va">duckdb</span> <span class="op">|&gt;</span></span>
@@ -200,8 +198,8 @@
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;    user  system elapsed</span></span>
-<span><span class="co">#&gt;  20.748  10.455  32.916</span></span>
+<span><span class="co">#&gt;   user  system elapsed</span></span>
+<span><span class="co">#&gt;  5.048   5.006   6.077</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span></span>
 <span>  <span class="va">records</span> <span class="op">&lt;-</span> <span class="va">duckdb</span> <span class="op">|&gt;</span></span>
@@ -213,7 +211,7 @@
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed</span></span>
 <span><span class="co">#&gt;   0.040   0.015   0.040</span></span></code></pre></div>
-<p>You can also write a Parquet file directly from DuckDB to take advantage of the features of <a href="https://arrow.apache.org/docs/r/" class="external-link">arrow</a>:</p>
+<p>You can also write a Parquet file directly from DuckDB and use <a href="https://arrow.apache.org/docs/r/" class="external-link">arrow</a>. A Parquet file will be about 5 times smaller than a DuckDB file:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">duckdb</span>, <span class="st">"COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)"</span><span class="op">)</span></span></code></pre></div>
 <p>Remember to close the connection when finished:</p>
