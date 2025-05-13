@@ -797,7 +797,6 @@ redcap_to_db <- function(
 
   main_process <- function(conn) {
     result <- attempt_transfer(conn)
-    class(result) <- c("redcap_transfer_result", class(result))
     return(result)
   }
 
