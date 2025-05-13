@@ -306,7 +306,7 @@ test_that("all record IDs from REDCap are present in a SQLite database", {
   db <- list(con = con, path = file_path, type = "sqlite")
   on.exit(cleanup_db(db))
 
-  expect_true(result)
+  expect_true(result$success)
 
   query <- paste0("SELECT DISTINCT ", DBI::dbQuoteIdentifier(con, record_id_name), " FROM data")
   db_record_ids <- DBI::dbGetQuery(con, query)[[1]]

@@ -64,11 +64,10 @@
 #' @return
 #' Returns a list with the following components:
 #' \itemize{
-#'   \item `had_errors`: Logical indicating if errors occurred during the transfer
+#'   \item `success`: Logical if the transfer was completed with no failed processing
 #'   \item `error_chunks`: Vector of chunk numbers that failed processing
 #'   \item `elapsed_sec`: Numeric value for total seconds
 #'   \item `processing_sec`: Numeric value for seconds of active processing
-#'   \item `success`: Logical indicating if the transfer was complete
 #' }
 #'
 #' @details
@@ -413,7 +412,6 @@ redcap_to_db <- function(
   process_chunks <- function(log_table_ref, data_table_ref, record_ids, start_time) {
     if (is.null(record_ids) || length(record_ids) == 0) {
       return(list(
-        had_errors = FALSE,
         error_chunks = integer(0),
         num_chunks = 0,
         processing_sec = round(as.numeric(difftime(Sys.time(), start_time, units = "secs"))),
@@ -517,7 +515,8 @@ redcap_to_db <- function(
           )
 
           if (ncol(chunk_data) == 0 || nrow(chunk_data) == 0) {
-            log_message(conn, log_table_ref, "WARNING", paste("Chunk", i, "returned no data"))
+            log_message(conn, log_table_ref, "ERROR", paste("Chunk", i, "returned no data"))
+            stop(paste("Chunk", i, "returned no data"))
           }
 
           chunk_data <- as.data.frame(lapply(chunk_data, as.character), stringsAsFactors = FALSE)
@@ -614,7 +613,6 @@ redcap_to_db <- function(
     }
 
     result <- list(
-      had_errors = length(error_chunks) > 0,
       error_chunks = error_chunks,
       num_chunks = num_chunks,
       processing_sec = round(as.numeric(difftime(Sys.time(), processing_start_time, units = "secs"))),
@@ -629,7 +627,6 @@ redcap_to_db <- function(
   }
 
   finalize_and_report <- function(data_table_ref, log_table_ref, chunk_results, start_time) {
-    had_errors <- chunk_results$had_errors
     error_chunks <- chunk_results$error_chunks
     num_chunks <- chunk_results$num_chunks
     processing_sec <- chunk_results$processing_sec
@@ -655,7 +652,7 @@ redcap_to_db <- function(
     formatted_time <- format_elapsed_time(as.numeric(elapsed))
     formatted_chunk_time <- format_elapsed_time(total_chunk_time)
 
-    if (had_errors) {
+    if (length(error_chunks) > 0) {
       error_message <- paste(
         "Errors occurred in chunks:",
         paste(error_chunks, collapse = ", ")
@@ -677,7 +674,6 @@ redcap_to_db <- function(
     }
 
     result <- list(
-      had_errors = had_errors,
       error_chunks = error_chunks,
       elapsed_sec = round(as.numeric(elapsed)),
       processing_sec = round(as.numeric(total_chunk_time))
@@ -694,7 +690,6 @@ redcap_to_db <- function(
       if (env$status == "complete") {
         return(list(
           success = TRUE,
-          had_errors = FALSE,
           error_chunks = integer(0),
           elapsed_sec = 0,
           processing_sec = 0
@@ -726,7 +721,6 @@ redcap_to_db <- function(
         log_message(conn, log_table_ref, "INFO", paste("Transfer completed in", format_elapsed_time(elapsed_sec)))
         return(list(
           success = TRUE,
-          had_errors = FALSE,
           error_chunks = integer(0),
           elapsed_sec = round(as.numeric(elapsed_sec)),
           processing_sec = 0
@@ -738,7 +732,6 @@ redcap_to_db <- function(
         }
         return(list(
           success = FALSE,
-          had_errors = TRUE,
           error_chunks = integer(0),
           elapsed_sec = round(as.numeric(difftime(Sys.time(), start_time, units = "secs"))),
           processing_sec = 0
@@ -772,7 +765,7 @@ redcap_to_db <- function(
     gc(FALSE)
 
     if (beep) {
-      if (!result$had_errors) {
+      if (length(result$error_chunks) == 0) {
         tryCatch(
           {
             audio::play(audio::load.wave(system.file("audio/quack.wav", package = "redquack")))
@@ -782,8 +775,7 @@ redcap_to_db <- function(
       }
     }
 
-    success <- !(result$had_errors && !is.null(failed_ids))
-
+    success <- length(result$error_chunks) == 0
     if (!success) {
       if (verbose) {
         cli::cli_alert_danger("Transfer incomplete with {length(failed_ids)} failed records")
@@ -792,6 +784,14 @@ redcap_to_db <- function(
     }
 
     result$success <- success
+    result <- list(
+      success = result$success,
+      error_chunks = result$error_chunks,
+      elapsed_sec = result$elapsed_sec,
+      processing_sec = result$processing_sec
+    )
+
+    class(result) <- c("redcap_transfer_result", class(result))
     return(result)
   }
 

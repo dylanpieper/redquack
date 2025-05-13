@@ -14,7 +14,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
     return(invisible(NULL))
   }
 
-  log_message(conn, log_table_ref, "INFO", "Optimizing column data types for DuckDB")
+  log_message(conn, log_table_ref, "INFO", "Optimizing data types for DuckDB")
 
   data_table_str <- gsub('"', "", data_table_ref)
   column_info <- DBI::dbGetQuery(
@@ -112,8 +112,6 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
       log_message(conn, log_table_ref, "WARNING", paste("Unable to enable compression:", e$message))
     }
   )
-
-  log_message(conn, log_table_ref, "INFO", "Column optimization completed")
 
   if (verbose) {
     cli::cli_status_clear(status_id)
