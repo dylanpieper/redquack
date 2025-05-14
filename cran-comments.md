@@ -1,5 +1,4 @@
 # CRAN Comments
-
 This version contains significant API improvements such as supporting any database.
 
 ## R CMD check results
