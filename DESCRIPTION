@@ -5,7 +5,7 @@ Authors@R: person("Dylan", "Pieper", , "dylanpieper@gmail.com", role = c("aut", 
 Description: Transfer 'REDCap' (Research Electronic Data Capture) data to a 
     database with additional support for 'DuckDB'. Processes data in chunks to 
     handle large datasets without exceeding available memory. Features include 
-    resuming incomplete transfers, automatically converting data types for DuckDB, 
+    resuming incomplete transfers, automatically converting data types for 'DuckDB', 
     tracking progress, and logging operations in the database.
 License: MIT + file LICENSE
 Encoding: UTF-8
