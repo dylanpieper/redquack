@@ -373,14 +373,14 @@ redcap_to_db <- function(
           log_message(conn, log_table_ref, "INFO", paste("Received", length(record_ids), "record IDs to process out of", total_records, "total records"))
           if (verbose) {
             cli::cli_status_clear(status_id)
-            cli::cli_alert_info("Received {length(record_ids)} record IDs to process out of {total_records} total records")
+            cli::cli_alert_success("Received {length(record_ids)} record IDs to process out of {total_records} total records")
           }
         } else {
           record_ids <- all_record_ids
           log_message(conn, log_table_ref, "INFO", paste("Received", total_records, "record IDs to process"))
           if (verbose) {
             cli::cli_status_clear(status_id)
-            cli::cli_alert_info("Received {total_records} record IDs to process")
+            cli::cli_alert_success("Received {total_records} record IDs to process")
           }
         }
 
@@ -631,8 +631,6 @@ redcap_to_db <- function(
     successful_chunks <- num_chunks - length(error_chunks)
     failed_chunks <- length(error_chunks)
 
-    optimize_data_types(conn, data_table_ref, log_table_ref, verbose)
-
     record_count_query <- paste0("SELECT COUNT(*) AS count FROM ", data_table_ref)
     record_count <- DBI::dbGetQuery(conn, record_count_query)$count
     formatted_chunk_time <- format_elapsed_time(total_chunk_time)
@@ -640,6 +638,8 @@ redcap_to_db <- function(
     if (verbose) {
       cli::cli_alert_success("Inserted {record_count} rows into database in {formatted_chunk_time}")
     }
+
+    optimize_data_types(conn, data_table_ref, log_table_ref, verbose)
 
     log_message(conn, log_table_ref, "INFO", paste("Successfully Inserted", record_count, "rows into database"))
 
