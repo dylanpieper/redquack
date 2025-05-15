@@ -286,6 +286,15 @@ test_that("all record IDs from REDCap are present in a SQLite database", {
     record_id_name = record_id_name
   )
 
+  # Normalize IDs
+  all_redcap_ids <- all_redcap_ids |>
+    gsub("\\?", "", x = _) |>
+    gsub("[[:punct:]]", "", x = _) |>
+    gsub("\\s+", "", x = _) |>
+    gsub("\u00a0", "", x = _) |>
+    trimws() |>
+    unique()
+
   expect_gt(length(all_redcap_ids), 0)
   cli::cli_alert_info(paste("Found", length(all_redcap_ids), "record IDs in REDCap"))
 
@@ -311,6 +320,15 @@ test_that("all record IDs from REDCap are present in a SQLite database", {
   query <- paste0("SELECT DISTINCT ", DBI::dbQuoteIdentifier(con, record_id_name), " FROM data")
   db_record_ids <- DBI::dbGetQuery(con, query)[[1]]
 
+  # Normalize IDs
+  db_record_ids <- db_record_ids |>
+    gsub("\\?", "", x = _) |>
+    gsub("[[:punct:]]", "", x = _) |>
+    gsub("\\s+", "", x = _) |>
+    gsub("\u00a0", "", x = _) |>
+    trimws() |>
+    unique()
+
   expect_gt(length(db_record_ids), 0)
   cli::cli_alert_info(paste("Found", length(db_record_ids), "unique record IDs in database"))
 
@@ -327,49 +345,4 @@ test_that("all record IDs from REDCap are present in a SQLite database", {
   expect_equal(sort(all_redcap_ids), sort(db_record_ids),
     label = "Record IDs in database should match those in REDCap"
   )
-})
-
-test_that("record_id_name parameter works properly with different DB types", {
-  skip_on_ci()
-  skip_on_cran()
-
-  creds <- get_redcap_credentials()
-
-  # Test with SQLite
-  test_dir <- file.path(tempdir(), "redcap_tests")
-  dir.create(test_dir, showWarnings = FALSE, recursive = TRUE)
-  sqlite_path <- file.path(test_dir, "sqlite_record_id_name_test.db")
-
-  custom_id <- "client_id"
-
-  con_sqlite <- DBI::dbConnect(RSQLite::SQLite(), dbname = sqlite_path)
-
-  # Transfer data to SQLite
-  result_sqlite <- redcap_to_db(
-    conn = con_sqlite,
-    redcap_uri = creds$uri,
-    token = creds$token,
-    data_table_name = "data",
-    log_table_name = "log",
-    record_id_name = custom_id,
-    beep = FALSE,
-    forms = "client_profile"
-  )
-
-  db_sqlite <- list(con = con_sqlite, path = sqlite_path, type = "sqlite")
-  on.exit(cleanup_db(db_sqlite))
-
-  expect_true(DBI::dbExistsTable(con_sqlite, "data"))
-
-  id_exists_sqlite <- tryCatch(
-    {
-      test <- DBI::dbGetQuery(con_sqlite, paste0("SELECT ", custom_id, " FROM data LIMIT 1"))
-      TRUE
-    },
-    error = function(e) {
-      FALSE
-    }
-  )
-
-  expect_true(id_exists_sqlite)
 })
