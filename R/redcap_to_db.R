@@ -4,15 +4,15 @@
 #' Transfer REDCap data to a database in chunks to minimize memory usage.
 #'
 #' @param conn A DBI connection object to a database.
-#' @param redcap_uri Character string specifying the URI (uniform resource identifier)
-#'   of the REDCap server's API.
-#' @param token Character string containing the REDCap API token specific to your project.
-#'   This token is used for authentication and must have export permissions.
 #' @param data_table_name Character string specifying the name of the table to create or append
 #'   data to. Default is "data". Can include schema name (e.g. "schema.table").
 #' @param log_table_name Character string specifying the name of the table to store
 #'   transfer logs. Default is "log". Can include schema name (e.g. "schema.log").
 #'   Set to NULL to disable logging.
+#' @param redcap_uri Character string specifying the URI (uniform resource identifier)
+#'   of the REDCap server's API.
+#' @param token Character string containing the REDCap API token specific to your project.
+#'   This token is used for authentication and must have export permissions.
 #' @param raw_or_label A string (either "raw" or "label") that specifies
 #'   whether to export the raw coded values or the labels for the options of
 #'   multiple choice fields. Default is "raw".

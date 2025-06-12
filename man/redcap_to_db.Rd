@@ -6,10 +6,10 @@
 \usage{
 redcap_to_db(
   conn,
-  redcap_uri,
-  token,
   data_table_name = "data",
   log_table_name = "log",
+  redcap_uri,
+  token,
   raw_or_label = "raw",
   raw_or_label_headers = "raw",
   export_checkbox_label = FALSE,
@@ -34,18 +34,18 @@ redcap_to_db(
 \arguments{
 \item{conn}{A DBI connection object to a database.}
 
-\item{redcap_uri}{Character string specifying the URI (uniform resource identifier)
-of the REDCap server's API.}
-
-\item{token}{Character string containing the REDCap API token specific to your project.
-This token is used for authentication and must have export permissions.}
-
 \item{data_table_name}{Character string specifying the name of the table to create or append
 data to. Default is "data". Can include schema name (e.g. "schema.table").}
 
 \item{log_table_name}{Character string specifying the name of the table to store
 transfer logs. Default is "log". Can include schema name (e.g. "schema.log").
 Set to NULL to disable logging.}
+
+\item{redcap_uri}{Character string specifying the URI (uniform resource identifier)
+of the REDCap server's API.}
+
+\item{token}{Character string containing the REDCap API token specific to your project.
+This token is used for authentication and must have export permissions.}
 
 \item{raw_or_label}{A string (either "raw" or "label") that specifies
 whether to export the raw coded values or the labels for the options of
