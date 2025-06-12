@@ -47,10 +47,10 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">redcap_to_db</span><span class="op">(</span></span>
 <span>  <span class="va">conn</span>,</span>
-<span>  <span class="va">redcap_uri</span>,</span>
-<span>  <span class="va">token</span>,</span>
 <span>  data_table_name <span class="op">=</span> <span class="st">"data"</span>,</span>
 <span>  log_table_name <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>  <span class="va">redcap_uri</span>,</span>
+<span>  <span class="va">token</span>,</span>
 <span>  raw_or_label <span class="op">=</span> <span class="st">"raw"</span>,</span>
 <span>  raw_or_label_headers <span class="op">=</span> <span class="st">"raw"</span>,</span>
 <span>  export_checkbox_label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -81,16 +81,6 @@
 <dd><p>A DBI connection object to a database.</p></dd>
 
 
-<dt id="arg-redcap-uri">redcap_uri<a class="anchor" aria-label="anchor" href="#arg-redcap-uri"></a></dt>
-<dd><p>Character string specifying the URI (uniform resource identifier)
-of the REDCap server's API.</p></dd>
-
-
-<dt id="arg-token">token<a class="anchor" aria-label="anchor" href="#arg-token"></a></dt>
-<dd><p>Character string containing the REDCap API token specific to your project.
-This token is used for authentication and must have export permissions.</p></dd>
-
-
 <dt id="arg-data-table-name">data_table_name<a class="anchor" aria-label="anchor" href="#arg-data-table-name"></a></dt>
 <dd><p>Character string specifying the name of the table to create or append
 data to. Default is "data". Can include schema name (e.g. "schema.table").</p></dd>
@@ -100,6 +90,16 @@ data to. Default is "data". Can include schema name (e.g. "schema.table").</p></
 <dd><p>Character string specifying the name of the table to store
 transfer logs. Default is "log". Can include schema name (e.g. "schema.log").
 Set to NULL to disable logging.</p></dd>
+
+
+<dt id="arg-redcap-uri">redcap_uri<a class="anchor" aria-label="anchor" href="#arg-redcap-uri"></a></dt>
+<dd><p>Character string specifying the URI (uniform resource identifier)
+of the REDCap server's API.</p></dd>
+
+
+<dt id="arg-token">token<a class="anchor" aria-label="anchor" href="#arg-token"></a></dt>
+<dd><p>Character string containing the REDCap API token specific to your project.
+This token is used for authentication and must have export permissions.</p></dd>
 
 
 <dt id="arg-raw-or-label">raw_or_label<a class="anchor" aria-label="anchor" href="#arg-raw-or-label"></a></dt>
