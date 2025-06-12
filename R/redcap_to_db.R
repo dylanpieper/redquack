@@ -131,11 +131,11 @@
 redcap_to_db <- function(
     ## Database Connection
     conn,
+    data_table_name = "data",
+    log_table_name = "log",
     ## REDCap Connection Parameters
     redcap_uri,
     token,
-    data_table_name = "data",
-    log_table_name = "log",
     ## Data Export Options
     raw_or_label = "raw",
     raw_or_label_headers = "raw",
