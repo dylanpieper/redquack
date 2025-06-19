@@ -318,7 +318,7 @@ redcap_to_db <- function(
     log_message(conn, log_table_ref, "INFO", "Fetching record IDs from REDCap")
 
     status_id <- NULL
-    if (echo | show_progress) {
+    if (echo) {
       status_id <- cli::cli_status("Sending request to REDCap API for record IDs...")
     }
 
@@ -337,7 +337,7 @@ redcap_to_db <- function(
 
         raw_text <- perform_redcap_request(req)
 
-        if (echo | show_progress) {
+        if (echo) {
           cli::cli_status_update(status_id, "Processing returned record IDs...")
         }
 
@@ -348,7 +348,7 @@ redcap_to_db <- function(
         )
 
         if (ncol(result_data) == 0 || nrow(result_data) == 0) {
-          if (echo | show_progress) cli::cli_status_clear(status_id)
+          if (echo) cli::cli_status_clear(status_id)
           stop("No records or fields returned from REDCap")
         }
 
@@ -358,7 +358,7 @@ redcap_to_db <- function(
         table_exists <- DBI::dbExistsTable(conn, name = data_table_name)
 
         if (table_exists) {
-          if (echo | show_progress) {
+          if (echo) {
             cli::cli_status_update(status_id, "Identifying new records to process...")
           }
 
@@ -372,7 +372,7 @@ redcap_to_db <- function(
 
           if (length(record_ids) == 0) {
             log_message(conn, log_table_ref, "INFO", "All record IDs have been processed")
-            if (echo | show_progress) {
+            if (echo) {
               cli::cli_status_clear(status_id)
               cli::cli_alert_info("All record IDs have been processed")
             }
@@ -380,14 +380,14 @@ redcap_to_db <- function(
           }
 
           log_message(conn, log_table_ref, "INFO", paste("Received", length(record_ids), "record IDs to process out of", total_records, "total records"))
-          if (echo | show_progress) {
+          if (echo) {
             cli::cli_status_clear(status_id)
             cli::cli_alert_success("Received {length(record_ids)} record IDs to process out of {total_records} total records")
           }
         } else {
           record_ids <- all_record_ids
           log_message(conn, log_table_ref, "INFO", paste("Received", total_records, "record IDs to process"))
-          if (echo | show_progress) {
+          if (echo) {
             cli::cli_status_clear(status_id)
             cli::cli_alert_success("Received {total_records} record IDs to process")
           }
@@ -396,7 +396,7 @@ redcap_to_db <- function(
         return(record_ids)
       },
       error = function(e) {
-        if (echo | show_progress) cli::cli_status_clear(status_id)
+        if (echo) cli::cli_status_clear(status_id)
         if (beep) {
           tryCatch(
             {
