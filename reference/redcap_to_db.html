@@ -67,7 +67,7 @@
 <span>  chunk_size <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  chunk_delay <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  max_retries <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>  beep <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -193,8 +193,8 @@ API connection or HTTP 504 error. Default is 10.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical indicating whether to show progress and completion messages.
-Default is TRUE.</p></dd>
+<dd><p>String indicating whether to show progress and/or completion messages.
+Options: "none", "all", or "progress".</p></dd>
 
 
 <dt id="arg-beep">beep<a class="anchor" aria-label="anchor" href="#arg-beep"></a></dt>
