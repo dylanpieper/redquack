@@ -3,7 +3,7 @@
 ## Lifecycle Changes
 * Rename `redcap_to_duckdb()` to `redcap_to_db()` and gain a `conn` argument to support any database connection
 * Return a list of processing data as an S3 object (`redcap_transfer_result`) 
-* Rename `verbose` to `echo` and change from logical to string options: "all", "none", or "progress" 
+* Rename `verbose` to `echo` and change from logical to string options: "all" (default), "progress", or "none"
 
 ## Patches
 * If `log_table_name` is NULL, then disable logging

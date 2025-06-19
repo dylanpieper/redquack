@@ -56,7 +56,7 @@
 #' @param max_retries Integer specifying the maximum number of retry attempts for failed
 #'   API connection or HTTP 504 error. Default is 10.
 #' @param echo String indicating whether to show progress and/or completion messages.
-#'   Options: "none", "all", or "progress".
+#'   Options: "all" (default), "progress", or "none".
 #' @param beep Logical indicating whether to play sound notifications when the process
 #'   completes or encounters errors. Default is TRUE.
 #' @param ... Additional arguments passed to the REDCap API call.

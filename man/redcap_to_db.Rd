@@ -106,7 +106,7 @@ requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.}
 API connection or HTTP 504 error. Default is 10.}
 
 \item{echo}{String indicating whether to show progress and/or completion messages.
-Options: "none", "all", or "progress".}
+Options: "all" (default), "progress", or "none".}
 
 \item{beep}{Logical indicating whether to play sound notifications when the process
 completes or encounters errors. Default is TRUE.}
