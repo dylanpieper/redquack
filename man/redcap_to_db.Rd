@@ -26,7 +26,7 @@ redcap_to_db(
   chunk_size = 1000,
   chunk_delay = 0.5,
   max_retries = 10,
-  verbose = "all",
+  echo = "all",
   beep = TRUE,
   ...
 )
@@ -105,7 +105,7 @@ requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.}
 \item{max_retries}{Integer specifying the maximum number of retry attempts for failed
 API connection or HTTP 504 error. Default is 10.}
 
-\item{verbose}{String indicating whether to show progress and/or completion messages.
+\item{echo}{String indicating whether to show progress and/or completion messages.
 Options: "none", "all", or "progress".}
 
 \item{beep}{Logical indicating whether to play sound notifications when the process

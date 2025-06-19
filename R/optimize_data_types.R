@@ -3,12 +3,12 @@
 #' @param conn A DBI connection object
 #' @param data_table_ref The name of the data table in database
 #' @param log_table_ref The name of the log table in database
-#' @param verbose Logical to show status messages
+#' @param echo Show messages
 #' @return NULL invisibly
 #' @details Optimizes column data types by analyzing content and converting to appropriate types
 #' @keywords internal
 #' @noRd
-optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
+optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
   if (!is_db_class(conn)) {
     log_message(conn, log_table_ref, "WARNING", "Connection is not DuckDB, skipping optimization")
     return(invisible(NULL))
@@ -24,7 +24,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
 
   status_id <- NULL
 
-  if (verbose) {
+  if (echo) {
     status_id <- cli::cli_status(paste("Optimizing", nrow(column_info), "columns..."))
   }
 
@@ -97,7 +97,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
     )
   }
 
-  if (verbose) {
+  if (echo) {
     cli::cli_status_update(status_id, "Enabling compression...")
   }
 
@@ -111,7 +111,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, verbose) {
     }
   )
 
-  if (verbose) {
+  if (echo) {
     cli::cli_status_clear(status_id)
     cli::cli_alert_success(paste("Optimized data types for", nrow(column_info), "columns"))
   }
