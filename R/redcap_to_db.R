@@ -162,11 +162,16 @@ redcap_to_db <- function(
     ...) {
   if (echo == "all") {
     echo <- TRUE
+    show_progress <- TRUE
   } else if (echo == "none") {
     echo <- FALSE
+    show_progress <- FALSE
   } else if (echo == "progress") {
     echo <- FALSE
     show_progress <- TRUE
+  } else {
+    echo <- FALSE
+    show_progress <- FALSE
   }
 
   old_options <- options()
@@ -453,7 +458,7 @@ redcap_to_db <- function(
       )
     }
 
-    if (echo | show_progress) {
+    if (echo || show_progress) {
       pb <- cli::cli_progress_bar(
         format = paste0(
           "Processing chunk [{cli::pb_current}/{cli::pb_total}] ",
@@ -476,7 +481,7 @@ redcap_to_db <- function(
           log_message(conn, log_table_ref, "INFO", paste("Skipping", skipped_count, "already processed records in chunk", i))
 
           if (length(chunk_record_ids) == 0) {
-            if (echo | show_progress) {
+            if (echo || show_progress) {
               cli::cli_progress_update()
             }
             next
@@ -559,7 +564,7 @@ redcap_to_db <- function(
           chunk_data <- NULL
           gc(FALSE)
 
-          if (echo | show_progress) {
+          if (echo || show_progress) {
             cli::cli_progress_update()
           }
 
@@ -580,7 +585,7 @@ redcap_to_db <- function(
 
           error_msg <- e$message
 
-          if (echo | show_progress) {
+          if (echo || show_progress) {
             cli::cli_progress_done()
             cli::cli_alert_danger("Chunk {i}/{num_chunks}: Error - {error_msg} [{formatted_chunk_sum}]")
           }
@@ -597,7 +602,7 @@ redcap_to_db <- function(
       if (!chunk_result$success) {
         log_message(conn, log_table_ref, "WARNING", paste("Error in chunk", i, "- continuing with remaining chunks"))
 
-        if (echo | show_progress) {
+        if (echo || show_progress) {
           cli::cli_progress_done()
           cli::cli_alert_warning("Error in chunk {i} - continuing with remaining chunks")
 
@@ -615,7 +620,7 @@ redcap_to_db <- function(
       if (i < num_chunks) Sys.sleep(chunk_delay)
     }
 
-    if (echo | show_progress) {
+    if (echo || show_progress) {
       cli::cli_progress_done()
     }
 
