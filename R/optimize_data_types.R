@@ -24,7 +24,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
 
   status_id <- NULL
 
-  if (echo) {
+  if (echo == "all") {
     status_id <- cli::cli_status(paste("Optimizing", nrow(column_info), "columns..."))
   }
 
@@ -97,7 +97,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
     )
   }
 
-  if (echo) {
+  if (echo == "all") {
     cli::cli_status_update(status_id, "Enabling compression...")
   }
 
@@ -111,7 +111,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
     }
   )
 
-  if (echo) {
+  if (echo == "all") {
     cli::cli_status_clear(status_id)
     cli::cli_alert_success(paste("Optimized data types for", nrow(column_info), "columns"))
   }
