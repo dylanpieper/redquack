@@ -160,20 +160,6 @@ redcap_to_db <- function(
     beep = TRUE,
     ## Additional Parameters
     ...) {
-  if (echo == "all") {
-    echo <- TRUE
-    show_progress <- TRUE
-  } else if (echo == "none") {
-    echo <- FALSE
-    show_progress <- FALSE
-  } else if (echo == "progress") {
-    echo <- FALSE
-    show_progress <- TRUE
-  } else {
-    echo <- FALSE
-    show_progress <- FALSE
-  }
-
   old_options <- options()
   readr_options <- names(old_options)[grep("^readr\\.", names(old_options))]
   saved_options <- old_options[readr_options]
@@ -244,18 +230,18 @@ redcap_to_db <- function(
       )
 
       if (completion_check$count > 0 && error_check$count == 0) {
-        if (echo) {
+        if (echo %in% c("all", "progress")) {
           cli::cli_alert_success("Database table exists and transfer was completed without errors")
         }
         return(list(data_table_ref = data_table_ref, log_table_ref = log_table_ref, status = "complete", start_time = Sys.time()))
       } else if (completion_check$count > 0 && error_check$count > 0) {
-        if (echo) {
+        if (echo %in% c("all", "progress")) {
           cli::cli_alert_warning("Database table exists but had errors during previous transfer")
         }
         log_message(conn, log_table_ref, "WARNING", "Resuming from incomplete transfer with errors")
         return(list(data_table_ref = data_table_ref, log_table_ref = log_table_ref, start_time = Sys.time()))
       } else {
-        if (echo) {
+        if (echo %in% c("all", "progress")) {
           cli::cli_alert_info("Resuming from incomplete transfer")
         }
         log_message(conn, log_table_ref, "INFO", "Resuming from incomplete transfer")
@@ -323,7 +309,7 @@ redcap_to_db <- function(
     log_message(conn, log_table_ref, "INFO", "Fetching record IDs from REDCap")
 
     status_id <- NULL
-    if (echo) {
+    if (echo == "all") {
       status_id <- cli::cli_status("Sending request to REDCap API for record IDs...")
     }
 
@@ -342,7 +328,7 @@ redcap_to_db <- function(
 
         raw_text <- perform_redcap_request(req)
 
-        if (echo) {
+        if (echo == "all") {
           cli::cli_status_update(status_id, "Processing returned record IDs...")
         }
 
@@ -353,7 +339,7 @@ redcap_to_db <- function(
         )
 
         if (ncol(result_data) == 0 || nrow(result_data) == 0) {
-          if (echo) cli::cli_status_clear(status_id)
+          if (echo == "all") cli::cli_status_clear(status_id)
           stop("No records or fields returned from REDCap")
         }
 
@@ -363,7 +349,7 @@ redcap_to_db <- function(
         table_exists <- DBI::dbExistsTable(conn, name = data_table_name)
 
         if (table_exists) {
-          if (echo) {
+          if (echo == "all") {
             cli::cli_status_update(status_id, "Identifying new records to process...")
           }
 
@@ -377,7 +363,7 @@ redcap_to_db <- function(
 
           if (length(record_ids) == 0) {
             log_message(conn, log_table_ref, "INFO", "All record IDs have been processed")
-            if (echo) {
+            if (echo == "all") {
               cli::cli_status_clear(status_id)
               cli::cli_alert_info("All record IDs have been processed")
             }
@@ -385,14 +371,14 @@ redcap_to_db <- function(
           }
 
           log_message(conn, log_table_ref, "INFO", paste("Received", length(record_ids), "record IDs to process out of", total_records, "total records"))
-          if (echo) {
+          if (echo == "all") {
             cli::cli_status_clear(status_id)
             cli::cli_alert_success("Received {length(record_ids)} record IDs to process out of {total_records} total records")
           }
         } else {
           record_ids <- all_record_ids
           log_message(conn, log_table_ref, "INFO", paste("Received", total_records, "record IDs to process"))
-          if (echo) {
+          if (echo == "all") {
             cli::cli_status_clear(status_id)
             cli::cli_alert_success("Received {total_records} record IDs to process")
           }
@@ -401,7 +387,7 @@ redcap_to_db <- function(
         return(record_ids)
       },
       error = function(e) {
-        if (echo) cli::cli_status_clear(status_id)
+        if (echo == "all") cli::cli_status_clear(status_id)
         if (beep) {
           tryCatch(
             {
@@ -458,7 +444,7 @@ redcap_to_db <- function(
       )
     }
 
-    if (echo || show_progress) {
+    if (echo == "progress") {
       pb <- cli::cli_progress_bar(
         format = paste0(
           "Processing chunk [{cli::pb_current}/{cli::pb_total}] ",
@@ -481,7 +467,7 @@ redcap_to_db <- function(
           log_message(conn, log_table_ref, "INFO", paste("Skipping", skipped_count, "already processed records in chunk", i))
 
           if (length(chunk_record_ids) == 0) {
-            if (echo || show_progress) {
+            if (echo == "progress") {
               cli::cli_progress_update()
             }
             next
@@ -564,7 +550,7 @@ redcap_to_db <- function(
           chunk_data <- NULL
           gc(FALSE)
 
-          if (echo || show_progress) {
+          if (echo == "progress") {
             cli::cli_progress_update()
           }
 
@@ -585,7 +571,7 @@ redcap_to_db <- function(
 
           error_msg <- e$message
 
-          if (echo || show_progress) {
+          if (echo == "progress") {
             cli::cli_progress_done()
             cli::cli_alert_danger("Chunk {i}/{num_chunks}: Error - {error_msg} [{formatted_chunk_sum}]")
           }
@@ -602,7 +588,7 @@ redcap_to_db <- function(
       if (!chunk_result$success) {
         log_message(conn, log_table_ref, "WARNING", paste("Error in chunk", i, "- continuing with remaining chunks"))
 
-        if (echo || show_progress) {
+        if (echo == "progress") {
           cli::cli_progress_done()
           cli::cli_alert_warning("Error in chunk {i} - continuing with remaining chunks")
 
@@ -620,7 +606,7 @@ redcap_to_db <- function(
       if (i < num_chunks) Sys.sleep(chunk_delay)
     }
 
-    if (echo || show_progress) {
+    if (echo == "progress") {
       cli::cli_progress_done()
     }
 
@@ -649,7 +635,7 @@ redcap_to_db <- function(
     record_count <- DBI::dbGetQuery(conn, record_count_query)$count
     formatted_chunk_time <- format_elapsed_time(total_chunk_time)
 
-    if (echo) {
+    if (echo == "all") {
       cli::cli_alert_success("Inserted {record_count} rows into database in {formatted_chunk_time}")
     }
 
@@ -715,7 +701,7 @@ redcap_to_db <- function(
       record_ids <- fetch_record_ids(log_table_ref, data_table_ref, start_time)
     } else {
       log_message(conn, log_table_ref, "INFO", paste("Processing", length(failed_record_ids), "record IDs"))
-      if (echo) {
+      if (echo == "all") {
         cli::cli_alert_info("Processing {length(failed_record_ids)} record IDs")
       }
       record_ids <- failed_record_ids
@@ -734,7 +720,7 @@ redcap_to_db <- function(
         ))
       } else {
         log_message(conn, log_table_ref, "ERROR", "No records returned from REDCap")
-        if (echo) {
+        if (echo %in% c("all", "progress")) {
           cli::cli_alert_danger("No records returned from REDCap")
         }
         return(list(
@@ -783,7 +769,7 @@ redcap_to_db <- function(
 
     success <- length(result$error_chunks) == 0
     if (!success) {
-      if (echo) {
+      if (echo %in% c("all", "progress")) {
         cli::cli_alert_danger("Transfer incomplete with {length(failed_ids)} failed records")
       }
       log_message(conn, log_table_ref, "ERROR", paste("Transfer incomplete with", length(failed_ids), "failed records"))
