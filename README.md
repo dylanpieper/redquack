@@ -181,8 +181,14 @@ While this package is only optimized for DuckDB, I invite collaborators to help 
 
 ## Other REDCap Interfaces
 
--   [REDCapSync](https://thecodingdocs.github.io/REDCapSync/) (R package; in development)
+-   [REDCapR](https://ouhscbbmc.github.io/REDCapR/) (R package)
+
+-   [REDCapTidieR](https://chop-cgtinformatics.github.io/REDCapTidieR/) (R package)
+
+-   [tidyREDCap](https://raymondbalise.github.io/tidyREDCap/) (R package)
 
 -   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package; includes a package comparison table)
+
+-   [REDCapSync](https://thecodingdocs.github.io/REDCapSync/) (R package; in development)
 
 -   [PyCap](https://redcap-tools.github.io/PyCap/) (python module)
