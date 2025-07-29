@@ -79,12 +79,12 @@
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
 <ul>
-<li>Auto-resume from incomplete transfers</li>
-<li>Auto-retry for API request failures</li>
-<li>Auto-convert data types for DuckDB</li>
+<li>Resume from incomplete transfers</li>
+<li>Retry for API request failures</li>
+<li>Convert data types for DuckDB queries</li>
 <li>Timestamped operation logs</li>
-<li>Status messages and progress bar</li>
-<li>Sound notifications (🔊 🦆)</li>
+<li>Progress bar and status messages</li>
+<li>Sound notifications (quacks on success! 🦆)</li>
 </ul>
 </div>
 <div class="section level2">
@@ -97,7 +97,7 @@
 <p>Development version:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"dylanpieper/redquack"</span><span class="op">)</span></span></code></pre></div>
-<p>These packages are used in the examples and are not imported by redquack:</p>
+<p>These packages are used in the examples but are not imported by redquack:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dplyr"</span>, <span class="st">"duckdb"</span>, <span class="st">"keyring"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -222,18 +222,24 @@
 <div class="section level2">
 <h2 id="collaboration-opportunities">Collaboration Opportunities<a class="anchor" aria-label="anchor" href="#collaboration-opportunities"></a>
 </h2>
-<p>While this package is only optimized for DuckDB, I invite collaborators to help optimize it for other databases. The pathway I suggest right now is to target your edits in <code>R/optimize_data_types.R</code>. Feel free to submit a PR and share any other ideas you may have.</p>
+<p>While this package is only optimized for DuckDB, I invite collaborators to help optimize it for other databases. Target your edits in <code>R/optimize_data_types.R</code>. Feel free to submit a PR and share any other ideas you may have.</p>
 </div>
 <div class="section level2">
 <h2 id="other-redcap-interfaces">Other REDCap Interfaces<a class="anchor" aria-label="anchor" href="#other-redcap-interfaces"></a>
 </h2>
 <ul>
-<li><p><a href="https://ouhscbbmc.github.io/REDCapR/" class="external-link">REDCapR</a> (R package)</p></li>
-<li><p><a href="https://chop-cgtinformatics.github.io/REDCapTidieR/" class="external-link">REDCapTidieR</a> (R package)</p></li>
-<li><p><a href="https://raymondbalise.github.io/tidyREDCap/" class="external-link">tidyREDCap</a> (R package)</p></li>
-<li><p><a href="https://github.com/vubiostat/redcapAPI" class="external-link">redcapAPI</a> (R package; includes a package comparison table)</p></li>
-<li><p><a href="https://thecodingdocs.github.io/REDCapSync/" class="external-link">REDCapSync</a> (R package; in development)</p></li>
-<li><p><a href="https://redcap-tools.github.io/PyCap/" class="external-link">PyCap</a> (python module)</p></li>
+<li>
+<a href="https://ouhscbbmc.github.io/REDCapR/" class="external-link">REDCapR</a> (R package)</li>
+<li>
+<a href="https://chop-cgtinformatics.github.io/REDCapTidieR/" class="external-link">REDCapTidieR</a> (R package)</li>
+<li>
+<a href="https://raymondbalise.github.io/tidyREDCap/" class="external-link">tidyREDCap</a> (R package)</li>
+<li>
+<a href="https://github.com/vubiostat/redcapAPI" class="external-link">redcapAPI</a> (R package; includes a package comparison table)</li>
+<li>
+<a href="https://thecodingdocs.github.io/REDCapSync/" class="external-link">REDCapSync</a> (R package; in development)</li>
+<li>
+<a href="https://redcap-tools.github.io/PyCap/" class="external-link">PyCap</a> (python module)</li>
 </ul>
 </div>
 </div>
