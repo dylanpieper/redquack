@@ -55,7 +55,7 @@
 #'   requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.
 #' @param max_retries Integer specifying the maximum number of retry attempts for failed
 #'   API connection or HTTP 504 error. Default is 10.
-#' @param echo String indicating whether to show progress and/or completion messages.
+#' @param echo String to show a progress bar and all status messages, only a progress bar, or nothing.
 #'   Options: "all" (default), "progress", or "none".
 #' @param beep Logical indicating whether to play sound notifications when the process
 #'   completes or encounters errors. Default is TRUE.
@@ -530,7 +530,7 @@ redcap_to_db <- function(
               data_table_created <- TRUE
               log_message(conn, log_table_ref, "INFO", paste("Created data table named", data_table_ref))
             } else {
-              stop("Cannot create table: first chunk returned no data")
+              stop("Cannot create table: First chunk returned no data")
             }
           }
 

@@ -105,7 +105,7 @@ requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.}
 \item{max_retries}{Integer specifying the maximum number of retry attempts for failed
 API connection or HTTP 504 error. Default is 10.}
 
-\item{echo}{String indicating whether to show progress and/or completion messages.
+\item{echo}{String to show a progress bar and all status messages, only a progress bar, or nothing.
 Options: "all" (default), "progress", or "none".}
 
 \item{beep}{Logical indicating whether to play sound notifications when the process
