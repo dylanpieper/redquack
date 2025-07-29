@@ -20,12 +20,12 @@ redquack's solution to this problem is to:
 
 ## Features
 
--   Auto-resume from incomplete transfers
--   Auto-retry for API request failures
--   Auto-convert data types for DuckDB
+-   Resume from incomplete transfers
+-   Retry for API request failures
+-   Convert data types for DuckDB queries
 -   Timestamped operation logs
--   Status messages and progress bar
--   Sound notifications (🔊 🦆)
+-   Progress bar and status messages 
+-   Sound notifications (quacks on success! 🦆)
 
 ## Installation
 
@@ -42,7 +42,7 @@ Development version:
 pak::pak("dylanpieper/redquack")
 ```
 
-These packages are used in the examples and are not imported by redquack:
+These packages are used in the examples but are not imported by redquack:
 
 ``` r
 pak::pak(c("dplyr", "duckdb", "keyring"))
@@ -177,18 +177,13 @@ DBI::dbDisconnect(duckdb)
 
 ## Collaboration Opportunities
 
-While this package is only optimized for DuckDB, I invite collaborators to help optimize it for other databases. The pathway I suggest right now is to target your edits in `R/optimize_data_types.R`. Feel free to submit a PR and share any other ideas you may have.
+While this package is only optimized for DuckDB, I invite collaborators to help optimize it for other databases. Target your edits in `R/optimize_data_types.R`. Feel free to submit a PR and share any other ideas you may have.
 
 ## Other REDCap Interfaces
 
 -   [REDCapR](https://ouhscbbmc.github.io/REDCapR/) (R package)
-
 -   [REDCapTidieR](https://chop-cgtinformatics.github.io/REDCapTidieR/) (R package)
-
 -   [tidyREDCap](https://raymondbalise.github.io/tidyREDCap/) (R package)
-
 -   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package; includes a package comparison table)
-
 -   [REDCapSync](https://thecodingdocs.github.io/REDCapSync/) (R package; in development)
-
 -   [PyCap](https://redcap-tools.github.io/PyCap/) (python module)
