@@ -188,7 +188,7 @@
 <p>In DuckDB, you can query the data to inspect the data types:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">duckdb</span>, <span class="st">"PRAGMA table_info(data)"</span><span class="op">)</span></span></code></pre></div>
-<p>You can also automatically convert data types in R using <a href="#id_0">readr</a>:</p>
+<p>You can also automatically convert data types in R using <a href="https://readr.tidyverse.org" class="external-link">readr</a>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/type_convert.html" class="external-link">type_convert</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
 <p>To optimize query performance with other databases, alter the database table manually.</p>
