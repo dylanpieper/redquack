@@ -17,7 +17,7 @@ Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in
 -   [Collaboration Opportunities](#collaboration-opportunities)
 -   [Other REDCap Interfaces](#other-redcap-interfaces)
 
-## Motivation {#motivation}
+## Motivation
 
 Is the size of your REDCap project outgrowing your laptop or desktop computer? Have you ever experienced this error when trying to export data via the API?
 
@@ -34,7 +34,7 @@ redquack's solution to the big data problem is to:
 
 Once complete, you can retrieve your data from the database and continue your work (see [Data Manipulation](#data-manipulation)).
 
-## Features {#features}
+## Features
 
 redquack has additional features to make it robust and improve user experience:
 
@@ -45,7 +45,7 @@ redquack has additional features to make it robust and improve user experience:
 -   Show progress bar and status messages
 -   Play sound notifications (quacks on success 🦆)
 
-## Installation {#installation}
+## Installation
 
 From CRAN:
 
@@ -66,7 +66,7 @@ These packages are used in the examples but are not imported by redquack:
 pak::pak(c("dplyr", "duckdb", "keyring"))
 ```
 
-## Setup API Token {#setup-api-token}
+## Setup API Token
 
 An API token allows R to interface with REDCap, and it should be stored securely. I recommend using the [keyring](https://keyring.r-lib.org) package to store your API token. For example:
 
@@ -74,7 +74,7 @@ An API token allows R to interface with REDCap, and it should be stored securely
 keyring::key_set("redcap_token")
 ```
 
-## Basic Usage {#basic-usage}
+## Basic Usage
 
 Data from REDCap is transferred to a database via a [DBI](https://dbi.r-dbi.org) connection in chunks of record IDs:
 
@@ -100,7 +100,7 @@ The function returns a list of metadata with class `redcap_transfer_result`:
 
 These metadata are useful for programming export pipelines and ETL workflows. The actual data is stored in database and accessed via the connection.
 
-## Database Structure {#database-structure}
+## Database Structure
 
 The database created by `redcap_to_db()` contains two tables:
 
@@ -116,7 +116,7 @@ The database created by `redcap_to_db()` contains two tables:
     log <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
     ```
 
-## Data Types {#data-types}
+## Data Types
 
 Data is imported as **VARCHAR/TEXT** for consistent handling across chunks.
 
@@ -134,7 +134,7 @@ In DuckDB, you can query the data to inspect the data types:
 DBI::dbGetQuery(duckdb, "PRAGMA table_info(data)")
 ```
 
-You can also automatically convert data types in R using [readr](#0):
+You can also automatically convert data types in R using [readr](https://readr.tidyverse.org):
 
 ``` r
 readr::type_convert(data)
@@ -142,7 +142,7 @@ readr::type_convert(data)
 
 To optimize query performance with other databases, alter the database table manually.
 
-## Data Manipulation {#data-manipulation}
+## Data Manipulation
 
 Manipulate your data with familar [dplyr](https://dplyr.tidyverse.org) syntax. The only difference is how you call and collect your data—everything between stays the same. Prior to collecting the data, DuckDB makes a optimized plan for how it will retrieve the data you requested without bringing it all into memory. This is called lazy evaluation.
 
@@ -193,11 +193,11 @@ Remember to close the connection when finished:
 DBI::dbDisconnect(duckdb)
 ```
 
-## Collaboration Opportunities {#collaboration-opportunities}
+## Collaboration Opportunities
 
 While this package is only optimized for DuckDB, I invite collaborators to help optimize it for other databases. Target your edits in `R/optimize_data_types.R`. Feel free to submit a PR and share any other ideas you may have.
 
-## Other REDCap Interfaces {#other-redcap-interfaces}
+## Other REDCap Interfaces
 
 -   [REDCapR](https://ouhscbbmc.github.io/REDCapR/) (R package)
 -   [REDCapTidieR](https://chop-cgtinformatics.github.io/REDCapTidieR/) (R package)
