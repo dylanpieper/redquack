@@ -4,7 +4,20 @@
 
 Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/)—a fast and portable SQL engine with first-class integration in Posit products.
 
-## Motivation
+## Table of Contents
+
+-   [Motivation](#motivation)
+-   [Features](#features)
+-   [Installation](#installation)
+-   [Setup API Token](#setup-api-token)
+-   [Basic Usage](#basic-usage)
+-   [Database Structure](#database-structure)
+-   [Data Types](#data-types)
+-   [Data Manipulation](#data-manipulation)
+-   [Collaboration Opportunities](#collaboration-opportunities)
+-   [Other REDCap Interfaces](#other-redcap-interfaces)
+
+## Motivation {#motivation}
 
 Is the size of your REDCap project outgrowing your laptop or desktop computer? Have you ever experienced this error when trying to export data via the API?
 
@@ -19,9 +32,9 @@ redquack's solution to the big data problem is to:
 3.  Transfer the chunk of data to a database
 4.  Remove the chunk from memory, and repeat from step 2
 
-Once complete, you can retrieve your data from the database and continue your work (see [Data Manipulation]).
+Once complete, you can retrieve your data from the database and continue your work (see [Data Manipulation](#data-manipulation)).
 
-## Features
+## Features {#features}
 
 redquack has additional features to make it robust and improve user experience:
 
@@ -32,7 +45,7 @@ redquack has additional features to make it robust and improve user experience:
 -   Show progress bar and status messages
 -   Play sound notifications (quacks on success 🦆)
 
-## Installation
+## Installation {#installation}
 
 From CRAN:
 
@@ -53,7 +66,7 @@ These packages are used in the examples but are not imported by redquack:
 pak::pak(c("dplyr", "duckdb", "keyring"))
 ```
 
-## Setup API Token
+## Setup API Token {#setup-api-token}
 
 An API token allows R to interface with REDCap, and it should be stored securely. I recommend using the [keyring](https://keyring.r-lib.org) package to store your API token. For example:
 
@@ -61,7 +74,7 @@ An API token allows R to interface with REDCap, and it should be stored securely
 keyring::key_set("redcap_token")
 ```
 
-## Basic Usage
+## Basic Usage {#basic-usage}
 
 Data from REDCap is transferred to a database via a [DBI](https://dbi.r-dbi.org) connection in chunks of record IDs:
 
@@ -87,7 +100,7 @@ The function returns a list of metadata with class `redcap_transfer_result`:
 
 These metadata are useful for programming export pipelines and ETL workflows. The actual data is stored in database and accessed via the connection.
 
-## Database Structure
+## Database Structure {#database-structure}
 
 The database created by `redcap_to_db()` contains two tables:
 
@@ -103,7 +116,7 @@ The database created by `redcap_to_db()` contains two tables:
     log <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
     ```
 
-## Data Types
+## Data Types {#data-types}
 
 Data is imported as **VARCHAR/TEXT** for consistent handling across chunks.
 
@@ -129,7 +142,7 @@ readr::type_convert(data)
 
 To optimize query performance with other databases, alter the database table manually.
 
-### Data Manipulation
+## Data Manipulation {#data-manipulation}
 
 Manipulate your data with familar [dplyr](https://dplyr.tidyverse.org) syntax. The only difference is how you call and collect your data—everything between stays the same. Prior to collecting the data, DuckDB makes a optimized plan for how it will retrieve the data you requested without bringing it all into memory. This is called lazy evaluation.
 
@@ -180,11 +193,11 @@ Remember to close the connection when finished:
 DBI::dbDisconnect(duckdb)
 ```
 
-## Collaboration Opportunities
+## Collaboration Opportunities {#collaboration-opportunities}
 
 While this package is only optimized for DuckDB, I invite collaborators to help optimize it for other databases. Target your edits in `R/optimize_data_types.R`. Feel free to submit a PR and share any other ideas you may have.
 
-## Other REDCap Interfaces
+## Other REDCap Interfaces {#other-redcap-interfaces}
 
 -   [REDCapR](https://ouhscbbmc.github.io/REDCapR/) (R package)
 -   [REDCapTidieR](https://chop-cgtinformatics.github.io/REDCapTidieR/) (R package)
