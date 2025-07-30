@@ -6,9 +6,9 @@ Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in
 
 ## Motivation
 
-Is the size of your REDCap project outgrowing your laptop or desktop computer? Have you ever received this error when trying to export data via the API?
+Is the size of your REDCap project outgrowing your laptop or desktop computer? Have you ever experienced this error when trying to export data via the API?
 
-<span style="color: orange">**Error:** vector memory limit of 16.0 GB reached, see mem.maxVSize()</span>
+**⚠️ Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
 You are not alone. R objects live entirely in local memory, which causes problems when your data gets too big and you eagerly try to load it all into R. A key strategy to prevent this error is to break the data into smaller chunks and offload it onto the disk or a remote database for lazy retrieval.
 
@@ -18,6 +18,8 @@ redquack's solution to the big data problem is to:
 2.  Request a chunk of the REDCap data (one at a time)
 3.  Transfer the chunk of data to a database
 4.  Remove the chunk from memory, and repeat from step 2
+
+Once complete, you can retrieve your data from the database and continue your work (see [Data Manipulation]).
 
 ## Features
 
@@ -129,7 +131,7 @@ To optimize query performance with other databases, alter the database table man
 
 ### Data Manipulation
 
-Query and collect the data with [dplyr](https://dplyr.tidyverse.org):
+Manipulate your data with familar [dplyr](https://dplyr.tidyverse.org) syntax. The only difference is how you call and collect your data—everything between stays the same. Prior to collecting the data, DuckDB makes a optimized plan for how it will retrieve the data you requested without bringing it all into memory. This is called lazy evaluation.
 
 ``` r
 library(dplyr)
@@ -166,7 +168,7 @@ system.time(
 #>   0.040   0.015   0.040
 ```
 
-You can also write a Parquet file directly from DuckDB and use [arrow](https://arrow.apache.org/docs/r/). A Parquet file will be about 5 times smaller than a DuckDB file:
+You can also write a Parquet file directly from DuckDB and use [arrow](https://arrow.apache.org/docs/r/). A Parquet file will be about 5 times smaller than a DuckDB file and easy to share:
 
 ``` r
 DBI::dbExecute(duckdb, "COPY (SELECT * FROM data) TO 'redcap.parquet' (FORMAT PARQUET)")
