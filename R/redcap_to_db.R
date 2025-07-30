@@ -55,8 +55,8 @@
 #'   requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.
 #' @param max_retries Integer specifying the maximum number of retry attempts for failed
 #'   API connection or HTTP 504 error. Default is 10.
-#' @param echo String to show a progress bar and all status messages, only a progress bar, or nothing.
-#'   Options: "all" (default), "progress", or "none".
+#' @param echo String to show a progress bar and all status messages ("all"),
+#'   only a progress bar ("progress"), or nothing ("none"). Default is "all".
 #' @param beep Logical indicating whether to play sound notifications when the process
 #'   completes or encounters errors. Default is TRUE.
 #' @param ... Additional arguments passed to the REDCap API call.
@@ -370,10 +370,10 @@ redcap_to_db <- function(
             return(NULL)
           }
 
-          log_message(conn, log_table_ref, "INFO", paste("Received", length(record_ids), "record IDs to process out of", total_records, "total records"))
+          log_message(conn, log_table_ref, "INFO", paste("Received", length(record_ids), "record IDs to process out of", total_records))
           if (echo == "all") {
             cli::cli_status_clear(status_id)
-            cli::cli_alert_success("Received {length(record_ids)} record IDs to process out of {total_records} total records")
+            cli::cli_alert_success("Received {length(record_ids)} record IDs to process out of {total_records}")
           }
         } else {
           record_ids <- all_record_ids
@@ -444,7 +444,7 @@ redcap_to_db <- function(
       )
     }
 
-    if (echo == "progress") {
+    if (echo %in% c("all", "progress")) {
       pb <- cli::cli_progress_bar(
         format = paste0(
           "Processing chunk [{cli::pb_current}/{cli::pb_total}] ",
@@ -467,7 +467,7 @@ redcap_to_db <- function(
           log_message(conn, log_table_ref, "INFO", paste("Skipping", skipped_count, "already processed records in chunk", i))
 
           if (length(chunk_record_ids) == 0) {
-            if (echo == "progress") {
+            if (echo %in% c("all", "progress")) {
               cli::cli_progress_update()
             }
             next
@@ -550,7 +550,7 @@ redcap_to_db <- function(
           chunk_data <- NULL
           gc(FALSE)
 
-          if (echo == "progress") {
+          if (echo %in% c("all", "progress")) {
             cli::cli_progress_update()
           }
 
@@ -571,7 +571,7 @@ redcap_to_db <- function(
 
           error_msg <- e$message
 
-          if (echo == "progress") {
+          if (echo %in% c("all", "progress")) {
             cli::cli_progress_done()
             cli::cli_alert_danger("Chunk {i}/{num_chunks}: Error - {error_msg} [{formatted_chunk_sum}]")
           }
@@ -588,7 +588,7 @@ redcap_to_db <- function(
       if (!chunk_result$success) {
         log_message(conn, log_table_ref, "WARNING", paste("Error in chunk", i, "- continuing with remaining chunks"))
 
-        if (echo == "progress") {
+        if (echo %in% c("all", "progress")) {
           cli::cli_progress_done()
           cli::cli_alert_warning("Error in chunk {i} - continuing with remaining chunks")
 
@@ -606,7 +606,7 @@ redcap_to_db <- function(
       if (i < num_chunks) Sys.sleep(chunk_delay)
     }
 
-    if (echo == "progress") {
+    if (echo %in% c("all", "progress")) {
       cli::cli_progress_done()
     }
 

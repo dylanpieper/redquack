@@ -2,30 +2,33 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/redquack)](https://cran.r-project.org/package=redquack) [![R-CMD-check](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml)
 
-Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/)—a fast and portable SQL engine with first-class integration in R/Posit products.
+Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/)—a fast and portable SQL engine with first-class integration in Posit products.
 
 ## Motivation
 
-R objects live entirely in memory, causing three problems if not using a specialized framework:
+Is the size of your REDCap project outgrowing your laptop or desktop computer? Have you ever received this error when trying to export data via the API?
 
-1.  You must load full datasets even if you only need a subset
-2.  Unused objects still consume memory
-3.  Large datasets can easily exceed available memory
+[Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()]{style="color: darkorange;"}
 
-redquack's solution to this problem is to:
+You are not alone. R objects live entirely in local memory, which causes problems when your data gets too big and you eagerly try to load it all into R. A key strategy to prevent this error is to break the data into smaller chunks and offload it onto the disk or a remote database for lazy retrieval.
 
-1.  Request all of the REDCap record IDs to sequence in chunks
-2.  Process each chunk of the REDCap data in one R object at a time
-3.  Remove each object from memory after it has been transferred to the database
+redquack's solution to the big data problem is to:
+
+1.  Request all of the REDCap record IDs to split into chunks
+2.  Request a chunk of the REDCap data (one at a time)
+3.  Transfer the chunk of data to a database
+4.  Remove the chunk from memory, and repeat from step 2
 
 ## Features
 
+redquack has additional features to make it robust and improve user experience:
+
+-   Retry on API request failures
 -   Resume from incomplete transfers
--   Retry for API request failures
--   Convert data types for DuckDB queries
--   Timestamped operation logs
--   Progress bar and status messages 
--   Sound notifications (quacks on success! 🦆)
+-   Convert data types for optimized queries
+-   Store timestamped operation logs
+-   Show progress bar and status messages
+-   Play sound notifications (quacks on success 🦆)
 
 ## Installation
 
@@ -50,7 +53,7 @@ pak::pak(c("dplyr", "duckdb", "keyring"))
 
 ## Setup API Token
 
-Your REDCap API token allows R to interface with REDCap and should be stored securely. I recommend using the [keyring](https://keyring.r-lib.org) package to store your API token. For example:
+An API token allows R to interface with REDCap, and it should be stored securely. I recommend using the [keyring](https://keyring.r-lib.org) package to store your API token. For example:
 
 ``` r
 keyring::key_set("redcap_token")
@@ -71,16 +74,16 @@ result <- redcap_to_db(
   token = keyring::key_get("redcap_token"),
   record_id_name = "record_id",
   chunk_size = 1000  
-  # Increase chunk size for memory-efficient systems (faster)
-  # Decrease chunk size for memory-constrained systems (slower)
 )
 ```
 
-The function returns a list with class `redcap_transfer_result`:
+The function returns a list of metadata with class `redcap_transfer_result`:
 
 -   `success`: Logical if the transfer was completed with no failed processing
 -   `error_chunks`: Vector of chunk numbers that failed processing
 -   `time_s`: Numeric value for total seconds to transfer and optimize data
+
+These metadata are useful for programming export pipelines and ETL workflows. The actual data is stored in database and accessed via the connection.
 
 ## Database Structure
 
@@ -122,7 +125,7 @@ You can also automatically convert data types in R using [readr](#0):
 readr::type_convert(data)
 ```
 
-To optimize query performance with other databases, you must alter the data table manually.
+To optimize query performance with other databases, alter the database table manually.
 
 ### Data Manipulation
 
@@ -141,18 +144,18 @@ If you `collect()` your data into memory in the last step, it can make a slow pr
 
 ``` r
 system.time(
-  records <- duckdb |>
+    duckdb |>
     tbl("data") |>
     collect() |>
     group_by(redcap_repeat_instrument) |>
     summarize(count = n()) |>
-    arrange(desc(count)) 
+    arrange(desc(count))
 )
 #>   user  system elapsed
 #>  5.048   5.006   6.077
 
 system.time(
-  records <- duckdb |>
+    duckdb |>
     tbl("data") |>
     group_by(redcap_repeat_instrument) |>
     summarize(count = n()) |>
@@ -184,6 +187,6 @@ While this package is only optimized for DuckDB, I invite collaborators to help 
 -   [REDCapR](https://ouhscbbmc.github.io/REDCapR/) (R package)
 -   [REDCapTidieR](https://chop-cgtinformatics.github.io/REDCapTidieR/) (R package)
 -   [tidyREDCap](https://raymondbalise.github.io/tidyREDCap/) (R package)
--   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package; includes a package comparison table)
+-   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package)
 -   [REDCapSync](https://thecodingdocs.github.io/REDCapSync/) (R package; in development)
 -   [PyCap](https://redcap-tools.github.io/PyCap/) (python module)
