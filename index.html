@@ -64,15 +64,14 @@
 </h2>
 <p>Is the size of your REDCap project outgrowing your laptop or desktop computer? Have you ever experienced this error when trying to export data via the API?</p>
 <p><strong>🛑 Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()</strong></p>
-<p>You are not alone. R objects live entirely in local memory, which causes problems when your data gets too big and you eagerly try to load it all into R. A key strategy to prevent this error is to break the data into smaller chunks and offload it onto the disk or a remote database for lazy retrieval.</p>
-<p>redquack’s solution to the big data problem is to:</p>
+<p>You are not alone. R objects live entirely in local memory, which causes problems when your data gets too big and you eagerly try to load it all into R. redquack’s strategy to prevent this error is to:</p>
 <ol style="list-style-type: decimal">
-<li>Request all of the REDCap record IDs to split into chunks</li>
-<li>Request a chunk of the REDCap data (one at a time)</li>
+<li>Request all of the REDCap record IDs, and split them into chunks</li>
+<li>Request one chunk of the REDCap data at a time</li>
 <li>Transfer the chunk of data to a database</li>
 <li>Remove the chunk from memory, and repeat from step 2</li>
 </ol>
-<p>Once complete, you can retrieve your data from the database and continue your work (see <a href="#data-manipulation">Data Manipulation</a>).</p>
+<p>Once complete, you can retrieve your data from the database and use it in R (see <a href="#data-manipulation">Data Manipulation</a>).</p>
 </div>
 <div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
