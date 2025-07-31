@@ -4,19 +4,6 @@
 
 Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/)—a fast and portable SQL engine with first-class integration in Posit products.
 
-## Table of Contents
-
--   [Motivation](#motivation)
--   [Features](#features)
--   [Installation](#installation)
--   [Setup API Token](#setup-api-token)
--   [Basic Usage](#basic-usage)
--   [Database Structure](#database-structure)
--   [Data Types](#data-types)
--   [Data Manipulation](#data-manipulation)
--   [Collaboration Opportunities](#collaboration-opportunities)
--   [Other REDCap Interfaces](#other-redcap-interfaces)
-
 ## Motivation
 
 Is the size of your REDCap project outgrowing your laptop or desktop computer? Have you ever experienced this error when trying to export data via the API?
