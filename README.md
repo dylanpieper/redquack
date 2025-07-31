@@ -10,16 +10,14 @@ Is the size of your REDCap project outgrowing your laptop or desktop computer? H
 
 **🛑 Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
-You are not alone. R objects live entirely in local memory, which causes problems when your data gets too big and you eagerly try to load it all into R. A key strategy to prevent this error is to break the data into smaller chunks and offload it onto the disk or a remote database for lazy retrieval.
+You are not alone. R objects live entirely in local memory, which causes problems when your data gets too big and you eagerly try to load it all into R. redquack's strategy to prevent this error is to:
 
-redquack's solution to the big data problem is to:
-
-1.  Request all of the REDCap record IDs to split into chunks
-2.  Request a chunk of the REDCap data (one at a time)
+1.  Request all of the REDCap record IDs, and split them into chunks
+2.  Request one chunk of the REDCap data at a time
 3.  Transfer the chunk of data to a database
 4.  Remove the chunk from memory, and repeat from step 2
 
-Once complete, you can retrieve your data from the database and continue your work (see [Data Manipulation](#data-manipulation)).
+Once complete, you can retrieve your data from the database and use it in R (see [Data Manipulation](#data-manipulation)).
 
 ## Features
 
