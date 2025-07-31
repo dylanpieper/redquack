@@ -129,7 +129,7 @@ readr::type_convert(data)
 
 To optimize query performance with other databases, alter the database table manually.
 
-## Data Manipulation {#data-manipulation}
+## Data Manipulation
 
 Manipulate your data with familiar [dplyr](https://dplyr.tidyverse.org) syntax. The only difference is you reference the database table first and collect the data into memory last. Everything in between stays the same. Prior to collecting the data, DuckDB makes a optimized plan for how it will retrieve the data you requested without loading it all into memory. This is called lazy evaluation.
 
