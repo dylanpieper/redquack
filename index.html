@@ -179,7 +179,7 @@
 <div class="section level2">
 <h2 id="data-manipulation">Data Manipulation<a class="anchor" aria-label="anchor" href="#data-manipulation"></a>
 </h2>
-<p>Manipulate your data with familiar <a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a> syntax. The only difference is you reference the database table first and collect the data into memory last. Everything in between stays the same. Prior to collecting the data, DuckDB makes a optimized plan for how it will retrieve the data you requested without loading it all into memory. This is called lazy evaluation.</p>
+<p>Manipulate your data with <a href="https://dbplyr.tidyverse.org/reference/tbl.src_dbi.html" class="external-link">familiar dplyr syntax</a>. The only difference is you reference the database table first and collect the data into memory last. Everything in between stays the same. Specifically, dplyr builds a lazy query plan through its verb functions, then the database engine executes the plan.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
