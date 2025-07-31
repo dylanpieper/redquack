@@ -129,7 +129,7 @@ To optimize query performance with other databases, alter the database table man
 
 ## Data Manipulation
 
-Manipulate your data with familiar [dplyr](https://dplyr.tidyverse.org) syntax. The only difference is you reference the database table first and collect the data into memory last. Everything in between stays the same. Prior to collecting the data, DuckDB makes a optimized plan for how it will retrieve the data you requested without loading it all into memory. This is called lazy evaluation.
+Manipulate your data with [familiar dplyr syntax](https://dbplyr.tidyverse.org/reference/tbl.src_dbi.html). The only difference is you reference the database table first and collect the data into memory last. Everything in between stays the same. Specifically, dplyr builds a lazy query plan through its verb functions, then the database engine executes the plan.
 
 ``` r
 library(dplyr)
