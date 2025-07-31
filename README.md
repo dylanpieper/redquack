@@ -8,7 +8,7 @@ Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in
 
 Is the size of your REDCap project outgrowing your laptop or desktop computer? Have you ever experienced this error when trying to export data via the API?
 
-**⚠️ Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
+**🛑 Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
 You are not alone. R objects live entirely in local memory, which causes problems when your data gets too big and you eagerly try to load it all into R. A key strategy to prevent this error is to break the data into smaller chunks and offload it onto the disk or a remote database for lazy retrieval.
 
@@ -129,9 +129,9 @@ readr::type_convert(data)
 
 To optimize query performance with other databases, alter the database table manually.
 
-## Data Manipulation
+## Data Manipulation {#data-manipulation}
 
-Manipulate your data with familar [dplyr](https://dplyr.tidyverse.org) syntax. The only difference is how you call and collect your data—everything between stays the same. Prior to collecting the data, DuckDB makes a optimized plan for how it will retrieve the data you requested without bringing it all into memory. This is called lazy evaluation.
+Manipulate your data with familiar [dplyr](https://dplyr.tidyverse.org) syntax. The only difference is you reference the database table first and collect the data into memory last. Everything in between stays the same. Prior to collecting the data, DuckDB makes a optimized plan for how it will retrieve the data you requested without loading it all into memory. This is called lazy evaluation.
 
 ``` r
 library(dplyr)
@@ -142,7 +142,7 @@ demographics <- tbl(duckdb, "data") |>
   collect()
 ```
 
-If you `collect()` your data into memory in the last step, it can make a slow process nearly instantaneous. The following example data is 2,825,092 rows x 397 columns:
+By collecting your data into memory last, manipulating big data becomes SO MUCH FASTER. The following example data is 2,825,092 rows x 397 columns:
 
 ``` r
 system.time(
