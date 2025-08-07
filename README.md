@@ -6,7 +6,7 @@ Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in
 
 ## Motivation
 
-Is the size of your REDCap project outgrowing your laptop or desktop computer? Have you ever experienced this error when trying to export data via the API?
+Is the size of your REDCap project outgrowing your computer? Have you ever experienced this error when trying to export data via the API?
 
 **🛑 Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
@@ -188,5 +188,5 @@ While this package is only optimized for DuckDB, I invite collaborators to help 
 -   [REDCapTidieR](https://chop-cgtinformatics.github.io/REDCapTidieR/) (R package)
 -   [tidyREDCap](https://raymondbalise.github.io/tidyREDCap/) (R package)
 -   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package)
--   [REDCapSync](https://thecodingdocs.github.io/REDCapSync/) (R package; in development)
+-   [REDCapSync](https://thecodingdocs.github.io/REDCapSync/) (R package)
 -   [PyCap](https://redcap-tools.github.io/PyCap/) (python module)
