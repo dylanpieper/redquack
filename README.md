@@ -6,7 +6,7 @@ Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in
 
 ## Use Case and Solution
 
-Your REDCap project is outgrowing your computer, and you experience this error in R when you request data via the API:
+Your REDCap project is outgrowing your computer, and you get this error in R when you request data via the API:
 
 **🛑 Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
