@@ -4,16 +4,18 @@
 
 Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/)—a fast and portable SQL engine with first-class integration in Posit products.
 
-## Motivation
+## Use Case and Solution
 
-Is the size of your REDCap project outgrowing your computer? Have you ever experienced this error when trying to export data via the API?
+Your REDCap project is outgrowing your computer, and you experience this error in R when you request data via the API:
 
 **🛑 Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
-You are not alone. R objects live entirely in local memory, which causes problems when your data gets too big and you eagerly try to load it all into R. redquack's strategy to prevent this error is to:
+R objects live entirely in local memory, which causes problems when your data gets too big, and you eagerly try to load it all into R.
 
-1.  Request all of the REDCap record IDs, and split them into chunks
-2.  Request one chunk of the REDCap data at a time
+redquack's solution to prevent this error is to:
+
+1.  Request all record IDs in REDCap, and split them into chunks
+2.  Request one chunk of the project data at a time
 3.  Transfer the chunk of data to a database
 4.  Remove the chunk from memory, and repeat from step 2
 
