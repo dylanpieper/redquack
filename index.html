@@ -60,14 +60,15 @@
 <p><a href="https://cran.r-project.org/package=redquack" class="external-link"><img src="https://www.r-pkg.org/badges/version/redquack" alt="CRAN status"></a> <a href="https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
 <p>Transfer <a href="https://www.project-redcap.org/" class="external-link">REDCap</a> data to a database and use in R without exceeding available memory. Compatible with all databases but specifically optimized for <a href="https://duckdb.org/" class="external-link">DuckDB</a>—a fast and portable SQL engine with first-class integration in Posit products.</p>
 <div class="section level2">
-<h2 id="motivation">Motivation<a class="anchor" aria-label="anchor" href="#motivation"></a>
+<h2 id="use-case-and-solution">Use Case and Solution<a class="anchor" aria-label="anchor" href="#use-case-and-solution"></a>
 </h2>
-<p>Is the size of your REDCap project outgrowing your computer? Have you ever experienced this error when trying to export data via the API?</p>
+<p>Your REDCap project is outgrowing your computer, and you get this error in R when you request data via the API:</p>
 <p><strong>🛑 Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()</strong></p>
-<p>You are not alone. R objects live entirely in local memory, which causes problems when your data gets too big and you eagerly try to load it all into R. redquack’s strategy to prevent this error is to:</p>
+<p>R objects live entirely in local memory, which causes problems when your data gets too big, and you eagerly try to load it all into R.</p>
+<p>redquack’s solution to prevent this error is to:</p>
 <ol style="list-style-type: decimal">
-<li>Request all of the REDCap record IDs, and split them into chunks</li>
-<li>Request one chunk of the REDCap data at a time</li>
+<li>Request all record IDs in REDCap, and split them into chunks</li>
+<li>Request one chunk of the project data at a time</li>
 <li>Transfer the chunk of data to a database</li>
 <li>Remove the chunk from memory, and repeat from step 2</li>
 </ol>
