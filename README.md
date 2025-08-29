@@ -6,11 +6,11 @@ Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in
 
 ## Use Case and Solution
 
-Your REDCap project is outgrowing your computer, and you get this error in R when you request data via the API:
+Is your REDCap project is outgrowing your computer, and you get this error in R when you request data via the API?
 
-**🛑 Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
+**Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
-R objects live entirely in local memory, which causes problems when your data gets too big, and you eagerly try to load it all into R.
+I certainly have. But what does it mean? Well, R objects a stored in your limited, local random access memory (RAM). When your data gets too big, and you load it all at once into R, you hit your memory limit.
 
 redquack's solution to prevent this error is to:
 
@@ -129,7 +129,7 @@ readr::type_convert(data)
 
 To optimize query performance with other databases, alter the database table manually.
 
-## Data Manipulation
+## Data Manipulation {#data-manipulation}
 
 Manipulate your data with [familiar dplyr syntax](https://dbplyr.tidyverse.org/reference/tbl.src_dbi.html). The only difference is you reference the database table first and collect the data into memory last. Everything in between stays the same. Specifically, dplyr builds a lazy query plan through its verb functions, then the database engine executes the plan.
 
