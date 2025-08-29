@@ -129,7 +129,7 @@ readr::type_convert(data)
 
 To optimize query performance with other databases, alter the database table manually.
 
-## Data Manipulation {#data-manipulation}
+## Data Manipulation
 
 Manipulate your data with [familiar dplyr syntax](https://dbplyr.tidyverse.org/reference/tbl.src_dbi.html). The only difference is you reference the database table first and collect the data into memory last. Everything in between stays the same. Specifically, dplyr builds a lazy query plan through its verb functions, then the database engine executes the plan.
 
