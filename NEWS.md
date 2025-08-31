@@ -3,6 +3,9 @@
 ## Lifecycle Changes
 * Rename `verbose` to `echo` and change from logical to string options: "all" (default), "progress", or "none", which is designed to help with integration into other packages where only the progress bar is desired
 
+## Minor Improvements
+* Add support for boolean type conversion (1/0, TRUE/FALSE, T/F, YES/NO, Y/N)
+
 # redquack 0.2.0
 
 ## Lifecycle Changes
