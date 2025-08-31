@@ -69,6 +69,9 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
 
   # Create sample data with various types (all stored as text initially)
   sample_data <- data.frame(
+    boolean_col = c("TRUE", "FALSE", "1", "0"),
+    boolean_col2 = c("yes", "no", "Y", "N"),
+    boolean_col3 = c("t", "f", "T", "F"),
     integer_col = c("1", "2", "3", "100"),
     decimal_col = c("1.5", "2.7", "-3.14", "0.0"),
     date_col = c("2023-01-01", "2022-12-25", "2020-02-29", "2024-04-30"),
@@ -79,6 +82,7 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
     mixed_integers = c("1", "2", "text", "3"),
     mixed_decimals = c("1.5", "text", "3.14", "0"),
     mixed_dates = c("2023-01-01", "invalid", "2020-02-29", ""),
+    mixed_booleans = c("TRUE", "maybe", "FALSE", "1"),
     text_col = c("text", "more text", "special chars: !@#$%", "123abc"),
     stringsAsFactors = FALSE
   )
@@ -117,6 +121,21 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
   )
 
   # Check specific type conversions using more flexible matching
+  boolean_type <- opt_types["boolean_col"]
+  expect_true(boolean_type %in% c("BOOLEAN", "BOOL"),
+    label = paste("boolean_col type is", boolean_type, "not in expected values")
+  )
+
+  boolean_type2 <- opt_types["boolean_col2"]
+  expect_true(boolean_type2 %in% c("BOOLEAN", "BOOL"),
+    label = paste("boolean_col2 type is", boolean_type2, "not in expected values")
+  )
+
+  boolean_type3 <- opt_types["boolean_col3"]
+  expect_true(boolean_type3 %in% c("BOOLEAN", "BOOL"),
+    label = paste("boolean_col3 type is", boolean_type3, "not in expected values")
+  )
+
   integer_type <- opt_types["integer_col"]
   expect_true(integer_type %in% c("INTEGER", "INT"),
     label = paste("integer_col type is", integer_type, "not in expected values")
@@ -154,12 +173,26 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
     label = paste("mixed_dates type is", mixed_date_type, "not in expected values")
   )
 
+  mixed_bool_type <- opt_types["mixed_booleans"]
+  expect_true(mixed_bool_type %in% c("VARCHAR", "TEXT", "STRING"),
+    label = paste("mixed_booleans type is", mixed_bool_type, "not in expected values")
+  )
+
   text_type <- opt_types["text_col"]
   expect_true(text_type %in% c("VARCHAR", "TEXT", "STRING"),
     label = paste("text_col type is", text_type, "not in expected values")
   )
 
   # Verify that the data is correctly preserved after type conversion
+  boolean_data <- DBI::dbGetQuery(con, "SELECT boolean_col FROM data_opt")
+  expect_equal(boolean_data$boolean_col, c(TRUE, FALSE, TRUE, FALSE))
+
+  boolean_data2 <- DBI::dbGetQuery(con, "SELECT boolean_col2 FROM data_opt")
+  expect_equal(boolean_data2$boolean_col2, c(TRUE, FALSE, TRUE, FALSE))
+
+  boolean_data3 <- DBI::dbGetQuery(con, "SELECT boolean_col3 FROM data_opt")
+  expect_equal(boolean_data3$boolean_col3, c(TRUE, FALSE, TRUE, FALSE))
+
   integer_data <- DBI::dbGetQuery(con, "SELECT integer_col FROM data_opt")
   expect_equal(integer_data$integer_col, c(1L, 2L, 3L, 100L))
 
@@ -170,6 +203,15 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
   logs <- DBI::dbGetQuery(con, "SELECT * FROM log WHERE type = 'INFO'")
 
   # More flexible log message checking - look for partial matches
+  boolean_log <- any(grepl("boolean_col.*(BOOLEAN|BOOL)", logs$message, ignore.case = TRUE))
+  expect_true(boolean_log, label = "No log entry found for boolean_col conversion")
+
+  boolean_log2 <- any(grepl("boolean_col2.*(BOOLEAN|BOOL)", logs$message, ignore.case = TRUE))
+  expect_true(boolean_log2, label = "No log entry found for boolean_col2 conversion")
+
+  boolean_log3 <- any(grepl("boolean_col3.*(BOOLEAN|BOOL)", logs$message, ignore.case = TRUE))
+  expect_true(boolean_log3, label = "No log entry found for boolean_col3 conversion")
+
   integer_log <- any(grepl("integer_col.*INTEGER", logs$message, ignore.case = TRUE) |
     grepl("integer_col.*INT", logs$message, ignore.case = TRUE))
   expect_true(integer_log, label = "No log entry found for integer_col conversion")
@@ -183,6 +225,95 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
   # The timestamp column might be reported differently depending on DuckDB version
   timestamp_log <- any(grepl("timestamp_col", logs$message, ignore.case = TRUE))
   expect_true(timestamp_log, label = "No log entry found for timestamp_col conversion")
+})
+
+test_that("optimize_data_types correctly converts boolean columns in DuckDB", {
+  skip_on_cran()
+
+  # Create a temporary DuckDB connection
+  test_dir <- file.path(tempdir(), "redcap_tests")
+  dir.create(test_dir, showWarnings = FALSE, recursive = TRUE)
+  db_path <- file.path(test_dir, "boolean_types_test.duckdb")
+
+  # Connect to the database
+  con <- DBI::dbConnect(duckdb::duckdb(), dbdir = db_path)
+  db <- list(con = con, path = db_path, type = "duckdb")
+  on.exit(cleanup_db(db))
+
+  # Create a log table first
+  DBI::dbExecute(
+    con,
+    "CREATE TABLE log (timestamp TIMESTAMP, type VARCHAR(50), message TEXT)"
+  )
+
+  # Create sample data with various boolean representations
+  boolean_data <- data.frame(
+    true_false = c("TRUE", "FALSE", "TRUE", "FALSE"),
+    yes_no = c("YES", "NO", "yes", "no"),
+    y_n = c("Y", "N", "y", "n"),
+    t_f = c("T", "F", "t", "f"),
+    one_zero = c("1", "0", "1", "0"),
+    mixed_case = c("True", "False", "TRUE", "false"),
+    mixed_boolean = c("TRUE", "maybe", "FALSE", "unknown"),
+    text_col = c("not", "boolean", "values", "here"),
+    stringsAsFactors = FALSE
+  )
+
+  # Create table for the test
+  DBI::dbWriteTable(con, "bool_test", boolean_data, overwrite = TRUE)
+
+  # Call the optimize_data_types function
+  optimize_data_types(con, "bool_test", "log", FALSE)
+
+  # Check the schema after optimization
+  schema <- DBI::dbGetQuery(con, "PRAGMA table_info(bool_test)")
+  types <- setNames(schema$type, schema$name)
+
+  # Check that pure boolean columns were converted to BOOLEAN
+  expect_true(types["true_false"] %in% c("BOOLEAN", "BOOL"),
+    label = paste("true_false type is", types["true_false"])
+  )
+  expect_true(types["yes_no"] %in% c("BOOLEAN", "BOOL"),
+    label = paste("yes_no type is", types["yes_no"])
+  )
+  expect_true(types["y_n"] %in% c("BOOLEAN", "BOOL"),
+    label = paste("y_n type is", types["y_n"])
+  )
+  expect_true(types["t_f"] %in% c("BOOLEAN", "BOOL"),
+    label = paste("t_f type is", types["t_f"])
+  )
+  expect_true(types["one_zero"] %in% c("BOOLEAN", "BOOL"),
+    label = paste("one_zero type is", types["one_zero"])
+  )
+  expect_true(types["mixed_case"] %in% c("BOOLEAN", "BOOL"),
+    label = paste("mixed_case type is", types["mixed_case"])
+  )
+
+  # Check that mixed content columns remain as text
+  expect_true(types["mixed_boolean"] %in% c("VARCHAR", "TEXT", "STRING"),
+    label = paste("mixed_boolean type is", types["mixed_boolean"])
+  )
+  expect_true(types["text_col"] %in% c("VARCHAR", "TEXT", "STRING"),
+    label = paste("text_col type is", types["text_col"])
+  )
+
+  # Verify data conversion correctness
+  true_false_data <- DBI::dbGetQuery(con, "SELECT true_false FROM bool_test")
+  expect_equal(true_false_data$true_false, c(TRUE, FALSE, TRUE, FALSE))
+
+  yes_no_data <- DBI::dbGetQuery(con, "SELECT yes_no FROM bool_test")
+  expect_equal(yes_no_data$yes_no, c(TRUE, FALSE, TRUE, FALSE))
+
+  one_zero_data <- DBI::dbGetQuery(con, "SELECT one_zero FROM bool_test")
+  expect_equal(one_zero_data$one_zero, c(TRUE, FALSE, TRUE, FALSE))
+
+  # Check that log entries were created
+  logs <- DBI::dbGetQuery(con, "SELECT * FROM log WHERE type = 'INFO'")
+
+  boolean_conversion_logs <- sum(grepl("converted to BOOLEAN", logs$message, ignore.case = TRUE))
+  expect_gte(boolean_conversion_logs, 5,
+    label = paste("Expected at least 5 boolean conversion logs, got", boolean_conversion_logs)
+  )
 })
 
 test_that("optimize_data_types gracefully handles SQLite", {
@@ -248,7 +379,7 @@ test_that("all record IDs from REDCap are present in a SQLite database", {
   skip_on_ci()
   skip_on_cran()
 
-  fetch_all_redcap_record_ids <- function(uri, token, record_id_name = "id") {
+  fetch_record_ids <- function(uri, token, record_id_name = "id") {
     req <- httr2::request(uri) |>
       httr2::req_body_form(
         token = token,
@@ -271,7 +402,7 @@ test_that("all record IDs from REDCap are present in a SQLite database", {
     result_data[[1]]
   }
 
-  creds <- get_redcap_credentials()
+  creds <- get_creds()
 
   test_dir <- file.path(tempdir(), "redcap_tests")
   dir.create(test_dir, showWarnings = FALSE, recursive = TRUE)
@@ -280,7 +411,7 @@ test_that("all record IDs from REDCap are present in a SQLite database", {
   record_id_name <- "id"
 
   cli::cli_alert_info("Fetching all record IDs directly from REDCap")
-  all_redcap_ids <- fetch_all_redcap_record_ids(
+  all_redcap_ids <- fetch_record_ids(
     uri = creds$uri,
     token = creds$token,
     record_id_name = record_id_name

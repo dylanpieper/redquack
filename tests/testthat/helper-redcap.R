@@ -1,9 +1,6 @@
-get_redcap_credentials <- function() {
+get_creds <- function() {
   uri <- Sys.getenv("REDCAP_URI")
   token <- keyring::key_get("redcap_token", "coe_test")
-  if (!nzchar(uri) || !nzchar(token)) {
-    testthat::skip("REDCAP_URI and REDCAP_TOKEN environment variables must be set")
-  }
   list(uri = uri, token = token)
 }
 

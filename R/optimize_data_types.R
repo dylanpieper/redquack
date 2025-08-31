@@ -32,6 +32,21 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
     tryCatch(
       {
         safe_col <- DBI::dbQuoteIdentifier(conn, col)
+        boolean_check <- DBI::dbGetQuery(
+          conn,
+          paste0(
+            "SELECT COUNT(*) = 0 AS is_boolean FROM ", data_table_ref, " WHERE ",
+            safe_col, " IS NOT NULL AND ",
+            safe_col, " != '' AND ",
+            "UPPER(", safe_col, ") NOT IN ('TRUE', 'FALSE', '1', '0', 'T', 'F', 'YES', 'NO', 'Y', 'N')"
+          )
+        )$is_boolean
+        if (boolean_check) {
+          DBI::dbExecute(conn, paste0("ALTER TABLE ", data_table_ref, " ALTER COLUMN ", safe_col, " TYPE BOOLEAN USING (UPPER(", safe_col, ") IN ('TRUE', '1', 'T', 'YES', 'Y'))"))
+          log_message(conn, log_table_ref, "INFO", paste("Column", col, "converted to BOOLEAN"))
+          next
+        }
+
         integer_check <- DBI::dbGetQuery(
           conn,
           paste0(

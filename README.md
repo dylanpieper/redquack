@@ -109,6 +109,7 @@ Data is imported as **VARCHAR/TEXT** for consistent handling across chunks.
 
 For DuckDB, data types are automatically optimized after transfer to improve query performance:
 
+-   **BOOLEAN**: Columns with boolean values
 -   **INTEGER**: Columns with only whole numbers
 -   **DOUBLE**: Columns with decimal numbers
 -   **DATE**: Columns with valid dates
