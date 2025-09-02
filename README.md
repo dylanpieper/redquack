@@ -185,11 +185,6 @@ DBI::dbDisconnect(duckdb)
 
 While this package is only optimized for DuckDB, I invite collaborators to help optimize it for other databases. Target your edits in `R/optimize_data_types.R`. Feel free to submit a PR and share any other ideas you may have.
 
-## Other REDCap Interfaces
+## Integration
 
--   [REDCapR](https://ouhscbbmc.github.io/REDCapR/) (R package)
--   [REDCapTidieR](https://chop-cgtinformatics.github.io/REDCapTidieR/) (R package)
--   [tidyREDCap](https://raymondbalise.github.io/tidyREDCap/) (R package)
--   [redcapAPI](https://github.com/vubiostat/redcapAPI) (R package)
--   [REDCapSync](https://thecodingdocs.github.io/REDCapSync/) (R package)
--   [PyCap](https://redcap-tools.github.io/PyCap/) (python module)
+redquack is integrated into the R package [tidyREDCap](https://raymondbalise.github.io/tidyREDCap/) as the backend for the [`import_instruments()`](https://raymondbalise.github.io/tidyREDCap/reference/import_instruments.html) function.
