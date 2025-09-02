@@ -6,13 +6,13 @@ Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in
 
 ## Use Case and Solution
 
-Is your REDCap project is outgrowing your computer, and you get this error in R when you request data via the API?
+Is your REDCap project outgrowing your computer? Have you seen this error when you request data via API?
 
 **Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
-I certainly have. But what does it mean? Well, R objects a stored in your limited, local random access memory (RAM). When your data gets too big, and you load it all at once into R, you hit your memory limit.
+I certainly have. But what does it mean? Well, R objects a stored in your random access memory (RAM). When your data gets too big, you hit your memory limit. **redquack's solution to this error is to store the data out of memory in a local database for easy retrieval in R.**
 
-redquack's solution to prevent this error is to:
+The process:
 
 1.  Request all record IDs in REDCap, and split them into chunks
 2.  Request one chunk of the project data at a time
