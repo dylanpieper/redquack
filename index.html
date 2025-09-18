@@ -58,13 +58,13 @@
 <div class="page-header"><h1 id="redquack-">redquack <img src="reference/figures/redquack.png" align="right" width="140"><a class="anchor" aria-label="anchor" href="#redquack-"></a>
 </h1></div>
 <p><a href="https://cran.r-project.org/package=redquack" class="external-link"><img src="https://www.r-pkg.org/badges/version/redquack" alt="CRAN status"></a> <a href="https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
-<p>Transfer <a href="https://www.project-redcap.org/" class="external-link">REDCap</a> data to a database and use in R without exceeding available memory. Use this package for small or large datasets, and enjoy features such as data labeling, coded value conversion, and hearing a “quack” sound on success. Compatible with all databases but specifically optimized for <a href="https://duckdb.org/" class="external-link">DuckDB</a>.</p>
+<p>Transfer <a href="https://www.project-redcap.org/" class="external-link">REDCap</a> data to a database and use in R without exceeding available memory. Use this package for small, large, or growing datasets, and enjoy features such as data labeling, coded value conversion, and hearing a “quack” sound on success. Compatible with all databases but specifically optimized for <a href="https://duckdb.org/" class="external-link">DuckDB</a>.</p>
 <div class="section level2">
 <h2 id="use-case-and-solution">Use Case and Solution<a class="anchor" aria-label="anchor" href="#use-case-and-solution"></a>
 </h2>
-<p>Is your project outgrowing your computer? Have you seen this error when using the REDCap API to retrieve data in R?</p>
+<p>Is your project outgrowing your computer? Have you seen this error when using the REDCap API to retrieve data?</p>
 <p><strong>Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()</strong></p>
-<p>Even if you’ve never seen this error, you may see as your project grows. So, what does it mean? Well, R objects a stored in your random access memory (RAM). When your data gets too big, you hit your memory limit. <strong>redquack’s solution to this error is to store the data out of memory in a local database for easy retrieval in R.</strong></p>
+<p>What does it mean? Well, R objects a stored in your random access memory (RAM). When your data gets too big, you hit your memory limit. <strong>redquack’s solution to this error is to store the data out of memory in a local database for easy retrieval in R.</strong></p>
 <p>The process:</p>
 <ol style="list-style-type: decimal">
 <li>Request all record IDs in REDCap, and split them into chunks</li>
@@ -168,7 +168,7 @@
 <div class="section level2">
 <h2 id="data-manipulation">Data Manipulation<a class="anchor" aria-label="anchor" href="#data-manipulation"></a>
 </h2>
-<p>Retrieve and manipulate your REDCap data with familiar <a href="https://dbplyr.tidyverse.org/" class="external-link">dplyr</a> verbs—currently limited to <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange()</a></code>, and <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code>—with <a href="https://dbplyr.tidyverse.org/reference/tbl.src_dbi.html" class="external-link">tbl-like syntax</a>. The key difference is you reference the database table first using <code><a href="reference/tbl_redcap.html">tbl_redcap()</a></code>. Everything in between stays the same: dplyr builds a lazy query plan through its verb functions, then the database engine executes the plan.</p>
+<p>Retrieve and manipulate your REDCap data with familiar <a href="https://dbplyr.tidyverse.org/" class="external-link">dplyr</a> verbs and <a href="https://dbplyr.tidyverse.org/reference/tbl.src_dbi.html" class="external-link">tbl-like syntax</a>. The key difference is you reference the database table first using <code><a href="reference/tbl_redcap.html">tbl_redcap()</a></code>.</p>
 <div class="section level3">
 <h3 id="basic-data-retrieval">Basic Data Retrieval<a class="anchor" aria-label="anchor" href="#basic-data-retrieval"></a>
 </h3>
@@ -227,7 +227,7 @@
 <h3 id="working-with-labels">Working with Labels<a class="anchor" aria-label="anchor" href="#working-with-labels"></a>
 </h3>
 <p>Apply column and coded value labels and control value conversion (i.e., choice mappings). <code><a href="reference/collect_labeled.html">collect_labeled()</a></code> and <code><a href="reference/collect_list.html">collect_labeled_list()</a></code> give you control over how these labels are applied:</p>
-<p><strong>Full labeling and coded value conversion (default):</strong></p>
+<p>Full labeling and coded value conversion (default):</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tbl_redcap.html">tbl_redcap</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/collect_labeled.html">collect_labeled</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -235,7 +235,7 @@
 <span><span class="co">#&gt; [1] "Female" "Male"   "Male"   "Female" "Male"  </span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span>,<span class="st">"label"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Gender"</span></span></code></pre></div>
-<p><strong>Keep raw coded values:</strong></p>
+<p>Keep raw coded values:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tbl_redcap.html">tbl_redcap</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/collect_labeled.html">collect_labeled</a></span><span class="op">(</span>convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
@@ -250,7 +250,7 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">sex</span>, <span class="st">"label"</span><span class="op">)</span> </span>
 <span><span class="co">#&gt; [1] "Gender"</span></span></code></pre></div>
-<p><strong>Column labels only:</strong></p>
+<p>Column labels only:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tbl_redcap.html">tbl_redcap</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/collect_labeled.html">collect_labeled</a></span><span class="op">(</span>vals <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
@@ -258,7 +258,7 @@
 <span><span class="co">#&gt; [1] 0 1 1 0 1</span></span>
 <span><span class="co">#&gt; attr(,"label")</span></span>
 <span><span class="co">#&gt; [1] "Gender"</span></span></code></pre></div>
-<p><strong>Value conversion only:</strong></p>
+<p>Value conversion only:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tbl_redcap.html">tbl_redcap</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/collect_labeled.html">collect_labeled</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
