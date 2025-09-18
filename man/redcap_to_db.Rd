@@ -6,11 +6,11 @@
 \usage{
 redcap_to_db(
   conn,
+  redcap_uri,
+  token,
   data_table_name = "data",
   log_table_name = "logs",
   metadata_table_name = "metadata",
-  redcap_uri,
-  token,
   export_survey_fields = FALSE,
   export_data_access_groups = FALSE,
   blank_for_gray_form_status = FALSE,
@@ -32,6 +32,12 @@ redcap_to_db(
 \arguments{
 \item{conn}{A DBI connection object to a database.}
 
+\item{redcap_uri}{Character string specifying the URI (uniform resource identifier)
+of the REDCap server's API.}
+
+\item{token}{Character string containing the REDCap API token specific to your project.
+This token is used for authentication and must have export permissions.}
+
 \item{data_table_name}{Character string specifying the name of the table to create
 or append data to. Default is "data". Can include schema name (e.g. "schema.table").}
 
@@ -41,12 +47,6 @@ Set to NULL to disable logging.}
 
 \item{metadata_table_name}{Character string specifying the name of the table to store
 REDCap metadata. Default is "metadata". Can include schema name (e.g. "schema.metadata").}
-
-\item{redcap_uri}{Character string specifying the URI (uniform resource identifier)
-of the REDCap server's API.}
-
-\item{token}{Character string containing the REDCap API token specific to your project.
-This token is used for authentication and must have export permissions.}
 
 \item{export_survey_fields}{Logical that specifies whether to export the
 survey identifier field (e.g., 'redcap_survey_identifier') or survey
@@ -117,8 +117,8 @@ This function transfers data from REDCap to any database in chunks, which helps 
 usage when dealing with large projects. It creates three tables in the database:
 \itemize{
 \item \code{data_table_name}: Contains all transferred REDCap records
-\item \code{log_table_name}: Contains timestamped logs of the transfer process
 \item \code{metadata_table_name}: Contains REDCap metadata for field definitions and labeling
+\item \code{log_table_name}: Contains timestamped logs of the transfer process
 }
 
 The function automatically detects existing databases and handles them in three ways:

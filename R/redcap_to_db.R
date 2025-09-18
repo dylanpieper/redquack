@@ -4,6 +4,10 @@
 #' Transfer REDCap data to a database in chunks of record IDs to minimize memory usage.
 #'
 #' @param conn A DBI connection object to a database.
+#' @param redcap_uri Character string specifying the URI (uniform resource identifier)
+#'   of the REDCap server's API.
+#' @param token Character string containing the REDCap API token specific to your project.
+#'   This token is used for authentication and must have export permissions.
 #' @param data_table_name Character string specifying the name of the table to create
 #'   or append data to. Default is "data". Can include schema name (e.g. "schema.table").
 #' @param log_table_name Character string specifying the name of the table to store
@@ -11,10 +15,6 @@
 #'   Set to NULL to disable logging.
 #' @param metadata_table_name Character string specifying the name of the table to store
 #'   REDCap metadata. Default is "metadata". Can include schema name (e.g. "schema.metadata").
-#' @param redcap_uri Character string specifying the URI (uniform resource identifier)
-#'   of the REDCap server's API.
-#' @param token Character string containing the REDCap API token specific to your project.
-#'   This token is used for authentication and must have export permissions.
 #' @param export_survey_fields Logical that specifies whether to export the
 #'   survey identifier field (e.g., 'redcap_survey_identifier') or survey
 #'   timestamp fields. Default is FALSE.
@@ -66,8 +66,8 @@
 #' usage when dealing with large projects. It creates three tables in the database:
 #' \itemize{
 #'   \item `data_table_name`: Contains all transferred REDCap records
-#'   \item `log_table_name`: Contains timestamped logs of the transfer process
 #'   \item `metadata_table_name`: Contains REDCap metadata for field definitions and labeling
+#'   \item `log_table_name`: Contains timestamped logs of the transfer process
 #' }
 #'
 #' The function automatically detects existing databases and handles them in three ways:
@@ -127,11 +127,11 @@
 #' @export
 redcap_to_db <- function(
     conn,
+    redcap_uri,
+    token,
     data_table_name = "data",
     log_table_name = "logs",
     metadata_table_name = "metadata",
-    redcap_uri,
-    token,
     export_survey_fields = FALSE,
     export_data_access_groups = FALSE,
     blank_for_gray_form_status = FALSE,
