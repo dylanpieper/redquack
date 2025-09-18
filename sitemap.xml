@@ -5,7 +5,18 @@
 <url><loc>https://dylanpieper.github.io/redquack/authors.html</loc></url>
 <url><loc>https://dylanpieper.github.io/redquack/index.html</loc></url>
 <url><loc>https://dylanpieper.github.io/redquack/news/index.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/close_duckdb.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/collect_labeled.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/collect_list.html</loc></url>
 <url><loc>https://dylanpieper.github.io/redquack/reference/index.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/inspect.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/list_to_env.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/logs.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/metadata.html</loc></url>
 <url><loc>https://dylanpieper.github.io/redquack/reference/redcap_to_db.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/remove_duckdb.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/save_parquet.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/tbl_redcap.html</loc></url>
+<url><loc>https://dylanpieper.github.io/redquack/reference/use_duckdb.html</loc></url>
 </urlset>
 
