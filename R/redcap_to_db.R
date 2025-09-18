@@ -1,28 +1,20 @@
 #' Transfer 'REDCap' Data to a Database
 #'
 #' @description
-#' Transfer REDCap data to a database in chunks to minimize memory usage.
+#' Transfer REDCap data to a database in chunks of record IDs to minimize memory usage.
 #'
 #' @param conn A DBI connection object to a database.
-#' @param data_table_name Character string specifying the name of the table to create or append
-#'   data to. Default is "data". Can include schema name (e.g. "schema.table").
+#' @param data_table_name Character string specifying the name of the table to create
+#'   or append data to. Default is "data". Can include schema name (e.g. "schema.table").
 #' @param log_table_name Character string specifying the name of the table to store
-#'   transfer logs. Default is "log". Can include schema name (e.g. "schema.log").
+#'   transfer logs. Default is "logs". Can include schema name (e.g. "schema.logs").
 #'   Set to NULL to disable logging.
+#' @param metadata_table_name Character string specifying the name of the table to store
+#'   REDCap metadata. Default is "metadata". Can include schema name (e.g. "schema.metadata").
 #' @param redcap_uri Character string specifying the URI (uniform resource identifier)
 #'   of the REDCap server's API.
 #' @param token Character string containing the REDCap API token specific to your project.
 #'   This token is used for authentication and must have export permissions.
-#' @param raw_or_label A string (either "raw" or "label") that specifies
-#'   whether to export the raw coded values or the labels for the options of
-#'   multiple choice fields. Default is "raw".
-#' @param raw_or_label_headers A string (either "raw" or "label") that
-#'   specifies for the CSV headers whether to export the variable/field names
-#'   (raw) or the field labels (label). Default is "raw".
-#' @param export_checkbox_label Logical that specifies the format of checkbox field values
-#'   specifically when exporting the data as labels. If `raw_or_label` is
-#'   "label" and `export_checkbox_label` is TRUE, the values will be the text
-#'   displayed to the users. Otherwise, the values will be 0/1. Default is FALSE.
 #' @param export_survey_fields Logical that specifies whether to export the
 #'   survey identifier field (e.g., 'redcap_survey_identifier') or survey
 #'   timestamp fields. Default is FALSE.
@@ -71,10 +63,11 @@
 #'
 #' @details
 #' This function transfers data from REDCap to any database in chunks, which helps manage memory
-#' usage when dealing with large projects. It creates two tables in the database:
+#' usage when dealing with large projects. It creates three tables in the database:
 #' \itemize{
 #'   \item `data_table_name`: Contains all transferred REDCap records
 #'   \item `log_table_name`: Contains timestamped logs of the transfer process
+#'   \item `metadata_table_name`: Contains REDCap metadata for field definitions and labeling
 #' }
 #'
 #' The function automatically detects existing databases and handles them in three ways:
@@ -100,65 +93,75 @@
 #'
 #' @examples
 #' \dontrun{
-#' # install.packages("pak")
-#' # pak::pak(c("duckdb", "keyring", "redquack"))
-#'
 #' library(redquack)
+#' library(dplyr)
 #'
-#' duckdb <- DBI::dbConnect(duckdb::duckdb(), "redcap.duckdb")
+#' conn <- use_duckdb()
 #'
 #' result <- redcap_to_db(
-#'   redcap_uri = "https://redcap.example.org/api/",
-#'   token = keyring::key_get("redcap_token"),
-#'   conn = duckdb,
+#'   conn,
+#'   redcap_uri = "https://bbmc.ouhsc.edu/redcap/api/",
+#'   token = "9A81268476645C4E5F03428B8AC3AA7B"
 #' )
 #'
-#' data <- DBI::dbGetQuery(duckdb, "SELECT * FROM data LIMIT 1000")
-#' log <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
+#' # Return raw, unlabeled data as a single data frame
+#' data <- tbl_redcap(conn) |>
+#'   filter(name_last == "Nutmouse") |>
+#'   collect()
 #'
-#' DBI::dbDisconnect(duckdb)
+#' # Return labeled data as a single data frame
+#' data <- tbl_redcap(conn) |>
+#'   filter(name_last == "Nutmouse") |>
+#'   collect_labeled()
+#'
+#' # Return labeled data as a list of instruments
+#' data <- tbl_redcap(conn) |>
+#'   filter(name_last == "Nutmouse") |>
+#'   collect_labeled_list()
+#'
+#' # Assign list of instruments to the global environment
+#' list_to_env(data)
+#'
+#' remove_duckdb(conn)
 #' }
 #' @seealso
-#' \code{\link[DBI]{dbConnect}} for database connection details
+#' \code{\link{use_duckdb}} for establishing a local duckdb connection
+#' \code{\link{close_duckdb}} for closing a local duckdb connection
+#' \code{\link{remove_duckdb}} for closing a local duckdb connection and removing the file
+#' \code{\link{collect_labeled}} for collecting a database table into a single data frame with column and value labels (converts coded values to their text labels by default)
+#' \code{\link{collect_list}} for collecting a database table into a list of instruments
+#' \code{\link{collect_labeled_list}} for collecting a database table into a list of instruments with column and value labels (converts coded values to their text labels by default)
+#' \code{\link{list_to_env}} for assigning a list of instruments to the global environment
 #'
 #' @importFrom audio load.wave play
 #' @importFrom DBI dbConnect dbDisconnect dbExecute dbExistsTable dbGetQuery dbAppendTable dbQuoteIdentifier dbWithTransaction
 #' @importFrom httr2 request req_body_form req_perform req_retry resp_body_string
 #' @importFrom readr read_csv cols col_character
-#' @importFrom cli cli_alert_info cli_alert_success cli_alert_warning cli_alert_danger cli_progress_update cli_progress_done
+#' @importFrom cli cli_alert_info cli_alert_success cli_alert_warning cli_alert_danger cli_progress_update cli_progress_done cli_abort
 #'
 #' @export
 redcap_to_db <- function(
-    ## Database Connection
     conn,
     data_table_name = "data",
-    log_table_name = "log",
-    ## REDCap Connection Parameters
+    log_table_name = "logs",
+    metadata_table_name = "metadata",
     redcap_uri,
     token,
-    ## Data Export Options
-    raw_or_label = "raw",
-    raw_or_label_headers = "raw",
-    export_checkbox_label = FALSE,
     export_survey_fields = FALSE,
     export_data_access_groups = FALSE,
     blank_for_gray_form_status = FALSE,
-    ## Data Filtering Options
     filter_logic = "",
     datetime_range_begin = as.POSIXct(NA),
     datetime_range_end = as.POSIXct(NA),
     fields = NULL,
     forms = NULL,
     events = NULL,
-    ## Processing Options
     record_id_name = "record_id",
     chunk_size = 1000,
     chunk_delay = 0.5,
     max_retries = 10,
-    ## User Interface Options
     echo = "all",
     beep = TRUE,
-    ## Additional Parameters
     ...) {
   old_options <- options()
   readr_options <- names(old_options)[grep("^readr\\.", names(old_options))]
@@ -168,6 +171,10 @@ redcap_to_db <- function(
   options("readr.show_progress" = FALSE)
 
   if (is_db_class(conn)) {
+    duckdb_options <- names(old_options)[grep("^duckdb\\.", names(old_options))]
+    saved_duckdb_options <- old_options[duckdb_options]
+    on.exit(options(saved_duckdb_options), add = TRUE)
+
     options(
       "duckdb.progress_display" = FALSE,
       "duckdb.echo_progress_bar" = FALSE,
@@ -199,6 +206,8 @@ redcap_to_db <- function(
   setup_environment <- function(conn) {
     data_table_ref <- get_table_reference(conn, data_table_name)
     log_table_ref <- get_table_reference(conn, log_table_name)
+    # metadata_table_name is now a parameter instead of derived from data_table_name
+    metadata_table_ref <- get_table_reference(conn, metadata_table_name)
 
     if (!is.null(log_table_name) && !DBI::dbExistsTable(conn, name = log_table_name)) {
       DBI::dbExecute(
@@ -208,6 +217,34 @@ redcap_to_db <- function(
           "timestamp TIMESTAMP, ",
           "type VARCHAR(50), ",
           "message TEXT)"
+        )
+      )
+    }
+
+    if (!DBI::dbExistsTable(conn, name = metadata_table_name)) {
+      DBI::dbExecute(
+        conn,
+        paste0(
+          "CREATE TABLE ", metadata_table_ref, " (",
+          "field_name VARCHAR(255), ",
+          "form_name VARCHAR(255), ",
+          "section_header TEXT, ",
+          "field_type VARCHAR(50), ",
+          "field_label TEXT, ",
+          "select_choices_or_calculations TEXT, ",
+          "field_note TEXT, ",
+          "text_validation_type_or_show_slider_number VARCHAR(255), ",
+          "text_validation_min VARCHAR(255), ",
+          "text_validation_max VARCHAR(255), ",
+          "identifier VARCHAR(10), ",
+          "branching_logic TEXT, ",
+          "required_field VARCHAR(10), ",
+          "custom_alignment VARCHAR(50), ",
+          "question_number TEXT, ",
+          "matrix_group_name VARCHAR(255), ",
+          "matrix_ranking VARCHAR(10), ",
+          "field_annotation TEXT, ",
+          "record_id_name VARCHAR(255))"
         )
       )
     }
@@ -233,13 +270,13 @@ redcap_to_db <- function(
         if (echo %in% c("all", "progress")) {
           cli::cli_alert_success("Database table exists and transfer was completed without errors")
         }
-        return(list(data_table_ref = data_table_ref, log_table_ref = log_table_ref, status = "complete", start_time = Sys.time()))
+        return(list(data_table_ref = data_table_ref, log_table_ref = log_table_ref, metadata_table_ref = metadata_table_ref, status = "complete", start_time = Sys.time()))
       } else if (completion_check$count > 0 && error_check$count > 0) {
         if (echo %in% c("all", "progress")) {
           cli::cli_alert_warning("Database table exists but had errors during previous transfer")
         }
         log_message(conn, log_table_ref, "WARNING", "Resuming from incomplete transfer with errors")
-        return(list(data_table_ref = data_table_ref, log_table_ref = log_table_ref, start_time = Sys.time()))
+        return(list(data_table_ref = data_table_ref, log_table_ref = log_table_ref, metadata_table_ref = metadata_table_ref, start_time = Sys.time()))
       } else {
         if (echo %in% c("all", "progress")) {
           cli::cli_alert_info("Resuming from incomplete transfer")
@@ -248,38 +285,29 @@ redcap_to_db <- function(
       }
     }
 
-    list(data_table_ref = data_table_ref, log_table_ref = log_table_ref, start_time = Sys.time())
+    list(data_table_ref = data_table_ref, log_table_ref = log_table_ref, metadata_table_ref = metadata_table_ref, start_time = Sys.time())
   }
 
-  create_redcap_request <- function(token, params = list(), record_fetcher = FALSE) {
-    if (!record_fetcher) {
-      default_params <- list(
-        token = token,
-        content = "record",
-        format = "csv",
-        type = "flat",
-        rawOrLabel = raw_or_label,
-        rawOrLabelHeaders = raw_or_label_headers,
-        exportCheckboxLabel = tolower(as.character(export_checkbox_label)),
-        exportSurveyFields = tolower(as.character(export_survey_fields)),
-        exportDataAccessGroups = tolower(as.character(export_data_access_groups)),
-        filterLogic = filter_logic,
-        dateRangeBegin = ifelse(is.na(datetime_range_begin), "",
-          strftime(datetime_range_begin, "%Y-%m-%d %H:%M:%S")
-        ),
-        dateRangeEnd = ifelse(is.na(datetime_range_end), "",
-          strftime(datetime_range_end, "%Y-%m-%d %H:%M:%S")
-        ),
-        exportBlankForGrayFormStatus = tolower(as.character(blank_for_gray_form_status))
-      )
-    } else {
-      default_params <- list(
-        token = token,
-        content = "record",
-        format = "csv",
-        type = "flat"
-      )
-    }
+  create_redcap_request <- function(token, params = list()) {
+    default_params <- list(
+      token = token,
+      content = "record",
+      format = "csv",
+      type = "flat",
+      rawOrLabel = "raw",
+      rawOrLabelHeaders = "raw",
+      exportCheckboxLabel = tolower(as.character(FALSE)),
+      exportSurveyFields = tolower(as.character(export_survey_fields)),
+      exportDataAccessGroups = tolower(as.character(export_data_access_groups)),
+      filterLogic = filter_logic,
+      dateRangeBegin = ifelse(is.na(datetime_range_begin), "",
+        strftime(datetime_range_begin, "%Y-%m-%d %H:%M:%S")
+      ),
+      dateRangeEnd = ifelse(is.na(datetime_range_end), "",
+        strftime(datetime_range_end, "%Y-%m-%d %H:%M:%S")
+      ),
+      exportBlankForGrayFormStatus = tolower(as.character(blank_for_gray_form_status))
+    )
 
     all_params <- c(default_params, list(...))
 
@@ -303,6 +331,106 @@ redcap_to_db <- function(
   perform_redcap_request <- function(req) {
     resp <- httr2::req_perform(req, verbosity = 0)
     httr2::resp_body_string(resp)
+  }
+
+  fetch_metadata <- function(log_table_ref, metadata_table_ref) {
+    if (DBI::dbExistsTable(conn, name = metadata_table_name)) {
+      existing_count <- DBI::dbGetQuery(
+        conn,
+        paste0("SELECT COUNT(*) AS count FROM ", metadata_table_ref)
+      )$count
+
+      if (existing_count > 0) {
+        log_message(conn, log_table_ref, "INFO", "Metadata already exists in database")
+        return(TRUE)
+      }
+    }
+
+    log_message(conn, log_table_ref, "INFO", "Fetching metadata from REDCap")
+
+    status_id <- NULL
+    if (echo == "all") {
+      status_id <- cli::cli_status("Sending request to REDCap API for metadata...")
+    }
+
+    tryCatch(
+      {
+        metadata_params <- list(
+          token = token,
+          content = "metadata",
+          format = "csv"
+        )
+
+        req <- httr2::request(redcap_uri) |>
+          httr2::req_body_form(!!!metadata_params) |>
+          httr2::req_retry(
+            max_tries = max_retries + 1,
+            is_transient = \(resp) resp$status_code == 504
+          )
+
+        raw_text <- perform_redcap_request(req)
+
+        if (echo == "all") {
+          cli::cli_status_update(status_id, "Processing returned metadata...")
+        }
+
+        metadata <- readr::read_csv(
+          raw_text,
+          col_types = readr::cols(.default = readr::col_character()),
+          show_col_types = FALSE
+        )
+
+        if (nrow(metadata) == 0) {
+          if (echo == "all") cli::cli_status_clear(status_id)
+          cli::cli_abort("No metadata returned from REDCap")
+        }
+
+        DBI::dbAppendTable(conn, name = metadata_table_name, metadata)
+
+        # Record ID field name varies by project, so store it for labeling functions
+        config_row <- data.frame(
+          field_name = "__record_id_name__",
+          form_name = NA,
+          section_header = NA,
+          field_type = "config",
+          field_label = record_id_name,
+          select_choices_or_calculations = NA,
+          field_note = NA,
+          text_validation_type_or_show_slider_number = NA,
+          text_validation_min = NA,
+          text_validation_max = NA,
+          identifier = NA,
+          branching_logic = NA,
+          required_field = NA,
+          custom_alignment = NA,
+          question_number = NA,
+          matrix_group_name = NA,
+          matrix_ranking = NA,
+          field_annotation = NA,
+          record_id_name = NA,
+          stringsAsFactors = FALSE
+        )
+
+        DBI::dbAppendTable(conn, name = metadata_table_name, config_row)
+
+        log_message(conn, log_table_ref, "INFO", paste("Stored", nrow(metadata), "metadata fields in database"))
+        if (echo == "all") {
+          cli::cli_status_clear(status_id)
+          cli::cli_alert_success("Stored {nrow(metadata)} metadata fields in database")
+        }
+
+        return(TRUE)
+      },
+      error = function(e) {
+        if (echo == "all") cli::cli_status_clear(status_id)
+        error_msg <- e$message
+        log_message(conn, log_table_ref, "WARNING", paste("Failed to fetch metadata:", error_msg))
+        if (echo == "all") {
+          cli::cli_alert_warning("Failed to fetch metadata: {error_msg}")
+        }
+        return(FALSE)
+      }
+    )
   }
 
   fetch_record_ids <- function(log_table_ref, data_table_ref, start_time) {
@@ -340,7 +468,7 @@ redcap_to_db <- function(
 
         if (ncol(result_data) == 0 || nrow(result_data) == 0) {
           if (echo == "all") cli::cli_status_clear(status_id)
-          stop("No records or fields returned from REDCap")
+          cli::cli_abort("No records or fields returned from REDCap")
         }
 
         all_record_ids <- result_data[[1]]
@@ -401,9 +529,7 @@ redcap_to_db <- function(
 
         log_message(conn, log_table_ref, "ERROR", paste("Failed to fetch record IDs:", error_msg))
 
-        stop(paste("Transfer failed: Unable to fetch record IDs:", {
-          error_msg
-        }), call. = FALSE)
+        cli::cli_abort("Transfer failed: Unable to fetch record IDs: {error_msg}")
       }
     )
   }
@@ -417,6 +543,7 @@ redcap_to_db <- function(
       ))
     }
 
+    # Break record IDs into manageable chunks to avoid memory issues and API limits
     chunks <- split(record_ids, ceiling(seq_along(record_ids) / chunk_size))
     num_chunks <- length(chunks)
 
@@ -427,6 +554,7 @@ redcap_to_db <- function(
     error_chunks <- integer(0)
     total_chunk_time <- 0
 
+    # Resume capability: skip record IDs that were already successfully processed
     processed_ids <- character(0)
     if (data_table_created) {
       processed_ids_query <- paste0(
@@ -514,9 +642,10 @@ redcap_to_db <- function(
 
           if (ncol(chunk_data) == 0 || nrow(chunk_data) == 0) {
             log_message(conn, log_table_ref, "ERROR", paste("Chunk", i, "returned no data"))
-            stop(paste("Chunk", i, "returned no data"))
+            cli::cli_abort("Chunk {i} returned no data")
           }
 
+          # Force all columns to character to handle mixed data types across chunks
           chunk_data <- as.data.frame(lapply(chunk_data, as.character), stringsAsFactors = FALSE)
 
           if (!data_table_created) {
@@ -530,7 +659,7 @@ redcap_to_db <- function(
               data_table_created <- TRUE
               log_message(conn, log_table_ref, "INFO", paste("Created data table named", data_table_ref))
             } else {
-              stop("Cannot create table: First chunk returned no data")
+              cli::cli_abort("Cannot create table: First chunk returned no data")
             }
           }
 
@@ -547,6 +676,7 @@ redcap_to_db <- function(
           chunk_total <- round(difftime(Sys.time(), chunk_start, units = "secs"))
           total_chunk_time <- total_chunk_time + as.numeric(chunk_total)
 
+          # Explicit garbage collection to manage memory during large transfers
           chunk_data <- NULL
           gc(FALSE)
 
@@ -693,9 +823,12 @@ redcap_to_db <- function(
 
     data_table_ref <- env$data_table_ref
     log_table_ref <- env$log_table_ref
+    metadata_table_ref <- env$metadata_table_ref
     start_time <- env$start_time
 
     log_message(conn, log_table_ref, "INFO", "Transfer started")
+
+    fetch_metadata(log_table_ref, metadata_table_ref)
 
     if (is.null(failed_record_ids)) {
       record_ids <- fetch_record_ids(log_table_ref, data_table_ref, start_time)
@@ -796,5 +929,11 @@ redcap_to_db <- function(
   }, envir = .GlobalEnv)
 
   result <- main_process(conn)
+  
+  # Store table names as connection attributes for use by helper functions
+  attr(conn, "data_table_name") <- data_table_name
+  attr(conn, "log_table_name") <- log_table_name
+  attr(conn, "metadata_table_name") <- metadata_table_name
+  
   return(result)
 }

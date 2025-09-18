@@ -1,12 +1,11 @@
 Package: redquack
 Title: Transfer 'REDCap' Data to Database
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: person("Dylan", "Pieper", , "dylanpieper@gmail.com", role = c("aut", "cre"))
-Description: Transfer 'REDCap' (Research Electronic Data Capture) data to a 
-    database with additional support for 'DuckDB'. Processes data in chunks to 
-    handle large datasets without exceeding available memory. Features include 
-    resuming incomplete transfers, automatically converting data types for 'DuckDB', 
-    tracking progress, and logging operations in the database.
+Description: Transfer 'REDCap' (Research Electronic Data Capture) data to a database,
+    specifically optimized for 'DuckDB'. 
+    Processes data in chunks to handle large datasets without exceeding available memory. 
+    Features include data labeling, coded value conversion, and hearing a "quack" sound on success.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -15,12 +14,15 @@ Imports:
     audio,
     cli,
     DBI,
+    dplyr,
+    dbplyr,
+    duckdb,
     httr2,
-    readr
+    labelled,
+    readr,
+    rlang
 Suggests:
     arrow,
-    dplyr,
-    duckdb,
     keyring,
     pak,
     RSQLite,
