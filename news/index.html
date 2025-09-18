@@ -65,9 +65,10 @@
 </ul></div>
 <div class="section level3">
 <h3 id="lifecycle-changes-0-3-0">Lifecycle Changes<a class="anchor" aria-label="anchor" href="#lifecycle-changes-0-3-0"></a></h3>
-<ul><li>Rename <code>verbose</code> to <code>echo</code> and change from logical to string options: “all” (default), “progress”, or “none”, which is designed to help with integration into other packages where only the progress bar is desired</li>
+<ul><li>Rename <code>redcap_uri</code> parameter to <code>url</code> in <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> for simplicity</li>
+<li>Rename <code>verbose</code> to <code>echo</code> in <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> and change from logical to string options: “all” (default), “progress”, or “none”, which is designed to help with integration into other packages where only the progress bar is desired</li>
 <li>Add <code>metadata_table_name</code> parameter to <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> for storing REDCap field definitions</li>
-<li>Remove data export formatting parameters (<code>raw_or_label</code>, <code>raw_or_label_headers</code>, <code>export_checkbox_label</code>) as labeling is now handled by collection functions</li>
+<li>Remove data export formatting parameters (<code>raw_or_label</code>, <code>raw_or_label_headers</code>, <code>export_checkbox_label</code>) in <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> as labeling is now handled by collection functions</li>
 <li>Import dplyr, dbplyr, duckdb, labelled, and rlang as new dependencies</li>
 </ul></div>
 <div class="section level3">
