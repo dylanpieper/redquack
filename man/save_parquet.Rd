@@ -36,11 +36,7 @@ stored in the connection attributes if available.
 \examples{
 \dontrun{
 # Save entire data table
-save_parquet(conn, "my_data.parquet")
-
-# Save with custom query
-save_parquet(conn, "filtered.parquet", 
-               query = "SELECT * FROM data WHERE age > 18")
+save_parquet(conn, "redcap.parquet")
 }
 
 }

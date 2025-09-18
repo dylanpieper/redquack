@@ -104,23 +104,8 @@
 #'   token = "9A81268476645C4E5F03428B8AC3AA7B"
 #' )
 #'
-#' # Return raw, unlabeled data as a single data frame
 #' data <- tbl_redcap(conn) |>
-#'   filter(name_last == "Nutmouse") |>
 #'   collect()
-#'
-#' # Return labeled data as a single data frame
-#' data <- tbl_redcap(conn) |>
-#'   filter(name_last == "Nutmouse") |>
-#'   collect_labeled()
-#'
-#' # Return labeled data as a list of instruments
-#' data <- tbl_redcap(conn) |>
-#'   filter(name_last == "Nutmouse") |>
-#'   collect_labeled_list()
-#'
-#' # Assign list of instruments to the global environment
-#' list_to_env(data)
 #'
 #' remove_duckdb(conn)
 #' }
@@ -929,11 +914,11 @@ redcap_to_db <- function(
   }, envir = .GlobalEnv)
 
   result <- main_process(conn)
-  
+
   # Store table names as connection attributes for use by helper functions
   attr(conn, "data_table_name") <- data_table_name
   attr(conn, "log_table_name") <- log_table_name
   attr(conn, "metadata_table_name") <- metadata_table_name
-  
+
   return(result)
 }

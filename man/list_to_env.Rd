@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{list_to_env}
 \alias{list_to_env}
-\title{Load List to Global Environment}
+\title{Assign List to Global Environment}
 \usage{
 list_to_env(instruments)
 }
@@ -10,19 +10,17 @@ list_to_env(instruments)
 \item{instruments}{A named list of data frames, typically output from tbl_to_list().}
 }
 \value{
-Invisibly returns the instruments list. Side effect: creates objects in global environment.
+Invisibly returns NULL. Side effect: assigns objects to the global environment.
 }
 \description{
-Load a list of instruments (data frames) into the global environment.
+Assign a list of instruments (data frames) to the global environment.
 Each element of the list becomes a separate object in the global environment.
 }
 \examples{
 \dontrun{
-library(redquack)
-duckdb <- DBI::dbConnect(duckdb::duckdb(), "redcap.duckdb")
-instruments <- tbl(duckdb, "data") |> tbl_to_list()
-list_to_env(instruments)
-DBI::dbDisconnect(duckdb)
+tbl(conn, "data") |>
+  tbl_to_list() |>
+  list_to_env()
 }
 
 }

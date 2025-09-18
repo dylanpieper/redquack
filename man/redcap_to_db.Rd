@@ -155,23 +155,8 @@ result <- redcap_to_db(
   token = "9A81268476645C4E5F03428B8AC3AA7B"
 )
 
-# Return raw, unlabeled data as a single data frame
 data <- tbl_redcap(conn) |>
-  filter(name_last == "Nutmouse") |>
   collect()
-
-# Return labeled data as a single data frame
-data <- tbl_redcap(conn) |>
-  filter(name_last == "Nutmouse") |>
-  collect_labeled()
-
-# Return labeled data as a list of instruments
-data <- tbl_redcap(conn) |>
-  filter(name_last == "Nutmouse") |>
-  collect_labeled_list()
-
-# Assign list of instruments to the global environment
-list_to_env(data)
 
 remove_duckdb(conn)
 }
