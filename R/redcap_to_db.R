@@ -4,7 +4,7 @@
 #' Transfer REDCap data to a database in chunks of record IDs to minimize memory usage.
 #'
 #' @param conn A DBI connection object to a database.
-#' @param redcap_uri Character string specifying the URI (uniform resource identifier)
+#' @param url Character string specifying the URI (uniform resource identifier)
 #'   of the REDCap server's API.
 #' @param token Character string containing the REDCap API token specific to your project.
 #'   This token is used for authentication and must have export permissions.
@@ -100,7 +100,7 @@
 #'
 #' result <- redcap_to_db(
 #'   conn,
-#'   redcap_uri = "https://bbmc.ouhsc.edu/redcap/api/",
+#'   url = "https://bbmc.ouhsc.edu/redcap/api/",
 #'   token = "9A81268476645C4E5F03428B8AC3AA7B"
 #' )
 #'
@@ -127,7 +127,7 @@
 #' @export
 redcap_to_db <- function(
     conn,
-    redcap_uri,
+    url,
     token,
     data_table_name = "data",
     log_table_name = "logs",
@@ -305,7 +305,7 @@ redcap_to_db <- function(
       }
     }
 
-    httr2::request(redcap_uri) |>
+    httr2::request(url) |>
       httr2::req_body_form(!!!all_params) |>
       httr2::req_retry(
         max_tries = max_retries + 1,
@@ -346,7 +346,7 @@ redcap_to_db <- function(
           format = "csv"
         )
 
-        req <- httr2::request(redcap_uri) |>
+        req <- httr2::request(url) |>
           httr2::req_body_form(!!!metadata_params) |>
           httr2::req_retry(
             max_tries = max_retries + 1,

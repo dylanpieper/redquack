@@ -44,7 +44,7 @@ create_test_db <- function(file_name, db_type = "duckdb", chunk_size = 5000, opt
 
   success <- redcap_to_db(
     conn = conn, # Pass the connection
-    redcap_uri = creds$uri,
+    url = creds$uri,
     token = creds$token,
     data_table_name = "data",
     log_table_name = "logs",

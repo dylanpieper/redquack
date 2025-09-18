@@ -6,7 +6,7 @@
 \usage{
 redcap_to_db(
   conn,
-  redcap_uri,
+  url,
   token,
   data_table_name = "data",
   log_table_name = "logs",
@@ -32,7 +32,7 @@ redcap_to_db(
 \arguments{
 \item{conn}{A DBI connection object to a database.}
 
-\item{redcap_uri}{Character string specifying the URI (uniform resource identifier)
+\item{url}{Character string specifying the URI (uniform resource identifier)
 of the REDCap server's API.}
 
 \item{token}{Character string containing the REDCap API token specific to your project.
@@ -151,7 +151,7 @@ conn <- use_duckdb()
 
 result <- redcap_to_db(
   conn,
-  redcap_uri = "https://bbmc.ouhsc.edu/redcap/api/",
+  url = "https://bbmc.ouhsc.edu/redcap/api/",
   token = "9A81268476645C4E5F03428B8AC3AA7B"
 )
 

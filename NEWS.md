@@ -13,9 +13,10 @@
   - `save_parquet()` for efficient data export
 
 ## Lifecycle Changes
-* Rename `verbose` to `echo` and change from logical to string options: "all" (default), "progress", or "none", which is designed to help with integration into other packages where only the progress bar is desired
+* Rename `redcap_uri` parameter to `url` in `redcap_to_db()` for simplicity
+* Rename `verbose` to `echo` in `redcap_to_db()` and change from logical to string options: "all" (default), "progress", or "none", which is designed to help with integration into other packages where only the progress bar is desired
 * Add `metadata_table_name` parameter to `redcap_to_db()` for storing REDCap field definitions
-* Remove data export formatting parameters (`raw_or_label`, `raw_or_label_headers`, `export_checkbox_label`) as labeling is now handled by collection functions
+* Remove data export formatting parameters (`raw_or_label`, `raw_or_label_headers`, `export_checkbox_label`) in `redcap_to_db()` as labeling is now handled by collection functions
 * Import dplyr, dbplyr, duckdb, labelled, and rlang as new dependencies
 
 ## Minor Improvements

@@ -11,7 +11,7 @@ test_that("redquack complete workflow integration test", {
   # Test: redcap_to_db() returns list with "success" (logi) == TRUE and "error_chunks" (int) == 0
   result <- redcap_to_db(
     conn,
-    redcap_uri = "https://bbmc.ouhsc.edu/redcap/api/",
+    url = "https://bbmc.ouhsc.edu/redcap/api/",
     token = "9A81268476645C4E5F03428B8AC3AA7B"
   )
 
@@ -478,7 +478,7 @@ test_that("all record IDs from REDCap are present in a SQLite database", {
   # Transfer data
   result <- redcap_to_db(
     conn = conn,
-    redcap_uri = creds$uri,
+    url = creds$uri,
     token = creds$token,
     data_table_name = "data",
     log_table_name = "logs",

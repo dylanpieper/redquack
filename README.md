@@ -64,7 +64,7 @@ conn <- use_duckdb()
 
 result <- redcap_to_db(
   conn,
-  redcap_uri = "https://bbmc.ouhsc.edu/redcap/api/",
+  url = "https://bbmc.ouhsc.edu/redcap/api/",
   token = keyring::key_get("redcap", "test")
 )
 ```
