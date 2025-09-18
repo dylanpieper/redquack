@@ -2,15 +2,15 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/redquack)](https://cran.r-project.org/package=redquack) [![R-CMD-check](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml)
 
-Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Use this package for small or large datasets, and enjoy features such as data labeling, coded value conversion, and hearing a "quack" sound on success. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/).
+Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Use this package for small, large, or growing datasets, and enjoy features such as data labeling, coded value conversion, and hearing a "quack" sound on success. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/).
 
 ## Use Case and Solution
 
-Is your project outgrowing your computer? Have you seen this error when using the REDCap API to retrieve data in R?
+Is your project outgrowing your computer? Have you seen this error when using the REDCap API to retrieve data?
 
 **Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
-Even if you've never seen this error, you may see as your project grows. So, what does it mean? Well, R objects a stored in your random access memory (RAM). When your data gets too big, you hit your memory limit. **redquack's solution to this error is to store the data out of memory in a local database for easy retrieval in R.**
+What does it mean? Well, R objects a stored in your random access memory (RAM). When your data gets too big, you hit your memory limit. **redquack's solution to this error is to store the data out of memory in a local database for easy retrieval in R.**
 
 The process:
 
@@ -119,7 +119,7 @@ inspect(conn)
 
 ## Data Manipulation
 
-Retrieve and manipulate your REDCap data with familiar [dplyr](https://dbplyr.tidyverse.org/) verbs—currently limited to `filter()`, `select()`, `arrange()`, and `group_by()`—with [tbl-like syntax](https://dbplyr.tidyverse.org/reference/tbl.src_dbi.html). The key difference is you reference the database table first using `tbl_redcap()`. Everything in between stays the same: dplyr builds a lazy query plan through its verb functions, then the database engine executes the plan.
+Retrieve and manipulate your REDCap data with familiar [dplyr](https://dbplyr.tidyverse.org/) verbs and [tbl-like syntax](https://dbplyr.tidyverse.org/reference/tbl.src_dbi.html). The key difference is you reference the database table first using `tbl_redcap()`.
 
 ### Basic Data Retrieval
 
@@ -186,7 +186,7 @@ below_avg_bmi <- tbl_redcap(conn) |>
 
 Apply column and coded value labels and control value conversion (i.e., choice mappings). `collect_labeled()` and `collect_labeled_list()` give you control over how these labels are applied:
 
-**Full labeling and coded value conversion (default):**
+Full labeling and coded value conversion (default):
 
 ``` r
 data <- tbl_redcap(conn) |> collect_labeled()
@@ -197,7 +197,7 @@ attr(,"label")
 #> [1] "Gender"
 ```
 
-**Keep raw coded values:**
+Keep raw coded values:
 
 ``` r
 data <- tbl_redcap(conn) |> collect_labeled(convert = FALSE)
@@ -215,7 +215,7 @@ attr(data$sex, "label")
 #> [1] "Gender"
 ```
 
-**Column labels only:**
+Column labels only:
 
 ``` r
 data <- tbl_redcap(conn) |> collect_labeled(vals = FALSE)
@@ -226,7 +226,7 @@ data$sex
 #> [1] "Gender"
 ```
 
-**Value conversion only:**
+Value conversion only:
 
 ``` r
 data <- tbl_redcap(conn) |> collect_labeled(cols = FALSE)
