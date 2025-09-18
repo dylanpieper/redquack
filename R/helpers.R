@@ -1,29 +1,27 @@
 # EXTERNAL ----------------------------------------------------------------
 
-#' Load List to Global Environment
+#' Assign List to Global Environment
 #'
 #' @description
-#' Load a list of instruments (data frames) into the global environment.
+#' Assign a list of instruments (data frames) to the global environment.
 #' Each element of the list becomes a separate object in the global environment.
 #'
 #' @param instruments A named list of data frames, typically output from tbl_to_list().
 #'
 #' @return
-#' Invisibly returns the instruments list. Side effect: creates objects in global environment.
+#' Invisibly returns NULL. Side effect: assigns objects to the global environment.
 #'
 #' @examples
 #' \dontrun{
-#' library(redquack)
-#' duckdb <- DBI::dbConnect(duckdb::duckdb(), "redcap.duckdb")
-#' instruments <- tbl(duckdb, "data") |> tbl_to_list()
-#' list_to_env(instruments)
-#' DBI::dbDisconnect(duckdb)
+#' tbl(conn, "data") |>
+#'   tbl_to_list() |>
+#'   list_to_env()
 #' }
 #'
 #' @export
 list_to_env <- function(instruments) {
   list2env(instruments, envir = .GlobalEnv)
-  invisible(instruments)
+  invisible(NULL)
 }
 
 #' Create DuckDB Connection
@@ -253,11 +251,7 @@ inspect <- function(conn, table_name = NULL) {
 #' @examples
 #' \dontrun{
 #' # Save entire data table
-#' save_parquet(conn, "my_data.parquet")
-#' 
-#' # Save with custom query
-#' save_parquet(conn, "filtered.parquet", 
-#'                query = "SELECT * FROM data WHERE age > 18")
+#' save_parquet(conn, "redcap.parquet")
 #' }
 #'
 #' @importFrom DBI dbExecute
@@ -270,7 +264,7 @@ save_parquet <- function(conn, file_path = "redcap.parquet", table_name = NULL, 
     table_name <- table_name %||% attr(conn, "data_table_name") %||% "data"
     sql_cmd <- paste0("COPY (SELECT * FROM ", table_name, ") TO '", file_path, "' (FORMAT PARQUET)")
   }
-  
+
   DBI::dbExecute(conn, sql_cmd)
   invisible(NULL)
 }
@@ -325,38 +319,6 @@ log_message <- function(conn, log_table_ref, type, msg) {
   }
 }
 
-#' Read Metadata from Database
-#'
-#' @description
-#' Read REDCap metadata that was stored during a `redcap_to_db()` transfer.
-#'
-#' @param conn A DBI connection object to a database.
-#' @param metadata_table_name Character string specifying the name of the metadata table.
-#'   Default is "metadata".
-#'
-#' @return
-#' A data frame containing the REDCap metadata with columns for field names,
-#' labels, types, choices, and other field properties.
-#'
-#' @examples
-#' \dontrun{
-#' library(redquack)
-#' duckdb <- DBI::dbConnect(duckdb::duckdb(), "redcap.duckdb")
-#' metadata <- read_metadata(duckdb, "metadata")
-#' DBI::dbDisconnect(duckdb)
-#' }
-#'
-#' @keywords internal
-#' @noRd
-read_metadata <- function(conn, metadata_table_name = "metadata") {
-
-  metadata <- DBI::dbGetQuery(
-    conn,
-    paste0("SELECT * FROM ", DBI::dbQuoteIdentifier(conn, metadata_table_name))
-  )
-
-  return(metadata)
-}
 
 #' Parse REDCap Choice Values
 #'
@@ -390,7 +352,7 @@ parse_choices <- function(choices_string) {
   choice_labels <- character()
 
   for (choice in choices) {
-    # REDCap format: "code, label" - find first comma to handle labels with commas
+    # REDCap format: "code, label"
     comma_pos <- regexpr(",\\s*", choice)
     if (comma_pos > 0) {
       code <- trimws(substr(choice, 1, comma_pos - 1))
@@ -434,22 +396,25 @@ filter.tbl_redcap <- function(.data, ...) {
 select.tbl_redcap <- function(.data, ...) {
   # Get the selected expressions
   selected_vars <- rlang::enquos(...)
-  
+
   # Check if we need to preserve record ID for multi-instrument support
   conn <- dbplyr::remote_con(.data)
   base_table_name <- attr(.data, "redcap_table") %||% dbplyr::remote_name(.data)
-  
+
   # Try to get the record ID field name from metadata
-  record_id_field <- tryCatch({
-    metadata <- read_metadata(conn, "metadata")
-    config_row <- metadata[metadata$field_name == "__record_id_name__", ]
-    if (nrow(config_row) > 0 && !is.na(config_row$field_label[1])) {
-      config_row$field_label[1]
-    } else {
-      "record_id"
-    }
-  }, error = function(e) "record_id")
-  
+  record_id_field <- tryCatch(
+    {
+      metadata_data <- metadata(conn, "metadata")
+      config_row <- metadata_data[metadata_data$field_name == "__record_id_name__", ]
+      if (nrow(config_row) > 0 && !is.na(config_row$field_label[1])) {
+        config_row$field_label[1]
+      } else {
+        "record_id"
+      }
+    },
+    error = function(e) "record_id"
+  )
+
   # Check if record ID is already being selected
   selected_names <- sapply(selected_vars, function(x) {
     if (rlang::quo_is_symbol(x)) {
@@ -458,18 +423,21 @@ select.tbl_redcap <- function(.data, ...) {
       NA
     }
   })
-  
+
   record_id_already_selected <- record_id_field %in% selected_names
-  
+
   # If record ID is not selected and we have multiple instruments, add it
   if (!record_id_already_selected) {
     # Check if we have multiple instruments in metadata
-    has_multiple_instruments <- tryCatch({
-      metadata <- read_metadata(conn, "metadata")
-      instruments <- unique(metadata$form_name[!is.na(metadata$form_name) & metadata$form_name != ""])
-      length(instruments) > 1
-    }, error = function(e) FALSE)
-    
+    has_multiple_instruments <- tryCatch(
+      {
+        metadata_data <- metadata(conn, "metadata")
+        instruments <- unique(metadata_data$form_name[!is.na(metadata_data$form_name) & metadata_data$form_name != ""])
+        length(instruments) > 1
+      },
+      error = function(e) FALSE
+    )
+
     if (has_multiple_instruments) {
       # Add record ID to the selection
       record_id_quo <- rlang::sym(record_id_field)
@@ -480,7 +448,7 @@ select.tbl_redcap <- function(.data, ...) {
   } else {
     result <- NextMethod()
   }
-  
+
   preserve_redcap_attr(result, .data)
 }
 

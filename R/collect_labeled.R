@@ -64,9 +64,9 @@ collect_labeled <- function(data, cols = TRUE, vals = TRUE, convert = TRUE, meta
 
   # Use metadata table name parameter
 
-  metadata <- tryCatch(
+  metadata_data <- tryCatch(
     {
-      read_metadata(conn, metadata_table_name)
+      metadata(conn, metadata_table_name)
     },
     error = function(e) {
       # Check if table exists at all
@@ -79,7 +79,7 @@ collect_labeled <- function(data, cols = TRUE, vals = TRUE, convert = TRUE, meta
     }
   )
 
-  if (is.null(metadata) || nrow(metadata) == 0) {
+  if (is.null(metadata_data) || nrow(metadata_data) == 0) {
     cli::cli_warn("No metadata available. Returning data unchanged.")
     return(dplyr::collect(data))
   }
@@ -89,7 +89,7 @@ collect_labeled <- function(data, cols = TRUE, vals = TRUE, convert = TRUE, meta
   if (cols) {
     var_labels <- list()
     for (field in names(collected_data)) {
-      field_meta <- metadata[metadata$field_name == field, ]
+      field_meta <- metadata_data[metadata_data$field_name == field, ]
       if (nrow(field_meta) > 0) {
         field_label <- field_meta$field_label[1]
         if (!is.na(field_label) && field_label != "") {
@@ -111,7 +111,7 @@ collect_labeled <- function(data, cols = TRUE, vals = TRUE, convert = TRUE, meta
     }
 
     for (field in names(collected_data)) {
-      field_meta <- metadata[metadata$field_name == field, ]
+      field_meta <- metadata_data[metadata_data$field_name == field, ]
       if (nrow(field_meta) > 0 && !is.na(field_meta$select_choices_or_calculations[1])) {
         choices <- parse_choices(field_meta$select_choices_or_calculations[1])
         if (!is.null(choices) && length(choices) > 0) {

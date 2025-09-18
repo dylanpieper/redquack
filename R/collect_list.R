@@ -94,9 +94,9 @@ collect_list <- function(
   }
 
   # Read metadata for instrument organization
-  metadata <- tryCatch(
+  metadata_data <- tryCatch(
     {
-      read_metadata(conn, metadata_table_name)
+      metadata(conn, metadata_table_name)
     },
     error = function(e) {
       cli::cli_warn("Could not read metadata: {e$message}")
@@ -105,15 +105,15 @@ collect_list <- function(
   )
 
   # REDCap organizes fields by forms/instruments - split collected data accordingly
-  if (!is.null(metadata) && is.data.frame(metadata) && nrow(metadata) > 0) {
+  if (!is.null(metadata_data) && is.data.frame(metadata_data) && nrow(metadata_data) > 0) {
     # Get record ID field name from metadata
     record_id_field <- "record_id"
-    config_row <- metadata[metadata$field_name == "__record_id_name__", ]
+    config_row <- metadata_data[metadata_data$field_name == "__record_id_name__", ]
     if (nrow(config_row) > 0 && !is.na(config_row$field_label[1])) {
       record_id_field <- config_row$field_label[1]
     }
 
-    instruments <- unique(metadata$form_name)
+    instruments <- unique(metadata_data$form_name)
     instruments <- instruments[!is.na(instruments) & instruments != ""]
 
     if (length(instruments) == 0) {
@@ -123,7 +123,7 @@ collect_list <- function(
     result_list <- list()
 
     for (instrument in instruments) {
-      instrument_fields <- metadata$field_name[metadata$form_name == instrument]
+      instrument_fields <- metadata_data$field_name[metadata_data$form_name == instrument]
       instrument_fields <- instrument_fields[!is.na(instrument_fields)]
 
       # Each instrument needs the record ID to maintain relationships
