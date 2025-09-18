@@ -1,0 +1,160 @@
+#' Collect a Database Table into to List of REDCap Instruments
+#'
+#' @description
+#' Takes a database table reference (tbl) and collects it into a list of instruments
+#' with column and value labels and optional coded value conversion.
+#' This function works in the tidy style with dplyr and separates the data by REDCap instruments.
+#' Use \code{collect_labeled_list} as an alias for the same functionality.
+#'
+#' @param data A tbl object referencing a database table (created with `tbl(conn, "data")`).
+#' @param col_labels Logical indicating whether to apply column (variable) labels.
+#'   Default is FALSE.
+#' @param val_labels Logical indicating whether to apply value labels to coded variables.
+#'   Default is FALSE.
+#' @param convert Logical indicating whether to convert labeled values
+#'   to their text labels (e.g., 0/1 becomes "No"/"Yes"). Default is FALSE.
+#' @param metadata_table_name Character string specifying the metadata table name.
+#'   Default is "metadata".
+#'
+#' @return
+#' Returns a named list of data frames, one per instrument.
+#' If only one instrument is present, returns the single data frame instead of a list.
+#'
+#' @examples
+#' \dontrun{
+#' library(redquack)
+#' library(dplyr)
+#'
+#' conn <- use_duckdb()
+#'
+#' result <- redcap_to_db(
+#'   conn,
+#'   redcap_uri = "https://bbmc.ouhsc.edu/redcap/api/",
+#'   token = "9A81268476645C4E5F03428B8AC3AA7B"
+#' )
+#'
+#' # Convert table to a list of instruments
+#' instruments <- tbl_redcap(conn) |>
+#'   collect_list()
+#'
+#' # Control labeling behavior
+#' instruments_no_val_labels <- tbl_redcap(conn) |>
+#'   collect_list(col_labels = FALSE)
+#'
+#' # Convert coded values to text labels
+#' instruments_with_codes <- tbl_redcap(conn) |>
+#'   collect_list(convert = TRUE)
+#'
+#' # Works with filtered data
+#' filtered_instruments <- tbl_redcap(conn) |>
+#'   filter(name_last == "Nutmouse") |>
+#'   collect_list()
+#'
+#' remove_duckdb(conn)
+#' }
+#'
+#' @seealso
+#' \code{\link{redcap_to_db}} for transferring data to a database
+#' \code{\link{collect_labeled}} for collecting labeled data as a single data frame
+#'
+#' @importFrom dplyr collect
+#' @importFrom dbplyr remote_con remote_name
+#' @importFrom labelled is.labelled val_labels to_character var_label set_variable_labels
+#' @importFrom cli cli_abort cli_warn
+#'
+#' @export
+collect_list <- function(
+    data,
+    col_labels = FALSE,
+    val_labels = FALSE,
+    convert = FALSE,
+    metadata_table_name = "metadata") {
+  if (!inherits(data, "tbl_sql")) {
+    cli::cli_abort("collect_list() expects a tbl object. Use tbl(conn, 'data_table_name') to create one.")
+  }
+
+  conn <- dbplyr::remote_con(data)
+
+  # Use metadata table name parameter
+
+  processed_data <- data
+
+  if (col_labels || val_labels || convert) {
+    processed_data <- collect_labeled(processed_data, cols = col_labels, vals = val_labels, convert = convert, metadata_table_name = metadata_table_name)
+  }
+
+  collected_data <- if (inherits(processed_data, "tbl_sql")) {
+    dplyr::collect(processed_data)
+  } else {
+    processed_data
+  }
+
+  if (is.null(collected_data) || nrow(collected_data) == 0) {
+    return(NULL)
+  }
+
+  # Read metadata for instrument organization
+  metadata <- tryCatch(
+    {
+      read_metadata(conn, metadata_table_name)
+    },
+    error = function(e) {
+      cli::cli_warn("Could not read metadata: {e$message}")
+      NULL
+    }
+  )
+
+  # REDCap organizes fields by forms/instruments - split collected data accordingly
+  if (!is.null(metadata) && is.data.frame(metadata) && nrow(metadata) > 0) {
+    # Get record ID field name from metadata
+    record_id_field <- "record_id"
+    config_row <- metadata[metadata$field_name == "__record_id_name__", ]
+    if (nrow(config_row) > 0 && !is.na(config_row$field_label[1])) {
+      record_id_field <- config_row$field_label[1]
+    }
+
+    instruments <- unique(metadata$form_name)
+    instruments <- instruments[!is.na(instruments) & instruments != ""]
+
+    if (length(instruments) == 0) {
+      return(collected_data)
+    }
+
+    result_list <- list()
+
+    for (instrument in instruments) {
+      instrument_fields <- metadata$field_name[metadata$form_name == instrument]
+      instrument_fields <- instrument_fields[!is.na(instrument_fields)]
+
+      # Each instrument needs the record ID to maintain relationships
+      all_fields <- c(record_id_field, instrument_fields)
+      all_fields <- unique(all_fields)
+
+      # Only include fields that exist in the collected data
+      available_fields <- intersect(all_fields, names(collected_data))
+
+      if (length(available_fields) > 0) {
+        instrument_data <- collected_data[, available_fields, drop = FALSE]
+
+        if (nrow(instrument_data) > 0) {
+          result_list[[instrument]] <- instrument_data
+        }
+      }
+    }
+
+    # Return single data frame if only one instrument, otherwise return list
+    if (length(result_list) == 1) {
+      return(result_list[[1]])
+    } else {
+      return(result_list)
+    }
+  }
+
+  return(collected_data)
+}
+
+#' @rdname collect_list
+#' @export
+collect_labeled_list <- function(data, col_labels = TRUE, val_labels = TRUE, convert = TRUE, metadata_table_name = "metadata") {
+  collect_list(data = data, col_labels = col_labels, val_labels = val_labels, convert = convert, metadata_table_name = metadata_table_name)
+}

@@ -7,12 +7,10 @@
 redcap_to_db(
   conn,
   data_table_name = "data",
-  log_table_name = "log",
+  log_table_name = "logs",
+  metadata_table_name = "metadata",
   redcap_uri,
   token,
-  raw_or_label = "raw",
-  raw_or_label_headers = "raw",
-  export_checkbox_label = FALSE,
   export_survey_fields = FALSE,
   export_data_access_groups = FALSE,
   blank_for_gray_form_status = FALSE,
@@ -34,31 +32,21 @@ redcap_to_db(
 \arguments{
 \item{conn}{A DBI connection object to a database.}
 
-\item{data_table_name}{Character string specifying the name of the table to create or append
-data to. Default is "data". Can include schema name (e.g. "schema.table").}
+\item{data_table_name}{Character string specifying the name of the table to create
+or append data to. Default is "data". Can include schema name (e.g. "schema.table").}
 
 \item{log_table_name}{Character string specifying the name of the table to store
-transfer logs. Default is "log". Can include schema name (e.g. "schema.log").
+transfer logs. Default is "logs". Can include schema name (e.g. "schema.logs").
 Set to NULL to disable logging.}
+
+\item{metadata_table_name}{Character string specifying the name of the table to store
+REDCap metadata. Default is "metadata". Can include schema name (e.g. "schema.metadata").}
 
 \item{redcap_uri}{Character string specifying the URI (uniform resource identifier)
 of the REDCap server's API.}
 
 \item{token}{Character string containing the REDCap API token specific to your project.
 This token is used for authentication and must have export permissions.}
-
-\item{raw_or_label}{A string (either "raw" or "label") that specifies
-whether to export the raw coded values or the labels for the options of
-multiple choice fields. Default is "raw".}
-
-\item{raw_or_label_headers}{A string (either "raw" or "label") that
-specifies for the CSV headers whether to export the variable/field names
-(raw) or the field labels (label). Default is "raw".}
-
-\item{export_checkbox_label}{Logical that specifies the format of checkbox field values
-specifically when exporting the data as labels. If \code{raw_or_label} is
-"label" and \code{export_checkbox_label} is TRUE, the values will be the text
-displayed to the users. Otherwise, the values will be 0/1. Default is FALSE.}
 
 \item{export_survey_fields}{Logical that specifies whether to export the
 survey identifier field (e.g., 'redcap_survey_identifier') or survey
@@ -122,14 +110,15 @@ Returns a list with the following components:
 }
 }
 \description{
-Transfer REDCap data to a database in chunks to minimize memory usage.
+Transfer REDCap data to a database in chunks of record IDs to minimize memory usage.
 }
 \details{
 This function transfers data from REDCap to any database in chunks, which helps manage memory
-usage when dealing with large projects. It creates two tables in the database:
+usage when dealing with large projects. It creates three tables in the database:
 \itemize{
 \item \code{data_table_name}: Contains all transferred REDCap records
 \item \code{log_table_name}: Contains timestamped logs of the transfer process
+\item \code{metadata_table_name}: Contains REDCap metadata for field definitions and labeling
 }
 
 The function automatically detects existing databases and handles them in three ways:
@@ -155,25 +144,44 @@ For DuckDB, data types are automatically optimized after all data is inserted:
 }
 \examples{
 \dontrun{
-# install.packages("pak")
-# pak::pak(c("duckdb", "keyring", "redquack"))
-
 library(redquack)
+library(dplyr)
 
-duckdb <- DBI::dbConnect(duckdb::duckdb(), "redcap.duckdb")
+conn <- use_duckdb()
 
 result <- redcap_to_db(
-  redcap_uri = "https://redcap.example.org/api/",
-  token = keyring::key_get("redcap_token"),
-  conn = duckdb,
+  conn,
+  redcap_uri = "https://bbmc.ouhsc.edu/redcap/api/",
+  token = "9A81268476645C4E5F03428B8AC3AA7B"
 )
 
-data <- DBI::dbGetQuery(duckdb, "SELECT * FROM data LIMIT 1000")
-log <- DBI::dbGetQuery(duckdb, "SELECT * FROM log")
+# Return raw, unlabeled data as a single data frame
+data <- tbl_redcap(conn) |>
+  filter(name_last == "Nutmouse") |>
+  collect()
 
-DBI::dbDisconnect(duckdb)
+# Return labeled data as a single data frame
+data <- tbl_redcap(conn) |>
+  filter(name_last == "Nutmouse") |>
+  collect_labeled()
+
+# Return labeled data as a list of instruments
+data <- tbl_redcap(conn) |>
+  filter(name_last == "Nutmouse") |>
+  collect_labeled_list()
+
+# Assign list of instruments to the global environment
+list_to_env(data)
+
+remove_duckdb(conn)
 }
 }
 \seealso{
-\code{\link[DBI]{dbConnect}} for database connection details
+\code{\link{use_duckdb}} for establishing a local duckdb connection
+\code{\link{close_duckdb}} for closing a local duckdb connection
+\code{\link{remove_duckdb}} for closing a local duckdb connection and removing the file
+\code{\link{collect_labeled}} for collecting a database table into a single data frame with column and value labels (converts coded values to their text labels by default)
+\code{\link{collect_list}} for collecting a database table into a list of instruments
+\code{\link{collect_labeled_list}} for collecting a database table into a list of instruments with column and value labels (converts coded values to their text labels by default)
+\code{\link{list_to_env}} for assigning a list of instruments to the global environment
 }

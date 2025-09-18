@@ -1,10 +1,26 @@
-# redquack (development)
+# redquack 0.3.0
+
+## New Features
+* Interface redesign with new functions for easy data access and manipulation:
+  - `use_duckdb()` and `close_duckdb()` for database connection management
+  - `remove_duckdb()` for cleanup and file removal
+  - `tbl_redcap()` for creating table references with dplyr support
+  - `collect_labeled()` and `collect_labeled_list()` for data with REDCap labels
+  - `collect_list()` for splitting data into instrument-specific tables
+  - `list_to_env()` for loading instruments into the global environment
+  - `metadata()` and `logs()` for accessing stored metadata and transfer logs
+  - `inspect()` for examining table structure
+  - `save_parquet()` for efficient data export
 
 ## Lifecycle Changes
 * Rename `verbose` to `echo` and change from logical to string options: "all" (default), "progress", or "none", which is designed to help with integration into other packages where only the progress bar is desired
+* Add `metadata_table_name` parameter to `redcap_to_db()` for storing REDCap field definitions
+* Remove data export formatting parameters (`raw_or_label`, `raw_or_label_headers`, `export_checkbox_label`) as labeling is now handled by collection functions
+* Import dplyr, dbplyr, duckdb, labelled, and rlang as new dependencies
 
 ## Minor Improvements
-* Add support for boolean type conversion (1/0, TRUE/FALSE, T/F, YES/NO, Y/N)
+* Add S3 methods for dplyr verbs (filter, select, arrange, group_by) that preserve REDCap table attributes
+* Automatic record ID preservation in across multiple instruments
 
 # redquack 0.2.0
 
