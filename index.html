@@ -58,7 +58,7 @@
 <div class="page-header"><h1 id="redquack-">redquack <img src="reference/figures/redquack.png" align="right" width="140"><a class="anchor" aria-label="anchor" href="#redquack-"></a>
 </h1></div>
 <p><a href="https://cran.r-project.org/package=redquack" class="external-link"><img src="https://www.r-pkg.org/badges/version/redquack" alt="CRAN status"></a> <a href="https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
-<p>Transfer <a href="https://www.project-redcap.org/" class="external-link">REDCap</a> data to a database and use in R without exceeding available memory. Use this package for small, large, or growing datasets, and enjoy features such as data labeling, coded value conversion, and hearing a “quack” sound on success. Compatible with all databases but specifically optimized for <a href="https://duckdb.org/" class="external-link">DuckDB</a>.</p>
+<p>Transfer <a href="https://www.project-redcap.org/" class="external-link">REDCap</a> data to a database and use in R without exceeding available memory. Use this package for small or large projects, and enjoy features such as data labeling, converting coded values, and hearing a “quack” sound on success. Compatible with all databases but specifically optimized for <a href="https://duckdb.org/" class="external-link">DuckDB</a>.</p>
 <div class="section level2">
 <h2 id="use-case-and-solution">Use Case and Solution<a class="anchor" aria-label="anchor" href="#use-case-and-solution"></a>
 </h2>
@@ -94,7 +94,7 @@
 <p>Your API token allows R to interface with your REDCap instance, and it should be stored securely. I recommend using the <a href="https://keyring.r-lib.org" class="external-link">keyring</a> package to store your API token. For example:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">keyring</span><span class="fu">::</span><span class="fu"><a href="https://keyring.r-lib.org/reference/key_get.html" class="external-link">key_set</a></span><span class="op">(</span><span class="st">"redcap"</span>, <span class="st">"test"</span><span class="op">)</span></span></code></pre></div>
-<p>To run the following examples, use 9A81268476645C4E5F03428B8AC3AA7B.</p>
+<p>Use this token to run the examples: 9A81268476645C4E5F03428B8AC3AA7B</p>
 </div>
 <div class="section level2">
 <h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
@@ -246,10 +246,7 @@
 <span><span class="co">#&gt; Labels:</span></span>
 <span><span class="co">#&gt;  value  label</span></span>
 <span><span class="co">#&gt;      0 Female</span></span>
-<span><span class="co">#&gt;      1   Male</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">sex</span>, <span class="st">"label"</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; [1] "Gender"</span></span></code></pre></div>
+<span><span class="co">#&gt;      1   Male</span></span></code></pre></div>
 <p>Column labels only:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tbl_redcap.html">tbl_redcap</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/collect_labeled.html">collect_labeled</a></span><span class="op">(</span>vals <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -281,7 +278,7 @@
 <p>When you’re finished working with your data, clean up your connection:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/close_duckdb.html">close_duckdb</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></span></code></pre></div>
-<p>Or, if you do not need to access the data again, remove the database file:</p>
+<p>Or, if you do not need to access the data again, remove/delete the database file:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/remove_duckdb.html">remove_duckdb</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></span></code></pre></div>
 </div>
