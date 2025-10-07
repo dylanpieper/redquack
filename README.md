@@ -2,7 +2,7 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/redquack)](https://cran.r-project.org/package=redquack) [![R-CMD-check](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml)
 
-Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Use this package for small, large, or growing datasets, and enjoy features such as data labeling, coded value conversion, and hearing a "quack" sound on success. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/).
+Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Use this package for small or large projects, and enjoy features such as data labeling, converting coded values, and hearing a "quack" sound on success. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/).
 
 ## Use Case and Solution
 
@@ -50,7 +50,7 @@ Your API token allows R to interface with your REDCap instance, and it should be
 keyring::key_set("redcap", "test")
 ```
 
-To run the following examples, use 9A81268476645C4E5F03428B8AC3AA7B.
+Use this token to run the examples: 9A81268476645C4E5F03428B8AC3AA7B
 
 ## Basic Usage
 
@@ -210,9 +210,6 @@ data$sex
 #>  value  label
 #>      0 Female
 #>      1   Male
-
-attr(data$sex, "label") 
-#> [1] "Gender"
 ```
 
 Column labels only:
@@ -254,7 +251,7 @@ When you're finished working with your data, clean up your connection:
 close_duckdb(conn)
 ```
 
-Or, if you do not need to access the data again, remove the database file:
+Or, if you do not need to access the data again, remove/delete the database file:
 
 ``` r
 remove_duckdb(conn)
