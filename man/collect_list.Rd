@@ -7,16 +7,16 @@
 \usage{
 collect_list(
   data,
-  col_labels = FALSE,
-  val_labels = FALSE,
+  cols = FALSE,
+  vals = FALSE,
   convert = FALSE,
   metadata_table_name = "metadata"
 )
 
 collect_labeled_list(
   data,
-  col_labels = TRUE,
-  val_labels = TRUE,
+  cols = TRUE,
+  vals = TRUE,
   convert = TRUE,
   metadata_table_name = "metadata"
 )
@@ -24,10 +24,10 @@ collect_labeled_list(
 \arguments{
 \item{data}{A tbl object referencing a database table (created with \code{tbl(conn, "data")}).}
 
-\item{col_labels}{Logical indicating whether to apply column (variable) labels.
+\item{cols}{Logical indicating whether to apply column (variable) labels.
 Default is FALSE.}
 
-\item{val_labels}{Logical indicating whether to apply value labels to coded variables.
+\item{vals}{Logical indicating whether to apply value labels to coded variables.
 Default is FALSE.}
 
 \item{convert}{Logical indicating whether to convert labeled values
@@ -65,7 +65,7 @@ instruments <- tbl_redcap(conn) |>
 
 # Control labeling behavior
 instruments_no_val_labels <- tbl_redcap(conn) |>
-  collect_list(col_labels = FALSE)
+  collect_list(cols = FALSE)
 
 # Convert coded values to text labels
 instruments_with_codes <- tbl_redcap(conn) |>

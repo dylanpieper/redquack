@@ -169,31 +169,60 @@ metadata <- function(conn, metadata_table_name = NULL) {
     dplyr::collect()
 }
 
-#' Get Log Table
+#' Get Transfer Logs Table
 #'
 #' @description
-#' Creates a tbl reference to the log table in the database and
-#' automatically collects it as a data frame. Uses the log table name
+#' Creates a tbl reference to the transfer logs table in the database and
+#' automatically collects it as a data frame. Uses the transfer logs table name
 #' stored in the connection attributes if available.
 #'
 #' @param conn A DuckDB connection object.
-#' @param log_table_name Character string specifying the log table name.
+#' @param transfer_log_table_name Character string specifying the transfer logs table name.
 #'   If NULL, uses the table name stored in connection attributes.
 #'   Default is NULL.
 #'
 #' @return
-#' A data frame containing the log data.
+#' A data frame containing the transfer log data.
 #'
 #' @examples
 #' \dontrun{
-#' log <- logs(conn)
+#' transfer_log <- transfer_log(conn)
 #' }
 #'
 #' @importFrom dplyr tbl collect
 #'
 #' @export
-logs <- function(conn, log_table_name = NULL) {
-  table_name <- log_table_name %||% attr(conn, "log_table_name") %||% "logs"
+transfer_log <- function(conn, transfer_log_table_name = NULL) {
+  table_name <- transfer_log_table_name %||% attr(conn, "transfer_logs_table_name") %||% "transfer_log"
+  dplyr::tbl(conn, table_name) |>
+    dplyr::collect()
+}
+
+#' Get REDCap Logs Table
+#'
+#' @description
+#' Creates a tbl reference to the REDCap logs table in the database and
+#' automatically collects it as a data frame. Uses the REDCap logs table name
+#' stored in the connection attributes if available.
+#'
+#' @param conn A DuckDB connection object.
+#' @param redcap_log_table_name Character string specifying the REDCap logs table name.
+#'   If NULL, uses the table name stored in connection attributes.
+#'   Default is NULL.
+#'
+#' @return
+#' A data frame containing the REDCap audit log data.
+#'
+#' @examples
+#' \dontrun{
+#' redcap_log <- redcap_log(conn)
+#' }
+#'
+#' @importFrom dplyr tbl collect
+#'
+#' @export
+redcap_log <- function(conn, redcap_log_table_name = NULL) {
+  table_name <- redcap_log_table_name %||% attr(conn, "redcap_logs_table_name") %||% "redcap_log"
   dplyr::tbl(conn, table_name) |>
     dplyr::collect()
 }

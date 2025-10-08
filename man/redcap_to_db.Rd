@@ -9,8 +9,11 @@ redcap_to_db(
   url,
   token,
   data_table_name = "data",
-  log_table_name = "logs",
   metadata_table_name = "metadata",
+  transfer_log_table_name = "transfer_log",
+  redcap_log_table_name = "redcap_log",
+  redcap_log_begin_date = Sys.Date() - 6,
+  redcap_log_end_date = Sys.Date(),
   export_survey_fields = FALSE,
   export_data_access_groups = FALSE,
   blank_for_gray_form_status = FALSE,
@@ -41,12 +44,19 @@ This token is used for authentication and must have export permissions.}
 \item{data_table_name}{Character string specifying the name of the table to create
 or append data to. Default is "data". Can include schema name (e.g. "schema.table").}
 
-\item{log_table_name}{Character string specifying the name of the table to store
-transfer logs. Default is "logs". Can include schema name (e.g. "schema.logs").
-Set to NULL to disable logging.}
-
 \item{metadata_table_name}{Character string specifying the name of the table to store
 REDCap metadata. Default is "metadata". Can include schema name (e.g. "schema.metadata").}
+
+\item{transfer_log_table_name}{Character string specifying the name of the table to store
+transfer logs. Default is "transfer_log". Can include schema name (e.g. "schema.transfer_log").
+Set to NULL to disable logging.}
+
+\item{redcap_log_table_name}{Character string specifying the name of the table to store
+REDCap audit logs. Default is "redcap_log". Can include schema name (e.g. "schema.redcap_log").
+Set to NULL to skip REDCap log retrieval.}
+
+\item{redcap_log_end_date}{Date/POSIXct specifying the end date for REDCap log retrieval.
+Default is today.}
 
 \item{export_survey_fields}{Logical that specifies whether to export the
 survey identifier field (e.g., 'redcap_survey_identifier') or survey
@@ -100,6 +110,9 @@ only a progress bar ("progress"), or nothing ("none"). Default is "all".}
 completes or encounters errors. Default is TRUE.}
 
 \item{...}{Additional arguments passed to the REDCap API call.}
+
+\item{redcap_redcap_log_begin_date}{Date/POSIXct specifying the start date for REDCap log retrieval.
+Default is 6 days prior to today.}
 }
 \value{
 Returns a list with the following components:
@@ -114,11 +127,12 @@ Transfer REDCap data to a database in chunks of record IDs to minimize memory us
 }
 \details{
 This function transfers data from REDCap to any database in chunks, which helps manage memory
-usage when dealing with large projects. It creates three tables in the database:
+usage when dealing with large projects. It creates up to four tables in the database:
 \itemize{
 \item \code{data_table_name}: Contains all transferred REDCap records
 \item \code{metadata_table_name}: Contains REDCap metadata for field definitions and labeling
-\item \code{log_table_name}: Contains timestamped logs of the transfer process
+\item \code{transfer_log_table_name}: Contains timestamped logs of the transfer process
+\item \code{redcap_log_table_name}: Contains REDCap audit logs (optional)
 }
 
 The function automatically detects existing databases and handles them in three ways:
@@ -132,8 +146,12 @@ The function fetches record IDs, then processes records in chunks.
 If any error occurs during processing, the function will continue with remaining chunks
 but mark the transfer as incomplete.
 
+If \code{redcap_log_table_name} is provided, the function will also retrieve REDCap audit logs
+and store them in a separate table. The date range for log retrieval can be controlled
+with \code{redcap_log_begin_date} and \code{redcap_log_end_date} parameters.
+
 Data is first set to \strong{VARCHAR/TEXT} type for consistent handling across chunks.
-For DuckDB, data types are automatically optimized after all data is inserted:
+For DuckDB, data types are automatically optimized after data is inserted:
 \itemize{
 \item \strong{INTEGER}: Columns with only whole numbers
 \item \strong{DOUBLE}: Columns with decimal numbers

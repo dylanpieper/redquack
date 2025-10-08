@@ -2,15 +2,15 @@
 #'
 #' @param conn A DBI connection object
 #' @param data_table_ref The name of the data table in database
-#' @param log_table_ref The name of the log table in database
+#' @param transfer_logs_table_ref The name of the transfer logs table in database
 #' @param echo Show messages
 #' @return NULL invisibly
 #' @details Optimizes column data types by analyzing content and converting to appropriate types
 #' @keywords internal
 #' @noRd
-optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
+optimize_data_types <- function(conn, data_table_ref, transfer_logs_table_ref, echo) {
   if (!is_db_class(conn)) {
-    log_message(conn, log_table_ref, "WARNING", "Connection is not DuckDB, skipping optimization")
+    log_message(conn, transfer_logs_table_ref, "WARNING", "Connection is not DuckDB, skipping optimization")
     return(invisible(NULL))
   }
 
@@ -21,7 +21,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
     paste0("SELECT column_name FROM information_schema.columns WHERE table_name = '", data_table_str, "'")
   )
 
-  log_message(conn, log_table_ref, "INFO", paste("Optimizing", nrow(column_info), "columns"))
+  log_message(conn, transfer_logs_table_ref, "INFO", paste("Optimizing", nrow(column_info), "columns"))
 
   status_id <- NULL
 
@@ -45,7 +45,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
         )$is_integer
         if (integer_check) {
           DBI::dbExecute(conn, paste0("ALTER TABLE ", data_table_ref, " ALTER COLUMN ", safe_col, " TYPE INTEGER USING CAST(", safe_col, " AS INTEGER)"))
-          log_message(conn, log_table_ref, "INFO", paste("Column", col, "converted to INTEGER"))
+          log_message(conn, transfer_logs_table_ref, "INFO", paste("Column", col, "converted to INTEGER"))
           next
         }
 
@@ -61,7 +61,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
         )$is_numeric
         if (numeric_check) {
           DBI::dbExecute(conn, paste0("ALTER TABLE ", data_table_ref, " ALTER COLUMN ", safe_col, " TYPE DOUBLE USING CAST(", safe_col, " AS DOUBLE)"))
-          log_message(conn, log_table_ref, "INFO", paste("Column", col, "converted to DOUBLE"))
+          log_message(conn, transfer_logs_table_ref, "INFO", paste("Column", col, "converted to DOUBLE"))
           next
         }
 
@@ -76,7 +76,7 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
         )$is_date
         if (date_check) {
           DBI::dbExecute(conn, paste0("ALTER TABLE ", data_table_ref, " ALTER COLUMN ", safe_col, " TYPE DATE USING CAST(", safe_col, " AS DATE)"))
-          log_message(conn, log_table_ref, "INFO", paste("Column", col, "converted to DATE"))
+          log_message(conn, transfer_logs_table_ref, "INFO", paste("Column", col, "converted to DATE"))
           next
         }
 
@@ -91,11 +91,11 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
         )$is_timestamp
         if (timestamp_check) {
           DBI::dbExecute(conn, paste0("ALTER TABLE ", data_table_ref, " ALTER COLUMN ", safe_col, " TYPE TIMESTAMP USING CAST(", safe_col, " AS TIMESTAMP)"))
-          log_message(conn, log_table_ref, "INFO", paste("Column", col, "converted to TIMESTAMP"))
+          log_message(conn, transfer_logs_table_ref, "INFO", paste("Column", col, "converted to TIMESTAMP"))
         }
       },
       error = function(e) {
-        log_message(conn, log_table_ref, "WARNING", paste("Unable to optimize column", col, ":", e$message))
+        log_message(conn, transfer_logs_table_ref, "WARNING", paste("Unable to optimize column", col, ":", e$message))
       }
     )
   }
@@ -108,10 +108,10 @@ optimize_data_types <- function(conn, data_table_ref, log_table_ref, echo) {
   tryCatch(
     {
       DBI::dbExecute(conn, "PRAGMA force_compression = 'Auto'")
-      log_message(conn, log_table_ref, "INFO", "Enabled compression for DuckDB")
+      log_message(conn, transfer_logs_table_ref, "INFO", "Enabled compression for DuckDB")
     },
     error = function(e) {
-      log_message(conn, log_table_ref, "WARNING", paste("Unable to enable compression:", e$message))
+      log_message(conn, transfer_logs_table_ref, "WARNING", paste("Unable to enable compression:", e$message))
     }
   )
 

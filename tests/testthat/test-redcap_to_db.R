@@ -31,9 +31,9 @@ test_that("redquack complete workflow integration test", {
   expect_s3_class(dat$demographics, "tbl_df")
   expect_s3_class(dat$health, "tbl_df")
   expect_s3_class(dat$race_and_ethnicity, "tbl_df")
-  expect_equal(dim(dat$demographics), c(5, 9))
-  expect_equal(dim(dat$health), c(5, 6))
-  expect_equal(dim(dat$race_and_ethnicity), c(5, 3))
+  expect_equal(dim(dat$demographics), c(5, 10))
+  expect_equal(dim(dat$health), c(5, 7))
+  expect_equal(dim(dat$race_and_ethnicity), c(5, 10))
 
   # Test: filtered data returns expected dimensions
   dat_filtered <- tbl_redcap(conn) |>
@@ -42,9 +42,9 @@ test_that("redquack complete workflow integration test", {
 
   expect_type(dat_filtered, "list")
   expect_length(dat_filtered, 3)
-  expect_equal(dim(dat_filtered$demographics), c(2, 9))
-  expect_equal(dim(dat_filtered$health), c(2, 6))
-  expect_equal(dim(dat_filtered$race_and_ethnicity), c(2, 3))
+  expect_equal(dim(dat_filtered$demographics), c(2, 10))
+  expect_equal(dim(dat_filtered$health), c(2, 7))
+  expect_equal(dim(dat_filtered$race_and_ethnicity), c(2, 10))
 
   # Test: select() returns expected dimensions
   dat_selected <- tbl_redcap(conn) |>
@@ -119,11 +119,11 @@ test_that("redquack complete workflow integration test", {
   expect_s3_class(metadata_tbl, "tbl_df")
   expect_equal(dim(metadata_tbl), c(18, 19))
 
-  # Test: logs() returns expected structure
-  logs_tbl <- logs(conn)
+  # Test: transfer_log() returns expected structure
+  logs_tbl <- transfer_log(conn)
 
   expect_s3_class(logs_tbl, "tbl_df")
-  expect_equal(dim(logs_tbl), c(31, 3))
+  expect_equal(dim(logs_tbl), c(41, 3))
 
   # Test: collect_labeled() with default settings
   dat_labeled_flat <- tbl_redcap(conn) |>
@@ -173,12 +173,12 @@ test_that("redcap_to_db creates database with correct tables in DuckDB", {
   on.exit(cleanup_db(db))
 
   expect_true(DBI::dbExistsTable(db$conn, "data"))
-  expect_true(DBI::dbExistsTable(db$conn, "logs"))
+  expect_true(DBI::dbExistsTable(db$conn, "transfer_log"))
 
   data_count <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) AS count FROM data")$count
   expect_gt(data_count, 0)
 
-  log_count <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) AS count FROM logs")$count
+  log_count <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) AS count FROM transfer_log")$count
   expect_gt(log_count, 0)
 })
 
@@ -190,12 +190,12 @@ test_that("redcap_to_db creates database with correct tables in SQLite", {
   on.exit(cleanup_db(db))
 
   expect_true(DBI::dbExistsTable(db$conn, "data"))
-  expect_true(DBI::dbExistsTable(db$conn, "logs"))
+  expect_true(DBI::dbExistsTable(db$conn, "transfer_log"))
 
   data_count <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) AS count FROM data")$count
   expect_gt(data_count, 0)
 
-  log_count <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) AS count FROM logs")$count
+  log_count <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) AS count FROM transfer_log")$count
   expect_gt(log_count, 0)
 })
 
@@ -209,8 +209,8 @@ test_that("redcap_to_db handles different chunk sizes", {
   db_large <- create_test_db("large_chunk.duckdb", db_type = "duckdb", chunk_size = 5000)
   on.exit(cleanup_db(db_large), add = TRUE)
 
-  small_logs <- DBI::dbGetQuery(db_small$conn, "SELECT * FROM logs WHERE message LIKE '%Chunk%successfully%'")
-  large_logs <- DBI::dbGetQuery(db_large$conn, "SELECT * FROM logs WHERE message LIKE '%Chunk%successfully%'")
+  small_logs <- DBI::dbGetQuery(db_small$conn, "SELECT * FROM transfer_log WHERE message LIKE '%Chunk%successfully%'")
+  large_logs <- DBI::dbGetQuery(db_large$conn, "SELECT * FROM transfer_log WHERE message LIKE '%Chunk%successfully%'")
 
   # For small datasets, both chunk sizes might result in the same number of chunks
   # So we test that both completed successfully (at least 1 chunk each)
@@ -238,7 +238,7 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
   # Create a log table first
   DBI::dbExecute(
     conn,
-    "CREATE TABLE logs (timestamp TIMESTAMP, type VARCHAR(50), message TEXT)"
+    "CREATE TABLE transfer_log (timestamp TIMESTAMP, type VARCHAR(50), message TEXT)"
   )
 
   # Create sample data with various types (all stored as text initially)
@@ -264,7 +264,7 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
   DBI::dbWriteTable(conn, "data_opt", sample_data, overwrite = TRUE)
 
   # Call the optimize_data_types function on the optimized table only
-  optimize_data_types(conn, "data_opt", "logs", FALSE)
+  optimize_data_types(conn, "data_opt", "transfer_log", FALSE)
 
   # Retrieve schemas for both tables
   raw_schema <- DBI::dbGetQuery(conn, "PRAGMA table_info(data_raw)")
@@ -341,7 +341,7 @@ test_that("optimize_data_types correctly converts column types in DuckDB", {
   expect_equal(decimal_data$decimal_col, c(1.5, 2.7, -3.14, 0.0))
 
   # Check log entries
-  logs <- DBI::dbGetQuery(conn, "SELECT * FROM logs WHERE type = 'INFO'")
+  logs <- DBI::dbGetQuery(conn, "SELECT * FROM transfer_log WHERE type = 'INFO'")
 
   # More flexible log message checking - look for partial matches
   integer_log <- any(grepl("integer_col.*INTEGER", logs$message, ignore.case = TRUE) |
@@ -375,7 +375,7 @@ test_that("optimize_data_types gracefully handles SQLite", {
   # Create a log table first
   DBI::dbExecute(
     conn,
-    "CREATE TABLE logs (timestamp TIMESTAMP, type VARCHAR(50), message TEXT)"
+    "CREATE TABLE transfer_log (timestamp TIMESTAMP, type VARCHAR(50), message TEXT)"
   )
 
   # Create sample data
@@ -389,10 +389,10 @@ test_that("optimize_data_types gracefully handles SQLite", {
   DBI::dbWriteTable(conn, "data_opt", sample_data, overwrite = TRUE)
 
   # Call the optimize_data_types function
-  optimize_data_types(conn, "data_opt", "logs", FALSE)
+  optimize_data_types(conn, "data_opt", "transfer_log", FALSE)
 
   # Verify it didn't crash and logged the message
-  logs <- DBI::dbGetQuery(conn, "SELECT * FROM logs WHERE type = 'WARNING'")
+  logs <- DBI::dbGetQuery(conn, "SELECT * FROM transfer_log WHERE type = 'WARNING'")
   expect_true(any(grepl("Connection is not DuckDB, skipping optimization", logs$message)))
 })
 
@@ -403,19 +403,19 @@ test_that("redcap_to_db handles log table correctly", {
   db <- create_test_db("log_test.duckdb", db_type = "duckdb")
   on.exit(cleanup_db(db))
 
-  log_schema <- DBI::dbGetQuery(db$conn, "PRAGMA table_info(logs)")
+  log_schema <- DBI::dbGetQuery(db$conn, "PRAGMA table_info(transfer_log)")
   log_columns <- log_schema$name
 
   expect_true(all(c("timestamp", "type", "message") %in% log_columns))
 
-  success_logs <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) as count FROM logs WHERE type = 'SUCCESS'")
-  info_logs <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) as count FROM logs WHERE type = 'INFO'")
+  success_logs <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) as count FROM transfer_log WHERE type = 'SUCCESS'")
+  info_logs <- DBI::dbGetQuery(db$conn, "SELECT COUNT(*) as count FROM transfer_log WHERE type = 'INFO'")
 
   expect_gt(success_logs$count, 0)
   expect_gt(info_logs$count, 0)
 
-  time_ordered <- DBI::dbGetQuery(db$conn, "SELECT timestamp FROM logs ORDER BY timestamp")
-  expect_equal(nrow(time_ordered), DBI::dbGetQuery(db$conn, "SELECT COUNT(*) FROM logs")[[1]])
+  time_ordered <- DBI::dbGetQuery(db$conn, "SELECT timestamp FROM transfer_log ORDER BY timestamp")
+  expect_equal(nrow(time_ordered), DBI::dbGetQuery(db$conn, "SELECT COUNT(*) FROM transfer_log")[[1]])
 })
 
 test_that("all record IDs from REDCap are present in a SQLite database", {
@@ -481,7 +481,7 @@ test_that("all record IDs from REDCap are present in a SQLite database", {
     url = creds$uri,
     token = creds$token,
     data_table_name = "data",
-    log_table_name = "logs",
+    transfer_log_table_name = "transfer_log",
     record_id_name = record_id_name,
     beep = FALSE
   )

@@ -123,11 +123,35 @@ collect_list <- function(
     result_list <- list()
 
     for (instrument in instruments) {
+      # Get base field names from metadata for this instrument
       instrument_fields <- metadata_data$field_name[metadata_data$form_name == instrument]
       instrument_fields <- instrument_fields[!is.na(instrument_fields)]
 
-      # Each instrument needs the record ID to maintain relationships
+      # Start with record ID and base fields
       all_fields <- c(record_id_field, instrument_fields)
+      
+      # For checkbox fields, find all related columns (REDCap convention: field___1, field___2, etc.)
+      checkbox_fields <- metadata_data$field_name[
+        metadata_data$form_name == instrument & 
+        metadata_data$field_type == "checkbox" & 
+        !is.na(metadata_data$field_type)
+      ]
+      
+      if (length(checkbox_fields) > 0) {
+        for (checkbox_field in checkbox_fields) {
+          # Find all columns that match the checkbox pattern: field___*
+          checkbox_pattern <- paste0("^", checkbox_field, "___")
+          checkbox_columns <- names(collected_data)[grepl(checkbox_pattern, names(collected_data))]
+          all_fields <- c(all_fields, checkbox_columns)
+        }
+      }
+      
+      # Add completion field last (REDCap convention: instrument_complete)
+      completion_field <- paste0(instrument, "_complete")
+      if (completion_field %in% names(collected_data)) {
+        all_fields <- c(all_fields, completion_field)
+      }
+
       all_fields <- unique(all_fields)
 
       # Only include fields that exist in the collected data

@@ -47,7 +47,7 @@ create_test_db <- function(file_name, db_type = "duckdb", chunk_size = 5000, opt
     url = creds$uri,
     token = creds$token,
     data_table_name = "data",
-    log_table_name = "logs",
+    transfer_log_table_name = "transfer_log",
     record_id_name = "record_id",
     chunk_size = chunk_size,
     export_data_access_groups = TRUE,

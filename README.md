@@ -2,9 +2,9 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/redquack)](https://cran.r-project.org/package=redquack) [![R-CMD-check](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dylanpieper/redquack/actions/workflows/R-CMD-check.yaml)
 
-Transfer [REDCap](https://www.project-redcap.org/) data to a database and use in R without exceeding available memory. Use this package for small or large projects, and enjoy features such as data labeling, converting coded values, and hearing a "quack" sound on success. Compatible with all databases but specifically optimized for [DuckDB](https://duckdb.org/).
+Transfer [REDCap](https://www.project-redcap.org/) data to a database in chunks and use in R without exceeding available memory. Whether you have a large or small project, enjoy features such as data labeling, converting coded values, and hearing a "quack" sound on success. Compatible with all databases but optimized for [DuckDB](https://duckdb.org/).
 
-## Use Case and Solution
+## Problem and Solution
 
 Is your project outgrowing your computer? Have you seen this error when using the REDCap API to retrieve data?
 
@@ -12,7 +12,7 @@ Is your project outgrowing your computer? Have you seen this error when using th
 
 What does it mean? Well, R objects a stored in your random access memory (RAM). When your data gets too big, you hit your memory limit. **redquack's solution to this error is to store the data out of memory in a local database for easy retrieval in R.**
 
-The process:
+The solution:
 
 1.  Request all record IDs in REDCap, and split them into chunks
 2.  Request one chunk of the project data at a time
@@ -73,11 +73,11 @@ result <- redcap_to_db(
 
 -   `success`: Logical if the transfer was completed with no failed processing
 -   `error_chunks`: Vector of chunk numbers that failed processing
--   `time_s`: Numeric value for total seconds to transfer and optimize data
+-   `time_s`: Numeric value for total seconds to process all data
 
 ## Database Structure
 
-The database created by `redcap_to_db()` contains three tables:
+The database created by `redcap_to_db()` contains up to four tables:
 
 1.  `data`: Contains the raw REDCap records
 
@@ -85,16 +85,22 @@ The database created by `redcap_to_db()` contains three tables:
     data <- tbl_redcap(conn) |> collect()
     ```
 
-2.  `meta`: Contains project metadata for labeling and coded value conversion
+2.  `metadata`: Contains project metadata for labeling and coded value conversion
 
     ``` r
     meta <- metadata(conn)
     ```
 
-3.  `logs`: Contains operation logs of the transfer process for troubleshooting
+3.  `redcap_log`: Contains REDCap audit logs (from the past week by default)
 
     ``` r
-    logs <- logs(conn)
+    redcap_log <- redcap_log(conn)
+    ```
+
+4.  `transfer_log`: Contains operation logs of the transfer process
+
+    ``` r
+    transfer_log <- transfer_log(conn)
     ```
 
 ## Data Types
@@ -160,7 +166,7 @@ key_vars <- tbl_redcap(conn) |>
   select(record_id, email, sex, bmi) |>
   collect_list()
 
-# Simple column selection for analysis
+# Simple column selection
 analysis_data <- tbl_redcap(conn) |>
   select(email, sex) |>
   collect_labeled()
