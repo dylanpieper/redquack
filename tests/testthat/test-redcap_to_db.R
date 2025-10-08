@@ -69,7 +69,7 @@ test_that("redquack complete workflow integration test", {
   dat_complex <- tbl_redcap(conn) |>
     select(record_id, sex, bmi) |>
     group_by(sex) |>
-    filter(bmi < mean(bmi)) |>
+    filter(bmi < mean(bmi, na.rm = TRUE)) |>
     arrange(bmi) |>
     collect_list()
 
@@ -141,22 +141,22 @@ test_that("redquack complete workflow integration test", {
   expect_equal(as.numeric(dat_labeled_raw$sex), c(0, 1, 1, 0, 1))
 
   # Test: collect_labeled(cols = FALSE)
-  dat_no_col_labels <- tbl_redcap(conn) |>
+  dat_no_cols <- tbl_redcap(conn) |>
     collect_labeled(cols = FALSE)
 
-  expect_null(attr(dat_no_col_labels$sex, "label"))
+  expect_null(attr(dat_no_cols$sex, "label"))
 
   # Test: collect_labeled(vals = FALSE)
-  dat_no_val_labels <- tbl_redcap(conn) |>
+  dat_no_vals <- tbl_redcap(conn) |>
     collect_labeled(vals = FALSE)
 
-  expect_equal(attr(dat_no_val_labels$sex, "label"), "Gender")
+  expect_equal(attr(dat_no_vals$sex, "label"), "Gender")
 
   # Test: collect_labeled(convert = FALSE, cols = FALSE)
-  dat_labels_only <- tbl_redcap(conn) |>
+  dat_vals_only <- tbl_redcap(conn) |>
     collect_labeled(convert = FALSE, cols = FALSE)
 
-  sex_labels <- attr(dat_labels_only$sex, "labels")
+  sex_labels <- attr(dat_vals_only$sex, "labels")
   expect_equal(names(sex_labels), c("Female", "Male"))
   expect_equal(as.numeric(sex_labels), c(0, 1))
 

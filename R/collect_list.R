@@ -7,9 +7,9 @@
 #' Use \code{collect_labeled_list} as an alias for the same functionality.
 #'
 #' @param data A tbl object referencing a database table (created with `tbl(conn, "data")`).
-#' @param col_labels Logical indicating whether to apply column (variable) labels.
+#' @param cols Logical indicating whether to apply column (variable) labels.
 #'   Default is FALSE.
-#' @param val_labels Logical indicating whether to apply value labels to coded variables.
+#' @param vals Logical indicating whether to apply value labels to coded variables.
 #'   Default is FALSE.
 #' @param convert Logical indicating whether to convert labeled values
 #'   to their text labels (e.g., 0/1 becomes "No"/"Yes"). Default is FALSE.
@@ -39,7 +39,7 @@
 #'
 #' # Control labeling behavior
 #' instruments_no_val_labels <- tbl_redcap(conn) |>
-#'   collect_list(col_labels = FALSE)
+#'   collect_list(cols = FALSE)
 #'
 #' # Convert coded values to text labels
 #' instruments_with_codes <- tbl_redcap(conn) |>
@@ -65,8 +65,8 @@
 #' @export
 collect_list <- function(
     data,
-    col_labels = FALSE,
-    val_labels = FALSE,
+    cols = FALSE,
+    vals = FALSE,
     convert = FALSE,
     metadata_table_name = "metadata") {
   if (!inherits(data, "tbl_sql")) {
@@ -79,8 +79,8 @@ collect_list <- function(
 
   processed_data <- data
 
-  if (col_labels || val_labels || convert) {
-    processed_data <- collect_labeled(processed_data, cols = col_labels, vals = val_labels, convert = convert, metadata_table_name = metadata_table_name)
+  if (cols || vals || convert) {
+    processed_data <- collect_labeled(processed_data, cols = cols, vals = vals, convert = convert, metadata_table_name = metadata_table_name)
   }
 
   collected_data <- if (inherits(processed_data, "tbl_sql")) {
@@ -155,6 +155,6 @@ collect_list <- function(
 
 #' @rdname collect_list
 #' @export
-collect_labeled_list <- function(data, col_labels = TRUE, val_labels = TRUE, convert = TRUE, metadata_table_name = "metadata") {
-  collect_list(data = data, col_labels = col_labels, val_labels = val_labels, convert = convert, metadata_table_name = metadata_table_name)
+collect_labeled_list <- function(data, cols = TRUE, vals = TRUE, convert = TRUE, metadata_table_name = "metadata") {
+  collect_list(data = data, cols = cols, vals = vals, convert = convert, metadata_table_name = metadata_table_name)
 }
