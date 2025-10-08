@@ -69,13 +69,11 @@ result <- redcap_to_db(
 )
 ```
 
-`redcap_to_db()` only returns a list of metadata with class `redcap_transfer_result`:
+`redcap_to_db()` returns a list of metadata with class `redcap_transfer_result`:
 
 -   `success`: Logical if the transfer was completed with no failed processing
 -   `error_chunks`: Vector of chunk numbers that failed processing
 -   `time_s`: Numeric value for total seconds to transfer and optimize data
-
-These status indicators are useful for programming workflows. The actual data is stored in database and accessed via the database connection.
 
 ## Database Structure
 
@@ -123,7 +121,7 @@ Retrieve and manipulate your REDCap data with familiar [dplyr](https://dbplyr.ti
 
 ### Basic Data Retrieval
 
-Access your REDCap data as a single table:
+Retrieve your REDCap data as a single table:
 
 ``` r
 data <- tbl_redcap(conn) |> 
@@ -237,7 +235,7 @@ attr(data$sex, "label")
 
 ### Exporting Data
 
-You can also write a Parquet file directly from DuckDB. A Parquet file will be about 5 times smaller than a DuckDB file and easy to share:
+You can also write a Parquet file directly from DuckDB. A Parquet file will be much smaller than a DuckDB file and easy to share:
 
 ``` r
 save_parquet(conn, "redcap.parquet")
