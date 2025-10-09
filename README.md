@@ -17,10 +17,10 @@ The solution:
 1.  Request all record IDs in REDCap
 2.  Split the record IDs into chunks of 1,000 (default)
 3.  Request one chunk of the project data at a time
-4.  Transfer the chunk of data to a database
-5.  Remove the chunk from memory, and repeat until complete
+    a.  Transfer the chunk of data to a database
+    b.  Remove the chunk from memory
 
-API requests are handled by [httr2](#0), which brilliantly handles retries to ensure your data is transferred without any hiccups.
+API requests are handled by [httr2](#0), which persistently retries to ensure your data is transferred successfully.
 
 ## Installation
 
