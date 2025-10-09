@@ -20,7 +20,7 @@ The solution:
     - Transfer the chunk to a database
     - Remove the chunk from memory
 
-API requests are handled by [httr2](#0), which persistently retries to ensure your data is transferred successfully.
+API requests are handled by [httr2](https://httr2.r-lib.org), which persistently retries to ensure your data is transferred successfully.
 
 ## Installation
 
