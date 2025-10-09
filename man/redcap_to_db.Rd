@@ -55,6 +55,9 @@ Set to NULL to disable logging.}
 REDCap audit logs. Default is "redcap_log". Can include schema name (e.g. "schema.redcap_log").
 Set to NULL to skip REDCap log retrieval.}
 
+\item{redcap_log_begin_date}{Date/POSIXct specifying the start date for REDCap log retrieval.
+Default is 6 days prior to today.}
+
 \item{redcap_log_end_date}{Date/POSIXct specifying the end date for REDCap log retrieval.
 Default is today.}
 
@@ -94,7 +97,7 @@ Default is NULL (all events).}
 \item{record_id_name}{Character string specifying the field name that contains record
 identifiers used for chunking requests. Default is "record_id".}
 
-\item{chunk_size}{Integer specifying the number of record IDs to process per chunk.
+\item{chunk_size}{Integer specifying the number of record IDs per chunk.
 Default is 1000. Consider decreasing this for projects with many fields.}
 
 \item{chunk_delay}{Numeric value specifying the delay in seconds between chunked
@@ -110,9 +113,6 @@ only a progress bar ("progress"), or nothing ("none"). Default is "all".}
 completes or encounters errors. Default is TRUE.}
 
 \item{...}{Additional arguments passed to the REDCap API call.}
-
-\item{redcap_redcap_log_begin_date}{Date/POSIXct specifying the start date for REDCap log retrieval.
-Default is 6 days prior to today.}
 }
 \value{
 Returns a list with the following components:

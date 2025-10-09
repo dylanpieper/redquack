@@ -18,7 +18,7 @@
 #' @param redcap_log_table_name Character string specifying the name of the table to store
 #'   REDCap audit logs. Default is "redcap_log". Can include schema name (e.g. "schema.redcap_log").
 #'   Set to NULL to skip REDCap log retrieval.
-#' @param redcap_redcap_log_begin_date Date/POSIXct specifying the start date for REDCap log retrieval.
+#' @param redcap_log_begin_date Date/POSIXct specifying the start date for REDCap log retrieval.
 #'   Default is 6 days prior to today.
 #' @param redcap_log_end_date Date/POSIXct specifying the end date for REDCap log retrieval.
 #'   Default is today.
@@ -48,7 +48,7 @@
 #'   Default is NULL (all events).
 #' @param record_id_name Character string specifying the field name that contains record
 #'   identifiers used for chunking requests. Default is "record_id".
-#' @param chunk_size Integer specifying the number of record IDs to process per chunk.
+#' @param chunk_size Integer specifying the number of record IDs per chunk.
 #'   Default is 1000. Consider decreasing this for projects with many fields.
 #' @param chunk_delay Numeric value specifying the delay in seconds between chunked
 #'   requests. Default is 0.5 seconds. Adjust to respect REDCap server limits.
@@ -361,11 +361,11 @@ redcap_to_db <- function(
       }
     }
 
-    log_message(conn, transfer_logs_table_ref, "INFO", "Requesting metadata from REDCap")
+    log_message(conn, transfer_logs_table_ref, "INFO", "Requesting metadata")
 
     status_id <- NULL
     if (echo == "all") {
-      status_id <- cli::cli_status("Sending request to REDCap API for metadata...")
+      status_id <- cli::cli_status("Requesting metadata...")
     }
 
     tryCatch(
@@ -385,10 +385,6 @@ redcap_to_db <- function(
 
         raw_text <- perform_redcap_request(req)
 
-        if (echo == "all") {
-          cli::cli_status_update(status_id, "Processing returned metadata...")
-        }
-
         metadata <- readr::read_csv(
           raw_text,
           col_types = readr::cols(.default = readr::col_character()),
@@ -397,7 +393,7 @@ redcap_to_db <- function(
 
         if (nrow(metadata) == 0) {
           if (echo == "all") cli::cli_status_clear(status_id)
-          cli::cli_abort("No metadata returned from REDCap")
+          cli::cli_abort("No metadata returned")
         }
 
         DBI::dbAppendTable(conn, name = metadata_table_name, metadata)
@@ -428,10 +424,10 @@ redcap_to_db <- function(
 
         DBI::dbAppendTable(conn, name = metadata_table_name, config_row)
 
-        log_message(conn, transfer_logs_table_ref, "INFO", paste("Stored", nrow(metadata), "metadata fields"))
+        log_message(conn, transfer_logs_table_ref, "INFO", paste("Transferred metadata"))
         if (echo == "all") {
           cli::cli_status_clear(status_id)
-          cli::cli_alert_success("Stored {nrow(metadata)} metadata fields")
+          cli::cli_alert_success("Transferred metadata")
         }
 
         return(TRUE)
@@ -461,7 +457,7 @@ redcap_to_db <- function(
       }
     }
 
-    log_message(conn, transfer_logs_table_ref, "INFO", "Requesting REDCap logs from REDCap")
+    log_message(conn, transfer_logs_table_ref, "INFO", "Requesting logs")
 
     # Check if we need to batch by day (>1 day difference)
     if (!is.null(redcap_log_begin_date) && !is.null(redcap_log_end_date)) {
@@ -476,7 +472,7 @@ redcap_to_db <- function(
 
     status_id <- NULL
     if (echo == "all") {
-      status_id <- cli::cli_status("Sending request to REDCap API for logs...")
+      status_id <- cli::cli_status("Requesting logs...")
     }
 
     tryCatch(
@@ -503,10 +499,6 @@ redcap_to_db <- function(
 
         raw_text <- perform_redcap_request(req)
 
-        if (echo == "all") {
-          cli::cli_status_update(status_id, "Processing returned REDCap logs...")
-        }
-
         redcap_logs <- readr::read_csv(
           raw_text,
           col_types = readr::cols(.default = readr::col_character()),
@@ -515,7 +507,7 @@ redcap_to_db <- function(
 
         if (nrow(redcap_logs) == 0) {
           if (echo == "all") cli::cli_status_clear(status_id)
-          log_message(conn, transfer_logs_table_ref, "INFO", "No REDCap logs returned from REDCap")
+          log_message(conn, transfer_logs_table_ref, "INFO", "No logs returned from REDCap")
           return(TRUE)
         }
 
@@ -530,10 +522,10 @@ redcap_to_db <- function(
           )
         }
 
-        log_message(conn, transfer_logs_table_ref, "INFO", paste("Stored", nrow(redcap_logs), "log entries", date_range_msg))
+        log_message(conn, transfer_logs_table_ref, "INFO", paste("Transferred", nrow(redcap_logs), "log entries", date_range_msg))
         if (echo == "all") {
           cli::cli_status_clear(status_id)
-          cli::cli_alert_success("Stored {nrow(redcap_logs)} log entries{date_range_msg}")
+          cli::cli_alert_success("Transferred {nrow(redcap_logs)} log entries{date_range_msg}")
         }
 
         return(TRUE)
@@ -556,7 +548,7 @@ redcap_to_db <- function(
     total_days <- length(date_sequence)
     total_logs <- 0
 
-    log_message(conn, transfer_logs_table_ref, "INFO", paste("Batching REDCap logs by day:", total_days, "days from", begin_date, "to", end_date))
+    log_message(conn, transfer_logs_table_ref, "INFO", paste("Requesting REDCap logs by day:", total_days, "days from", begin_date, "to", end_date))
 
     if (echo %in% c("all", "progress")) {
       pb <- cli::cli_progress_bar(
@@ -601,7 +593,7 @@ redcap_to_db <- function(
             DBI::dbAppendTable(conn, name = redcap_log_table_name, day_logs)
             total_logs <- total_logs + nrow(day_logs)
 
-            log_message(conn, transfer_logs_table_ref, "INFO", paste("Stored", nrow(day_logs), "log entries for", current_date))
+            log_message(conn, transfer_logs_table_ref, "INFO", paste("Transferred", nrow(day_logs), "log entries for", current_date))
           }
 
           if (echo %in% c("all", "progress")) {
@@ -627,20 +619,20 @@ redcap_to_db <- function(
 
     date_range_msg <- paste(" from", begin_date, "to", end_date)
 
-    log_message(conn, transfer_logs_table_ref, "INFO", paste("Stored", total_logs, "total log entries", date_range_msg))
+    log_message(conn, transfer_logs_table_ref, "INFO", paste("Transferred", total_logs, "log entries", date_range_msg))
     if (echo == "all") {
-      cli::cli_alert_success("Stored {total_logs} total log entries{date_range_msg}")
+      cli::cli_alert_success("Transferred {total_logs} log entries{date_range_msg}")
     }
 
     return(TRUE)
   }
 
   fetch_record_ids <- function(transfer_logs_table_ref, data_table_ref, start_time) {
-    log_message(conn, transfer_logs_table_ref, "INFO", "Requesting record IDs from REDCap")
+    log_message(conn, transfer_logs_table_ref, "INFO", "Requesting record IDs")
 
     status_id <- NULL
     if (echo == "all") {
-      status_id <- cli::cli_status("Sending request to REDCap API for record IDs...")
+      status_id <- cli::cli_status("Requesting record IDs...")
     }
 
     tryCatch(
@@ -657,10 +649,6 @@ redcap_to_db <- function(
         )
 
         raw_text <- perform_redcap_request(req)
-
-        if (echo == "all") {
-          cli::cli_status_update(status_id, "Processing returned record IDs...")
-        }
 
         result_data <- readr::read_csv(
           raw_text,
@@ -700,17 +688,17 @@ redcap_to_db <- function(
             return(NULL)
           }
 
-          log_message(conn, transfer_logs_table_ref, "INFO", paste("Received", length(record_ids), "record IDs to process out of", total_records))
+          log_message(conn, transfer_logs_table_ref, "INFO", paste("Received", length(record_ids), "record IDs out of", total_records))
           if (echo == "all") {
             cli::cli_status_clear(status_id)
-            cli::cli_alert_success("Received {length(record_ids)} record IDs to process out of {total_records}")
+            cli::cli_alert_success("Received {length(record_ids)} record IDs out of {total_records}")
           }
         } else {
           record_ids <- all_record_ids
-          log_message(conn, transfer_logs_table_ref, "INFO", paste("Received", total_records, "record IDs to process"))
+          log_message(conn, transfer_logs_table_ref, "INFO", paste("Received", total_records, "record IDs"))
           if (echo == "all") {
             cli::cli_status_clear(status_id)
-            cli::cli_alert_success("Received {total_records} record IDs to process")
+            cli::cli_alert_success("Received {total_records} record IDs")
           }
         }
 
@@ -777,7 +765,7 @@ redcap_to_db <- function(
     if (echo %in% c("all", "progress")) {
       pb <- cli::cli_progress_bar(
         format = paste0(
-          "Transferring records in chunks [{cli::pb_current}/{cli::pb_total}] ",
+          "Transferring records [{cli::pb_current}/{cli::pb_total}] ",
           "[{cli::pb_bar}] {cli::pb_percent} | ETA: {cli::pb_eta}"
         ),
         total = num_chunks
@@ -926,7 +914,7 @@ redcap_to_db <- function(
 
           pb <- cli::cli_progress_bar(
             format = paste0(
-              "Transferring records in chunks [{cli::pb_current}/{cli::pb_total}] ",
+              "Transferring records [{cli::pb_current}/{cli::pb_total}] ",
               "[{cli::pb_bar}] {cli::pb_percent} | ETA: {cli::pb_eta}"
             ),
             total = num_chunks,
@@ -968,12 +956,12 @@ redcap_to_db <- function(
     formatted_chunk_time <- format_elapsed_time(total_chunk_time)
 
     if (echo == "all") {
-      cli::cli_alert_success("Stored {record_count} rows of project data in {formatted_chunk_time}")
+      cli::cli_alert_success("Transferred {record_count} rows of project data in {formatted_chunk_time}")
     }
 
     optimize_data_types(conn, data_table_ref, transfer_logs_table_ref, echo)
 
-    log_message(conn, transfer_logs_table_ref, "INFO", paste("Successfully inserted", record_count, "rows into database"))
+    log_message(conn, transfer_logs_table_ref, "INFO", paste("Successfully transferred", record_count, "rows of project data"))
 
     end_time <- Sys.time()
     elapsed <- difftime(end_time, start_time, units = "secs")
@@ -1059,9 +1047,9 @@ redcap_to_db <- function(
           time_s = round(as.numeric(elapsed_sec))
         ))
       } else {
-        log_message(conn, transfer_logs_table_ref, "ERROR", "No records returned from REDCap")
+        log_message(conn, transfer_logs_table_ref, "ERROR", "No records returned")
         if (echo %in% c("all", "progress")) {
-          cli::cli_alert_danger("No records returned from REDCap")
+          cli::cli_alert_danger("No records returned")
         }
         return(list(
           success = FALSE,

@@ -14,10 +14,11 @@ What does it mean? Well, R objects a stored in your random access memory (RAM). 
 
 The solution:
 
-1.  Request all record IDs in REDCap, and split them into chunks
-2.  Request one chunk of the project data at a time
-3.  Transfer the chunk of data to a database
-4.  Remove the chunk from memory, and repeat from step 2
+1.  Request all record IDs in REDCap
+2.  Split the record IDs into chunks of 1,000 (default)
+3.  Request one chunk of the project data at a time
+4.  Transfer the chunk of data to a database
+5.  Remove the chunk from memory, and repeat until complete
 
 Once complete, you can retrieve your data from the database and use it in R.
 
@@ -125,7 +126,7 @@ inspect(conn)
 
 Retrieve and manipulate your REDCap data with familiar [dplyr](https://dbplyr.tidyverse.org/) verbs and [tbl-like syntax](https://dbplyr.tidyverse.org/reference/tbl.src_dbi.html). The key difference is you reference the database table first using `tbl_redcap()`.
 
-### Basic Data Retrieval
+### Basic Retrieval
 
 Retrieve your REDCap data as a single table:
 
@@ -143,7 +144,7 @@ instruments <- tbl_redcap(conn) |>
   collect_list() 
 ```
 
-Assign instruments to the global environment:
+Assign instrument data frames to the global environment:
 
 ``` r
 tbl_redcap(conn) |>
@@ -255,7 +256,7 @@ When you're finished working with your data, clean up your connection:
 close_duckdb(conn)
 ```
 
-Or, if you do not need to access the data again, remove/delete the database file:
+Or, if you do not need to access the data again, remove/delete the file:
 
 ``` r
 remove_duckdb(conn)

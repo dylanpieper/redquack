@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{inspect}
 \alias{inspect}
-\title{Inspect Data Table Structure}
+\title{Inspect Project Data Table Structure}
 \usage{
 inspect(conn, table_name = NULL)
 }
@@ -18,7 +18,7 @@ A data frame containing table information with columns for
 column ID, name, type, not null status, default value, and primary key.
 }
 \description{
-Inspects the structure of the data table showing column information
+Inspects the structure of the project data table showing column information
 including name, type, and properties. This is a convenience wrapper
 around DBI::dbGetQuery() for examining table schema. Uses the data table name
 stored in the connection attributes if available.

@@ -227,10 +227,10 @@ redcap_log <- function(conn, redcap_log_table_name = NULL) {
     dplyr::collect()
 }
 
-#' Inspect Data Table Structure
+#' Inspect Project Data Table Structure
 #'
 #' @description
-#' Inspects the structure of the data table showing column information
+#' Inspects the structure of the project data table showing column information
 #' including name, type, and properties. This is a convenience wrapper
 #' around DBI::dbGetQuery() for examining table schema. Uses the data table name
 #' stored in the connection attributes if available.
