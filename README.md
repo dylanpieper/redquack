@@ -20,7 +20,7 @@ The solution:
 4.  Transfer the chunk of data to a database
 5.  Remove the chunk from memory, and repeat until complete
 
-The API requests are handled by [httr2](#0), which brilliantly takes care of retries to ensure that all of your data is transferred with no hiccups.
+API requests are handled by [httr2](#0), which brilliantly handles retries to ensure your data is transferred without any hiccups.
 
 ## Installation
 
