@@ -42,7 +42,7 @@
 <h2 class="pkg-version" data-toc-text="0.3.0" id="redquack-030">redquack 0.3.0<a class="anchor" aria-label="anchor" href="#redquack-030"></a></h2>
 <div class="section level3">
 <h3 id="new-features-0-3-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
-<ul><li>Interface redesign with new functions for easy data access and manipulation:
+<ul><li>Interface redesign with new convience functions:
 <ul><li>
 <code><a href="../reference/use_duckdb.html">use_duckdb()</a></code> and <code><a href="../reference/close_duckdb.html">close_duckdb()</a></code> for database connection management</li>
 <li>
@@ -56,25 +56,33 @@
 <li>
 <code><a href="../reference/list_to_env.html">list_to_env()</a></code> for loading instruments into the global environment</li>
 <li>
-<code><a href="../reference/metadata.html">metadata()</a></code> and <code><a href="../reference/logs.html">logs()</a></code> for accessing stored metadata and transfer logs</li>
+<code><a href="../reference/metadata.html">metadata()</a></code> and <code>logs()</code> for accessing stored metadata and transfer logs</li>
 <li>
-<code><a href="../reference/inspect.html">inspect()</a></code> for examining table structure</li>
+<code><a href="../reference/inspect.html">inspect()</a></code> for examining table structure for project data</li>
 <li>
 <code><a href="../reference/save_parquet.html">save_parquet()</a></code> for efficient data export</li>
 </ul></li>
+<li>Add REDCap audit logs (<code><a href="../reference/redcap_log.html">redcap_log()</a></code>) with configurable date ranges</li>
 </ul></div>
 <div class="section level3">
 <h3 id="lifecycle-changes-0-3-0">Lifecycle Changes<a class="anchor" aria-label="anchor" href="#lifecycle-changes-0-3-0"></a></h3>
-<ul><li>Rename <code>redcap_uri</code> parameter to <code>url</code> in <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> for simplicity</li>
-<li>Rename <code>verbose</code> to <code>echo</code> in <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> and change from logical to string options: “all” (default), “progress”, or “none”, which is designed to help with integration into other packages where only the progress bar is desired</li>
+<ul><li>Rename <code>logs()</code> to <code><a href="../reference/transfer_log.html">transfer_log()</a></code>
+</li>
+<li>Rename <code>log_table_name</code> parameter to <code>transfer_log_table_name</code> in <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code>
+</li>
+<li>Rename <code>redcap_uri</code> parameter to <code>url</code> in <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code>
+</li>
+<li>Rename <code>verbose</code> to <code>echo</code> in <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> and change from logical to string options: “all” (default), “progress”, or “none”</li>
 <li>Add <code>metadata_table_name</code> parameter to <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> for storing REDCap field definitions</li>
+<li>Add <code>redcap_log_table_name</code> parameter to <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> for customizing REDCap audit log table name and schema</li>
+<li>Add <code>redcap_log_begin_date</code> and <code>redcap_log_end_date</code> parameters to <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> for configurable REDCap log date ranges</li>
 <li>Remove data export formatting parameters (<code>raw_or_label</code>, <code>raw_or_label_headers</code>, <code>export_checkbox_label</code>) in <code><a href="../reference/redcap_to_db.html">redcap_to_db()</a></code> as labeling is now handled by collection functions</li>
 <li>Import dplyr, dbplyr, duckdb, labelled, and rlang as new dependencies</li>
 </ul></div>
 <div class="section level3">
 <h3 id="minor-improvements-0-3-0">Minor Improvements<a class="anchor" aria-label="anchor" href="#minor-improvements-0-3-0"></a></h3>
 <ul><li>Add S3 methods for dplyr verbs (filter, select, arrange, group_by) that preserve REDCap table attributes</li>
-<li>Automatic record ID preservation in across multiple instruments</li>
+<li>Automatic record ID preservation across multiple instruments</li>
 </ul></div>
 </div>
     <div class="section level2">

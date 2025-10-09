@@ -50,8 +50,11 @@
 <span>  <span class="va">url</span>,</span>
 <span>  <span class="va">token</span>,</span>
 <span>  data_table_name <span class="op">=</span> <span class="st">"data"</span>,</span>
-<span>  log_table_name <span class="op">=</span> <span class="st">"logs"</span>,</span>
 <span>  metadata_table_name <span class="op">=</span> <span class="st">"metadata"</span>,</span>
+<span>  transfer_log_table_name <span class="op">=</span> <span class="st">"transfer_log"</span>,</span>
+<span>  redcap_log_table_name <span class="op">=</span> <span class="st">"redcap_log"</span>,</span>
+<span>  redcap_log_begin_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">6</span>,</span>
+<span>  redcap_log_end_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  export_survey_fields <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  export_data_access_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  blank_for_gray_form_status <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -94,15 +97,31 @@ This token is used for authentication and must have export permissions.</p></dd>
 or append data to. Default is "data". Can include schema name (e.g. "schema.table").</p></dd>
 
 
-<dt id="arg-log-table-name">log_table_name<a class="anchor" aria-label="anchor" href="#arg-log-table-name"></a></dt>
-<dd><p>Character string specifying the name of the table to store
-transfer logs. Default is "logs". Can include schema name (e.g. "schema.logs").
-Set to NULL to disable logging.</p></dd>
-
-
 <dt id="arg-metadata-table-name">metadata_table_name<a class="anchor" aria-label="anchor" href="#arg-metadata-table-name"></a></dt>
 <dd><p>Character string specifying the name of the table to store
 REDCap metadata. Default is "metadata". Can include schema name (e.g. "schema.metadata").</p></dd>
+
+
+<dt id="arg-transfer-log-table-name">transfer_log_table_name<a class="anchor" aria-label="anchor" href="#arg-transfer-log-table-name"></a></dt>
+<dd><p>Character string specifying the name of the table to store
+transfer logs. Default is "transfer_log". Can include schema name (e.g. "schema.transfer_log").
+Set to NULL to disable logging.</p></dd>
+
+
+<dt id="arg-redcap-log-table-name">redcap_log_table_name<a class="anchor" aria-label="anchor" href="#arg-redcap-log-table-name"></a></dt>
+<dd><p>Character string specifying the name of the table to store
+REDCap audit logs. Default is "redcap_log". Can include schema name (e.g. "schema.redcap_log").
+Set to NULL to skip REDCap log retrieval.</p></dd>
+
+
+<dt id="arg-redcap-log-begin-date">redcap_log_begin_date<a class="anchor" aria-label="anchor" href="#arg-redcap-log-begin-date"></a></dt>
+<dd><p>Date/POSIXct specifying the start date for REDCap log retrieval.
+Default is 6 days prior to today.</p></dd>
+
+
+<dt id="arg-redcap-log-end-date">redcap_log_end_date<a class="anchor" aria-label="anchor" href="#arg-redcap-log-end-date"></a></dt>
+<dd><p>Date/POSIXct specifying the end date for REDCap log retrieval.
+Default is today.</p></dd>
 
 
 <dt id="arg-export-survey-fields">export_survey_fields<a class="anchor" aria-label="anchor" href="#arg-export-survey-fields"></a></dt>
@@ -162,7 +181,7 @@ identifiers used for chunking requests. Default is "record_id".</p></dd>
 
 
 <dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
-<dd><p>Integer specifying the number of record IDs to process per chunk.
+<dd><p>Integer specifying the number of record IDs per chunk.
 Default is 1000. Consider decreasing this for projects with many fields.</p></dd>
 
 
@@ -199,17 +218,21 @@ completes or encounters errors. Default is TRUE.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function transfers data from REDCap to any database in chunks, which helps manage memory
-usage when dealing with large projects. It creates three tables in the database:</p><ul><li><p><code>data_table_name</code>: Contains all transferred REDCap records</p></li>
+usage when dealing with large projects. It creates up to four tables in the database:</p><ul><li><p><code>data_table_name</code>: Contains all transferred REDCap records</p></li>
 <li><p><code>metadata_table_name</code>: Contains REDCap metadata for field definitions and labeling</p></li>
-<li><p><code>log_table_name</code>: Contains timestamped logs of the transfer process</p></li>
+<li><p><code>transfer_log_table_name</code>: Contains timestamped logs of the transfer process</p></li>
+<li><p><code>redcap_log_table_name</code>: Contains REDCap audit logs (optional)</p></li>
 </ul><p>The function automatically detects existing databases and handles them in three ways:</p><ul><li><p>If no table exists, starts a new transfer process</p></li>
 <li><p>If a table exists but is incomplete, resumes from the last processed record ID</p></li>
 <li><p>If a table exists and is complete, returns success without reprocessing</p></li>
 </ul><p>The function fetches record IDs, then processes records in chunks.
 If any error occurs during processing, the function will continue with remaining chunks
 but mark the transfer as incomplete.</p>
+<p>If <code>redcap_log_table_name</code> is provided, the function will also retrieve REDCap audit logs
+and store them in a separate table. The date range for log retrieval can be controlled
+with <code>redcap_log_begin_date</code> and <code>redcap_log_end_date</code> parameters.</p>
 <p>Data is first set to <strong>VARCHAR/TEXT</strong> type for consistent handling across chunks.
-For DuckDB, data types are automatically optimized after all data is inserted:</p><ul><li><p><strong>INTEGER</strong>: Columns with only whole numbers</p></li>
+For DuckDB, data types are automatically optimized after data is inserted:</p><ul><li><p><strong>INTEGER</strong>: Columns with only whole numbers</p></li>
 <li><p><strong>DOUBLE</strong>: Columns with decimal numbers</p></li>
 <li><p><strong>DATE</strong>: Columns with valid dates</p></li>
 <li><p><strong>TIMESTAMP</strong>: Columns with valid timestamps</p></li>
