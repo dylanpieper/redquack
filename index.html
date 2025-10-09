@@ -69,11 +69,14 @@
 <ol style="list-style-type: decimal">
 <li>Request all record IDs in REDCap</li>
 <li>Split the record IDs into chunks of 1,000 (default)</li>
-<li>Request one chunk of the project data at a time</li>
+<li>Request one chunk of the project data at a time
+<ul>
 <li>Transfer the chunk of data to a database</li>
-<li>Remove the chunk from memory, and repeat until complete</li>
+<li>Remove the chunk from memory</li>
+</ul>
+</li>
 </ol>
-<p>The API requests are handled by <a href="#id_0">httr2</a>, which brilliantly takes care of retries to ensure that all of your data is transferred with no hiccups.</p>
+<p>API requests are handled by <a href="#id_0">httr2</a>, which persistently retries to ensure your data is transferred successfully.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
