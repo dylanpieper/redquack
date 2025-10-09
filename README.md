@@ -20,7 +20,7 @@ The solution:
 4.  Transfer the chunk of data to a database
 5.  Remove the chunk from memory, and repeat until complete
 
-Once complete, you can retrieve your data from the database and use it in R.
+The API requests are handled by [httr2](#0), which brilliantly takes care of retries to ensure that all of your data is transferred with no hiccups.
 
 ## Installation
 
@@ -92,7 +92,7 @@ The database created by `redcap_to_db()` contains up to four tables:
     meta <- metadata(conn)
     ```
 
-3.  `redcap_log`: Contains REDCap audit logs (from the past week by default)
+3.  `redcap_log`: Contains REDCap audit logs from the past week (default)
 
     ``` r
     redcap_log <- redcap_log(conn)
