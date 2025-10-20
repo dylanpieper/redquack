@@ -198,7 +198,7 @@ data <- tbl_redcap(conn) |> collect_labeled()
 
 data$sex
 #> [1] "Female" "Male"   "Male"   "Female" "Male"  
-attr(,"label")
+attr(data$sex, "label")
 #> [1] "Gender"
 ```
 
@@ -224,7 +224,7 @@ data <- tbl_redcap(conn) |> collect_labeled(vals = FALSE)
 
 data$sex
 #> [1] 0 1 1 0 1
-#> attr(,"label")
+#> attr(data$sex, "label")
 #> [1] "Gender"
 ```
 
