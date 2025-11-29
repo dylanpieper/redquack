@@ -10,15 +10,15 @@ Is your project outgrowing your computer? Have you seen this error when using th
 
 **Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
-What does it mean? Well, R objects a stored in your random access memory (RAM). When your data gets too big, you hit your memory limit. **redquack's solution to this error is to store the data out of memory in a local database for easy retrieval in R.**
+What does it mean? Well, R objects are stored in your computer's random access memory (RAM). When your REDCap project data gets too big, you reach your memory limit during import. **redquack's solution to this error is to store the data on disk in a database rather than in RAM, allowing you to work with the data in R without loading it all into memory at once.**
 
 The solution:
 
 1.  Request all record IDs in REDCap
 2.  Split the record IDs into chunks of 1,000 (default)
 3.  Request one chunk of the project data at a time
-    - Transfer the chunk to a database
-    - Remove the chunk from memory
+    -   Transfer the chunk to a database
+    -   Remove the chunk from memory
 
 API requests are handled by [httr2](https://httr2.r-lib.org), which persistently retries to ensure your data is transferred successfully.
 
@@ -55,13 +55,13 @@ Use this token to run the examples: 9A81268476645C4E5F03428B8AC3AA7B
 
 ## Basic Usage
 
-Data from REDCap is transferred to a database connection in chunks of record IDs:
+Data from REDCap is transferred to a database connection (see [DBI](https://dbi.r-dbi.org)) in chunks of record IDs:
 
 ``` r
 library(redquack)
 library(dplyr)
 
-conn <- use_duckdb()
+conn <- use_duckdb() # Creates connection to "redcap.duckdb" file
 
 result <- redcap_to_db(
   conn,
