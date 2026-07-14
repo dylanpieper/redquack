@@ -10,7 +10,7 @@ Is your project outgrowing your computer? Have you seen this error when using th
 
 **Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()**
 
-What does it mean? Well, R objects are stored in your computer's random access memory (RAM). When your REDCap project data gets too big, you reach your memory limit during import. **redquack's solution to this error is to store the data on disk in a database rather than in RAM, allowing you to work with the data in R without loading it all into memory at once.**
+What does it mean? Well, R objects are stored in your computer's random access memory (RAM). When your REDCap project data gets too big, you reach your memory limit. **redquack's solution to this error is to store the data on disk in a database rather than in RAM, allowing you to work with the data in R without loading it all into memory at once.**
 
 The solution:
 
