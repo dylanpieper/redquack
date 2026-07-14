@@ -6,12 +6,12 @@
 
 ## Citation
 
-Pieper D (2025). *redquack: Transfer 'REDCap' Data to Database*. R
+Pieper D (2026). *redquack: Transfer 'REDCap' Data to Database*. R
 package version 0.3.0.
 
     @Manual{,
       title = {redquack: Transfer 'REDCap' Data to Database},
       author = {Dylan Pieper},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.3.0},
     }

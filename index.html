@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Transfer REDCap Data to Database • redquack</title>
 <script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Transfer REDCap Data to Database">
 <meta name="description" content='Transfer REDCap (Research Electronic Data Capture) data to a database, specifically optimized for DuckDB. Processes data in chunks to handle large datasets without exceeding available memory. Features include data labeling, coded value conversion, and hearing a "quack" sound on success.'>
@@ -64,7 +64,7 @@
 </h2>
 <p>Is your project outgrowing your computer? Have you seen this error when using the REDCap API to retrieve data?</p>
 <p><strong>Error: vector memory limit of 16.0 GB reached, see mem.maxVSize()</strong></p>
-<p>What does it mean? Well, R objects are stored in your computer’s random access memory (RAM). When your REDCap project data gets too big, you reach your memory limit during import. <strong>redquack’s solution to this error is to store the data on disk in a database rather than in RAM, allowing you to work with the data in R without loading it all into memory at once.</strong></p>
+<p>What does it mean? Well, R objects are stored in your computer’s random access memory (RAM). When your REDCap project data gets too big, you reach your memory limit. <strong>redquack’s solution to this error is to store the data on disk in a database rather than in RAM, allowing you to work with the data in R without loading it all into memory at once.</strong></p>
 <p>The solution:</p>
 <ol style="list-style-type: decimal">
 <li>Request all record IDs in REDCap</li>
@@ -334,7 +334,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

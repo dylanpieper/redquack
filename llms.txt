@@ -20,10 +20,9 @@ using the REDCap API to retrieve data?
 
 What does it mean? Well, R objects are stored in your computer’s random
 access memory (RAM). When your REDCap project data gets too big, you
-reach your memory limit during import. **redquack’s solution to this
-error is to store the data on disk in a database rather than in RAM,
-allowing you to work with the data in R without loading it all into
-memory at once.**
+reach your memory limit. **redquack’s solution to this error is to store
+the data on disk in a database rather than in RAM, allowing you to work
+with the data in R without loading it all into memory at once.**
 
 The solution:
 
@@ -41,6 +40,7 @@ persistently retries to ensure your data is transferred successfully.
 From CRAN:
 
 ``` r
+
 # install.packages("pak")
 pak::pak("redquack")
 ```
@@ -48,12 +48,14 @@ pak::pak("redquack")
 From GitHub (development version):
 
 ``` r
+
 pak::pak("dylanpieper/redquack")
 ```
 
 These packages are also used in the examples:
 
 ``` r
+
 pak::pak(c("keyring", "dplyr"))
 ```
 
@@ -65,6 +67,7 @@ should be stored securely. I recommend using the
 For example:
 
 ``` r
+
 keyring::key_set("redcap", "test")
 ```
 
@@ -76,6 +79,7 @@ Data from REDCap is transferred to a database connection (see
 [DBI](https://dbi.r-dbi.org)) in chunks of record IDs:
 
 ``` r
+
 library(redquack)
 library(dplyr)
 
@@ -105,6 +109,7 @@ contains up to four tables:
 1.  `data`: Contains the raw REDCap records
 
     ``` r
+
     data <- tbl_redcap(conn) |> collect()
     ```
 
@@ -112,6 +117,7 @@ contains up to four tables:
     conversion
 
     ``` r
+
     meta <- metadata(conn)
     ```
 
@@ -119,12 +125,14 @@ contains up to four tables:
     (default)
 
     ``` r
+
     redcap_log <- redcap_log(conn)
     ```
 
 4.  `transfer_log`: Contains operation logs of the transfer process
 
     ``` r
+
     transfer_log <- transfer_log(conn)
     ```
 
@@ -145,6 +153,7 @@ performance:
 You can also query the database to inspect the data types:
 
 ``` r
+
 inspect(conn)
 ```
 
@@ -161,6 +170,7 @@ key difference is you reference the database table first using
 Retrieve your REDCap data as a single table:
 
 ``` r
+
 data <- tbl_redcap(conn) |> 
   collect()
 ```
@@ -170,6 +180,7 @@ data <- tbl_redcap(conn) |>
 Retrieve data organized by REDCap instruments as a list:
 
 ``` r
+
 instruments <- tbl_redcap(conn) |>
   collect_list() 
 ```
@@ -177,6 +188,7 @@ instruments <- tbl_redcap(conn) |>
 Assign instrument data frames to the global environment:
 
 ``` r
+
 tbl_redcap(conn) |>
   collect_list() |>
   list_to_env()
@@ -187,6 +199,7 @@ tbl_redcap(conn) |>
 Use dplyr verbs to filter and select data before collecting:
 
 ``` r
+
 # Filter to specific participants
 nutmouse_data <- tbl_redcap(conn) |>
   filter(name_last == "Nutmouse") |>
@@ -208,6 +221,7 @@ analysis_data <- tbl_redcap(conn) |>
 Perform complex data manipulation with grouping and filtering:
 
 ``` r
+
 # Group by sex and filter to below-average BMI
 below_avg_bmi <- tbl_redcap(conn) |>
   select(record_id, sex, bmi) |>
@@ -229,6 +243,7 @@ give you control over how these labels are applied:
 Full labeling and coded value conversion (default):
 
 ``` r
+
 data <- tbl_redcap(conn) |> collect_labeled()
 
 data$sex
@@ -240,6 +255,7 @@ attr(data$sex, "label")
 Keep raw coded values:
 
 ``` r
+
 data <- tbl_redcap(conn) |> collect_labeled(convert = FALSE)
 
 data$sex
@@ -255,6 +271,7 @@ data$sex
 Column labels only:
 
 ``` r
+
 data <- tbl_redcap(conn) |> collect_labeled(vals = FALSE)
 
 data$sex
@@ -266,6 +283,7 @@ data$sex
 Value conversion only:
 
 ``` r
+
 data <- tbl_redcap(conn) |> collect_labeled(cols = FALSE)
 
 data$sex  
@@ -281,6 +299,7 @@ You can also write a Parquet file directly from DuckDB. A Parquet file
 will be much smaller than a DuckDB file and easy to share:
 
 ``` r
+
 save_parquet(conn, "redcap.parquet")
 ```
 
@@ -289,12 +308,14 @@ save_parquet(conn, "redcap.parquet")
 When you’re finished working with your data, clean up your connection:
 
 ``` r
+
 close_duckdb(conn)
 ```
 
 Or, if you do not need to access the data again, remove/delete the file:
 
 ``` r
+
 remove_duckdb(conn)
 ```
 
